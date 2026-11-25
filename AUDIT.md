@@ -1,20 +1,20 @@
 # DimensiUI — Audit Ronde 2 / Hardening
 
 **Project:** DimensiUI  
-**Version:** 1.2.15  
+**Version:** 1.0.1  
 **Author / displayed credit:** telatnakal  
 **Theme:** Dimensi only (obsidian-violet)  
 **Audit type:** Static source review and hardening; runtime validation is outstanding.
 
-## Current package note — v1.2.15
+## Current package note — v1.0.1
 
-The release metadata is synchronized across `src/init.lua`, `README.md`, this audit, and the `dist/main.lua` banner. The build script derives the bundle banner version from the modular source, and the static audit checks that parity. v1.2.15 hardens addon library binding and filesystem error handling. This is static validation, not Roblox runtime certification.
+The public package version is set to 1.0.1. Earlier 1.2.x engineering entries are retained in `docs/DEVELOPMENT_HISTORY.md` for traceability and are not the current public version. Release metadata is synchronized across `src/init.lua`, `README.md`, this audit, and the `dist/main.lua` banner. The build script derives the bundle banner version from modular source, and the static audit checks that parity. This package has passed static checks only; it is not Roblox runtime certified.
 
 ## Scope
 
 Reviewed the modular source, bundled build, addon managers, component lifecycle, callback paths, configuration handling, theme registry, animation ownership, input capture, and repository metadata. The project has no Fluent UI or Flipper imports/packages in this revision. Roblox built-in services and Roblox asset IDs remain in use.
 
-## Changes in v1.2.15
+## Changes included in v1.0.1
 
 - SaveManager now protects file-existence checks for config and autoload files, validates ignore-index input and the assigned Library instance, reports autoload write failures, validates all config entries before applying any values, rejects duplicate option IDs, and rolls back already-applied values if a setter fails.
 - InterfaceManager now validates the assigned Library instance and reports folder initialization failures to its caller.
@@ -99,7 +99,7 @@ Reviewed the modular source, bundled build, addon managers, component lifecycle,
 - SaveManager validates the complete config before applying values and attempts rollback if a setter fails; rollback itself is best-effort because Roblox callbacks and external side effects cannot be transactionally reversed.
 - Notification buttons are implemented with validated titles/callbacks and owner-bound click connections; verify layout and callback behavior in Roblox runtime.
 - InterfaceManager cannot activate Acrylic if the window was created with Acrylic disabled; Acrylic is opt-in at window creation in the current API.
-- Source provenance/licensing of all pre-existing UI modules and asset IDs is not fully established from the supplied archive. This release does not invent a license file. Verify the source/license inventory before public distribution and retain required notices.
+- The repository includes a project-level MIT `LICENSE`, but source provenance/licensing of all pre-existing UI modules and Roblox asset IDs is not fully established from the supplied archive. Verify upstream history, asset terms, and required third-party notices before redistributing those materials; the project-level license does not prove that every included asset is covered.
 
 ## Manual regression matrix (required before tagging a public release)
 
@@ -119,7 +119,7 @@ Reviewed the modular source, bundled build, addon managers, component lifecycle,
 
 ## Release status
 
-**Static hardened release candidate (1.2.15) — not runtime verified.** Do not label it production/runtime-tested until the compiler and Roblox regression matrix above pass.
+**Public package version 1.0.1 — static validation only; not runtime verified.** Do not label it production/runtime-tested until the compiler and Roblox regression matrix above pass.
 
 ## Findings fixed during the final hardening pass
 

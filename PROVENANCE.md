@@ -1,7 +1,7 @@
 # Source and asset provenance status
 
+The displayed project author and credit are `telatnakal`. The repository includes a project-level MIT license in `LICENSE`.
 
-DimensiUI's displayed author and project credit are `telatnakal`.
+The supplied source archive did not include a complete provenance inventory for every pre-existing UI module or Roblox asset ID. The hardening work removed the bundled Flipper package and replaced its animation/motor layer with the internal `DimensiMotion` package, but that change does not establish authorship or licensing for every other pre-existing module. The icon map uses Roblox asset IDs with Lucide-style naming.
 
-
-The current archive was provided for review and did not contain a complete source provenance inventory or verified license file. This audit removed the bundled Flipper package and rewrote the animation/motor layer as `DimensiMotion`; it does not establish that every pre-existing UI module or Roblox asset ID is originally authored by telatnakal. The icon map is a generated asset-ID mapping and carries Lucide-style naming. Review upstream history and applicable license obligations before public release. No license has been fabricated or added.
+Before redistributing third-party modules or assets, review the upstream repository history, asset terms, and any required notices. The presence of the repository-level MIT license should not be interpreted as proof that third-party assets or materials are covered by that license.

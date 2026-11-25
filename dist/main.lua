@@ -1,5 +1,5 @@
 --[[
-    DimensiUI v1.2.15 (Bundled Single-File Build)
+    DimensiUI v1.0.1 (Bundled Single-File Build)
     Standalone DimensiUI | Theme: Dimensi | Author: telatnakal
 ]]
 
@@ -193,7 +193,7 @@ local Library = {
 	Name = "DimensiUI",
 	Author = "telatnakal",
 	Credit = "telatnakal",
-	Version = "1.2.15",
+	Version = "1.0.1",
 
 	OpenFrames = {},
 	Options = {},

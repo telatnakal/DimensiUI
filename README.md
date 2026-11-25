@@ -1,47 +1,69 @@
 # DimensiUI
 
-Repository: https://github.com/telatnakal/DimensiUI
-Raw source: https://raw.githubusercontent.com/telatnakal/DimensiUI/main/
+**DimensiUI** is a modular UI library for Roblox experiences, with a standalone bundled build.
 
-A modular Roblox UI library with a self-contained bundled build, a responsive interface for desktop, tablet, and mobile, predictable APIs, and lightweight customization.
+| Release metadata | Value |
+|---|---|
+| Project | DimensiUI |
+| Version | `1.0.1` |
+| Release type | Stable Release |
+| Author | telatnakal |
+| Theme | Dimensi (obsidian-violet) |
+| Runtime | Roblox Lua / Luau |
 
-- **Author:** telatnakal
-- **Credit:** telatnakal
-- **Version:** 1.2.15
-- **Theme:** Dimensi only (obsidian-violet / Builder Sans typography)
+- **Version:** 1.0.1
 
 ## Features
 
-- Window, tabs, sections, buttons, toggles, sliders, dropdowns, inputs, keybinds, color pickers, paragraphs
-- Notifications and dialogs
-- Single Dimensi theme with runtime accent override
-- Optional acrylic and transparency effects
-- SaveManager and InterfaceManager addons with per-instance factories and guarded persistence
-- Modular source and a bundled single-file build
-- Isolated library instances through `Library:NewInstance()` and `Library:CreateInstance()`
-- Per-instance SaveManager and InterfaceManager factories with validated library binding
+- Windows, tabs, sections, buttons, toggles, sliders, dropdowns, inputs, keybinds, color pickers, and paragraphs
+- Notifications and dialogs, including notification action buttons
+- Single Dimensi theme with runtime accent customization
+- Shared typography resolver with Builder Sans candidate and Roblox font fallbacks
+- Responsive window sizing and viewport-aware controls
+- Optional Acrylic/transparency effects
+- Instance factory APIs: `NewInstance()` and `CreateInstance()`
+- Instance-owned cleanup callbacks through `AddCleanup()`
+- SaveManager and InterfaceManager addons with per-instance factories
+- Modular source plus generated standalone bundle
+
+## Repository layout
+
+```text
+DimensiUI/
+├── Addons/                 # SaveManager and InterfaceManager
+├── docs/                   # Retained internal development history
+├── dist/                   # Generated standalone distribution
+│   └── main.lua
+├── scripts/                # Bundle builder and static audit
+├── src/                    # Authoritative modular source
+├── AUDIT.md                # Scope, validation, and known limitations
+├── BUILDING.md             # Build and release instructions
+├── CHANGELOG.md            # Public v1.0.1 release notes
+├── Example.lua             # Usage example
+├── LICENSE                 # MIT License
+└── default.project.json    # Rojo project mapping
+```
 
 ## Installation
 
-Use `src` as the modular source in Roblox Studio, or load the bundled single-file build from the project raw URL:
+### Standalone bundle
+
+The generated single-file build is available at `dist/main.lua`. For example, in environments that permit `loadstring` and HTTP requests:
 
 ```lua
-local DimensiUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/telatnakal/DimensiUI/main/dist/main.lua"))()
+local DimensiUI = loadstring(game:HttpGet(
+    "https://raw.githubusercontent.com/telatnakal/DimensiUI/main/dist/main.lua"
+))()
 ```
 
-Addon raw URLs:
-- `https://raw.githubusercontent.com/telatnakal/DimensiUI/main/Addons/SaveManager.lua`
-- `https://raw.githubusercontent.com/telatnakal/DimensiUI/main/Addons/InterfaceManager.lua`
+### Modular source
 
+Use `default.project.json` with Rojo or place the `src/` hierarchy into Roblox Studio as a ModuleScript tree. Require the root module (`src/init.lua`).
 
 ## Basic usage
 
 ```lua
 local DimensiUI = loadstring(game:HttpGet("YOUR_RAW_SOURCE_URL"))()
-
-
--- Create another independent library instance when a separate UI lifecycle is needed.
-local SecondaryUI = DimensiUI:NewInstance()
 
 local Window = DimensiUI:CreateWindow({
     Title = "DimensiUI",
@@ -54,54 +76,64 @@ local Window = DimensiUI:CreateWindow({
 
 local Tab = Window:AddTab({ Title = "Main", Icon = "home" })
 local Section = Tab:AddSection("Controls")
-Section:AddButton({ Title = "Example", Callback = function() end })
+Section:AddButton({
+    Title = "Example",
+    Callback = function() end,
+})
 ```
 
+## Multiple library instances
 
-## Theme
-
-`Dimensi` is the only supported theme. `CreateWindow({ Theme = ... })` always uses `Dimensi`, and `DimensiUI:SetTheme()` returns `false` for every other theme name. Runtime accent customization remains available through `DimensiUI:SetAccent(Color3)` and `DimensiUI:ResetAccent()`.
-
-
-## Attribution and license
-
-Author and project credit displayed by this library: **telatnakal**. License and source provenance must be reviewed before public distribution. This archive does not include a verified upstream license inventory.
-
-
-## Multiple instances
-
-Each library instance owns an independent root module tree and its own GUI, theme registry, tab state, notifications, motion resources, and cleanup lifecycle. Create additional instances with `local OtherUI = DimensiUI:NewInstance()`. Each instance can create one window using the existing `CreateWindow` API. Destroy instances independently with `OtherUI:Destroy()`; destroying one instance is not intended to unload another.
-
-
-### Instance isolation and cleanup
-
-Each library instance owns its own cloned module tree and module cache in both modular and bundled builds. Create an independent instance with either `Library:NewInstance()` or `Library:CreateInstance()`. Each instance can create one window and can be destroyed independently.
+Create a separate library instance when an independent UI lifecycle is needed:
 
 ```lua
-local UI = require(path.to.DimensiUI)
-local UI2 = UI:CreateInstance()
+local PrimaryUI = DimensiUI
+local SecondaryUI = DimensiUI:NewInstance()
 
-UI:CreateWindow({ Title = "Primary" })
-UI2:CreateWindow({ Title = "Secondary" })
+PrimaryUI:CreateWindow({ Title = "Primary" })
+SecondaryUI:CreateWindow({ Title = "Secondary" })
 
-UI2:Destroy() -- does not destroy UI
+SecondaryUI:Destroy() -- PrimaryUI remains alive
 ```
 
-Register instance-owned cleanup work with `Library:AddCleanup(function() ... end)`. Callbacks are run in reverse registration order when that instance is destroyed. Acrylic's owned DepthOfField effect is also released during destruction and previously captured effect states are restored.
+`CreateInstance()` is also available as an alias. Each library instance is intended to own its module tree/cache, GUI, theme registry, tab state, notifications, motion resources, and cleanup lifecycle. Runtime behavior should be verified in the target Roblox environment.
 
-### Per-instance addons
+Register additional instance-owned teardown work with:
 
-The addon modules retain their existing singleton exports for compatibility. For multiple independent library instances, create a matching addon instance and assign the corresponding library:
+```lua
+DimensiUI:AddCleanup(function()
+    -- Release resources owned by this library instance.
+end)
+```
+
+Cleanup callbacks run in reverse registration order when the instance is destroyed.
+
+## Addons
+
+The addon modules preserve their legacy singleton exports and also expose instance factories. Bind each addon instance to the matching library instance:
 
 ```lua
 local SaveManagerModule = loadstring(game:HttpGet("YOUR_SAVEMANAGER_RAW_URL"))()
-local InterfaceManagerModule = loadstring(game:HttpGet("YOUR_INTERFACEMANAGER_RAW_URL"))()
-
 local SaveManager = SaveManagerModule:NewInstance()
-local InterfaceManager = InterfaceManagerModule:NewInstance()
-
-SaveManager:SetLibrary(UI2)
-InterfaceManager:SetLibrary(UI2)
+SaveManager:SetLibrary(SecondaryUI)
+SaveManager:SetFolder("DimensiUI/Secondary")
 ```
 
-Use a distinct `SetFolder()` path for each manager if their configuration files must also remain separate on disk. Independent manager objects do not automatically create separate filesystem namespaces.
+Use a distinct folder for each manager when configurations must be stored separately. Addon instance isolation does not automatically create separate filesystem namespaces.
+
+## Theme and typography
+
+`Dimensi` is the only supported theme. Runtime accent customization is available through `SetAccent(Color3)` and `ResetAccent()`. The typography resolver attempts Builder Sans and falls back to supported Roblox font families when needed. Availability of a font family depends on the Roblox runtime.
+
+## Build and validation
+
+See [BUILDING.md](BUILDING.md) for bundle generation, static audit commands, and release steps. See [AUDIT.md](AUDIT.md) for validation results and known limitations.
+
+## License and provenance
+
+The repository includes an MIT `LICENSE` file. The provenance of every pre-existing UI module and Roblox asset ID has not been independently established; review [PROVENANCE.md](PROVENANCE.md) and applicable upstream notices before redistributing third-party materials.
+
+## Links
+
+- Repository: https://github.com/telatnakal/DimensiUI
+- Standalone bundle: https://raw.githubusercontent.com/telatnakal/DimensiUI/main/dist/main.lua
