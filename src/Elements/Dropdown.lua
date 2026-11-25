@@ -56,7 +56,7 @@ function Element:New(Idx, Config)
 		FontFace = Typography.Regular,
 		Text = "Value",
 		TextColor3 = Color3.fromRGB(240, 240, 240),
-		TextSize = 12,
+		TextSize = 13,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		Size = UDim2.new(1, -30, 0, 14),
 		Position = UDim2.new(0, 8, 0.5, 0),
@@ -81,7 +81,7 @@ function Element:New(Idx, Config)
 	})
 
 	local DropdownInner = New("TextButton", {
-		Size = UDim2.fromOffset(140, 32),
+		Size = UDim2.fromOffset(136, 34),
 		Position = UDim2.new(1, -12, 0.5, 0),
 		AnchorPoint = Vector2.new(1, 0.5),
 		BackgroundTransparency = 0,

@@ -76,7 +76,7 @@ function Element:New(Idx, Config)
 	local SliderDisplay = New("TextLabel", {
 		FontFace = Typography.Regular,
 		Text = "Value",
-		TextSize = 12,
+		TextSize = 13,
 		TextWrapped = true,
 		TextXAlignment = Enum.TextXAlignment.Right,
 		BackgroundColor3 = Color3.fromRGB(255, 255, 255),

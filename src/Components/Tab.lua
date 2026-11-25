@@ -75,7 +75,7 @@ function TabModule:New(Title, Icon, Parent, Description)
 		RichText = true,
 		TextTransparency = 0,
 		FontFace = Typography.Regular,
-		TextSize = 13,
+		TextSize = 14,
 		TextXAlignment = "Left",
 		TextYAlignment = "Center",
 		Size = UDim2.new(1, Icon and -48 or -20, 1, 0),
@@ -113,7 +113,7 @@ function TabModule:New(Title, Icon, Parent, Description)
 	})
 
 	local ContainerLayout = New("UIListLayout", {
-		Padding = UDim.new(0, 20),
+		Padding = UDim.new(0, 16),
 		SortOrder = Enum.SortOrder.LayoutOrder,
 	})
 

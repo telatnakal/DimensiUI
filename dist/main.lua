@@ -1734,7 +1734,7 @@ return function(Theme, Parent, DialogCheck)
 	Button.Title = New("TextLabel", {
 		FontFace = Typography.Medium,
 		TextColor3 = Color3.fromRGB(241, 243, 247),
-		TextSize = 13,
+		TextSize = 14,
 		TextWrapped = true,
 		TextXAlignment = Enum.TextXAlignment.Center,
 		TextYAlignment = Enum.TextYAlignment.Center,
@@ -1816,13 +1816,13 @@ function Card.New(Parent)
 		},
 	}, {
 		New("UICorner", {
-			CornerRadius = UDim.new(0, 14),
+			CornerRadius = UDim.new(0, 12),
 		}),
 		New("UIPadding", {
-			PaddingTop = UDim.new(0, 4),
-			PaddingBottom = UDim.new(0, 4),
-			PaddingLeft = UDim.new(0, 4),
-			PaddingRight = UDim.new(0, 4),
+			PaddingTop = UDim.new(0, 5),
+			PaddingBottom = UDim.new(0, 5),
+			PaddingLeft = UDim.new(0, 5),
+			PaddingRight = UDim.new(0, 5),
 		}),
 		New("UIListLayout", {
 			SortOrder = Enum.SortOrder.LayoutOrder,
@@ -2068,7 +2068,7 @@ return function(Title, Desc, Parent, Hover)
 		FontFace = Typography.Medium,
 		Text = Title,
 		TextColor3 = Color3.fromRGB(241, 243, 247),
-		TextSize = 13,
+		TextSize = 14,
 		TextWrapped = true,
 		LineHeight = 1.12,
 		TextXAlignment = Enum.TextXAlignment.Left,
@@ -2085,7 +2085,7 @@ return function(Title, Desc, Parent, Hover)
 		FontFace = Typography.Regular,
 		Text = Desc,
 		TextColor3 = Color3.fromRGB(150, 158, 172),
-		TextSize = 12,
+		TextSize = 13,
 		TextWrapped = true,
 		LineHeight = 1.12,
 		TextXAlignment = Enum.TextXAlignment.Left,
@@ -2111,11 +2111,11 @@ return function(Title, Desc, Parent, Hover)
 			VerticalAlignment = Enum.VerticalAlignment.Center,
 		}),
 		New("UIPadding", {
-			PaddingBottom = UDim.new(0, 10),
-			PaddingTop = UDim.new(0, 10),
+			PaddingBottom = UDim.new(0, 11),
+			PaddingTop = UDim.new(0, 11),
 		}),
 		New("UISizeConstraint", {
-			MinSize = Vector2.new(0, 48),
+			MinSize = Vector2.new(0, 54),
 		}),
 		Element.TitleLabel,
 		Element.DescLabel,
@@ -2518,12 +2518,12 @@ return function(Title, Parent)
 
 	-- Section.Container is the card that holds this section's rows.
 	Section.Container = Card.New(nil)
-	Section.Container.Position = UDim2.fromOffset(0, 26)
+	Section.Container.Position = UDim2.fromOffset(0, 28)
 	Section.Layout = Section.Container:FindFirstChildOfClass("UIListLayout")
 
 	Section.Root = New("Frame", {
 		BackgroundTransparency = 1,
-		Size = UDim2.new(1, 0, 0, 34),
+		Size = UDim2.new(1, 0, 0, 38),
 		LayoutOrder = 7,
 		Parent = Parent,
 	}, {
@@ -2532,11 +2532,11 @@ return function(Title, Parent)
 			Text = Title,
 			TextTransparency = 0,
 			FontFace = Typography.Medium,
-			TextSize = 12,
+			TextSize = 14,
 			TextXAlignment = "Left",
 			TextYAlignment = "Center",
 			Size = UDim2.new(1, -16, 0, 18),
-			Position = UDim2.fromOffset(4, 0),
+			Position = UDim2.fromOffset(5, 0),
 			BackgroundTransparency = 1,
 			ThemeTag = {
 				TextColor3 = "SubText",
@@ -2547,7 +2547,7 @@ return function(Title, Parent)
 
 	-- Card height = rows + 8px of inner padding; the title takes the first 26px.
 	Creator.AddSignal(Section.Layout:GetPropertyChangedSignal("AbsoluteContentSize"), function()
-		Section.Root.Size = UDim2.new(1, 0, 0, Section.Layout.AbsoluteContentSize.Y + 8 + 26)
+		Section.Root.Size = UDim2.new(1, 0, 0, Section.Layout.AbsoluteContentSize.Y + 10 + 28)
 	end, Section.Root)
 
 	return Section
@@ -2632,7 +2632,7 @@ function TabModule:New(Title, Icon, Parent, Description)
 		RichText = true,
 		TextTransparency = 0,
 		FontFace = Typography.Regular,
-		TextSize = 13,
+		TextSize = 14,
 		TextXAlignment = "Left",
 		TextYAlignment = "Center",
 		Size = UDim2.new(1, Icon and -48 or -20, 1, 0),
@@ -2670,7 +2670,7 @@ function TabModule:New(Title, Icon, Parent, Description)
 	})
 
 	local ContainerLayout = New("UIListLayout", {
-		Padding = UDim.new(0, 20),
+		Padding = UDim.new(0, 16),
 		SortOrder = Enum.SortOrder.LayoutOrder,
 	})
 
@@ -2797,7 +2797,7 @@ return function(Parent, InElement)
 	Textbox.Input = New("TextBox", {
 		FontFace = Typography.Regular,
 		TextColor3 = Color3.fromRGB(241, 243, 247),
-		TextSize = 12,
+		TextSize = 13,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		TextYAlignment = Enum.TextYAlignment.Center,
 		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
@@ -2973,7 +2973,7 @@ return function(Config)
 			RichText = true,
 			Text = Config.Title,
 			FontFace = Typography.SemiBold,
-			TextSize = 14,
+			TextSize = 15,
 			TextXAlignment = "Left",
 			TextYAlignment = "Center",
 			TextWrapped = true,
@@ -2990,7 +2990,7 @@ return function(Config)
 			Text = Config.SubTitle,
 			TextTransparency = 0,
 			FontFace = Typography.Regular,
-			TextSize = 11,
+			TextSize = 12,
 			TextXAlignment = "Left",
 			TextYAlignment = "Center",
 			TextWrapped = true,
@@ -3179,7 +3179,7 @@ return function(Config)
 		Text = "Tab",
 		TextTransparency = 0,
 		FontFace = Typography.SemiBold,
-		TextSize = 18,
+		TextSize = 20,
 		TextXAlignment = "Left",
 		TextYAlignment = "Center",
 		TextTruncate = Enum.TextTruncate.AtEnd,
@@ -3194,7 +3194,7 @@ return function(Config)
 	Window.PageDescription = New("TextLabel", {
 		Text = "",
 		FontFace = Typography.Regular,
-		TextSize = 12,
+		TextSize = 13,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		TextYAlignment = Enum.TextYAlignment.Center,
 		TextTruncate = Enum.TextTruncate.AtEnd,
@@ -3692,7 +3692,7 @@ function Element:New(Idx, Config)
 				FontFace = Typography.Medium,
 				Text = Text,
 				TextColor3 = Color3.fromRGB(240, 240, 240),
-				TextSize = 12,
+				TextSize = 13,
 				TextXAlignment = Enum.TextXAlignment.Left,
 				Size = UDim2.new(1, 0, 0, 32),
 				Position = Pos,
@@ -4175,7 +4175,7 @@ function Element:New(Idx, Config)
 		FontFace = Typography.Regular,
 		Text = "Value",
 		TextColor3 = Color3.fromRGB(240, 240, 240),
-		TextSize = 12,
+		TextSize = 13,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		Size = UDim2.new(1, -30, 0, 14),
 		Position = UDim2.new(0, 8, 0.5, 0),
@@ -4200,7 +4200,7 @@ function Element:New(Idx, Config)
 	})
 
 	local DropdownInner = New("TextButton", {
-		Size = UDim2.fromOffset(140, 32),
+		Size = UDim2.fromOffset(136, 34),
 		Position = UDim2.new(1, -12, 0.5, 0),
 		AnchorPoint = Vector2.new(1, 0.5),
 		BackgroundTransparency = 0,
@@ -4689,7 +4689,7 @@ function Element:New(Idx, Config)
 	local Textbox = require(Components.Textbox)(InputFrame.Frame, true)
 	Textbox.Frame.Position = UDim2.new(1, -12, 0.5, 0)
 	Textbox.Frame.AnchorPoint = Vector2.new(1, 0.5)
-	Textbox.Frame.Size = UDim2.fromOffset(140, 32)
+	Textbox.Frame.Size = UDim2.fromOffset(136, 34)
 	InputFrame.LabelHolder.Size = UDim2.new(1, -180, 0, 0)
 	Textbox.Input.Text = Config.Default or ""
 	Textbox.Input.PlaceholderText = Config.Placeholder or ""
@@ -4792,7 +4792,7 @@ function Element:New(Idx, Config)
 		FontFace = Typography.Regular,
 		Text = Config.Default,
 		TextColor3 = Color3.fromRGB(240, 240, 240),
-		TextSize = 12,
+		TextSize = 13,
 		TextXAlignment = Enum.TextXAlignment.Center,
 		Size = UDim2.new(0, 0, 0, 14),
 		Position = UDim2.new(0.5, 0, 0.5, 0),
@@ -4806,7 +4806,7 @@ function Element:New(Idx, Config)
 	})
 
 	local KeybindDisplayFrame = New("TextButton", {
-		Size = UDim2.fromOffset(140, 32),
+		Size = UDim2.fromOffset(136, 34),
 		Position = UDim2.new(1, -12, 0.5, 0),
 		AnchorPoint = Vector2.new(1, 0.5),
 		BackgroundTransparency = 0,
@@ -5060,7 +5060,7 @@ function Element:New(Idx, Config)
 	local SliderDisplay = New("TextLabel", {
 		FontFace = Typography.Regular,
 		Text = "Value",
-		TextSize = 12,
+		TextSize = 13,
 		TextWrapped = true,
 		TextXAlignment = Enum.TextXAlignment.Right,
 		BackgroundColor3 = Color3.fromRGB(255, 255, 255),

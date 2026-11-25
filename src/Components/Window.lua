@@ -115,7 +115,7 @@ return function(Config)
 		Text = "Tab",
 		TextTransparency = 0,
 		FontFace = Typography.SemiBold,
-		TextSize = 18,
+		TextSize = 20,
 		TextXAlignment = "Left",
 		TextYAlignment = "Center",
 		TextTruncate = Enum.TextTruncate.AtEnd,
@@ -130,7 +130,7 @@ return function(Config)
 	Window.PageDescription = New("TextLabel", {
 		Text = "",
 		FontFace = Typography.Regular,
-		TextSize = 12,
+		TextSize = 13,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		TextYAlignment = Enum.TextYAlignment.Center,
 		TextTruncate = Enum.TextTruncate.AtEnd,

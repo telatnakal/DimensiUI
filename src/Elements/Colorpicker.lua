@@ -93,7 +93,7 @@ function Element:New(Idx, Config)
 				FontFace = Typography.Medium,
 				Text = Text,
 				TextColor3 = Color3.fromRGB(240, 240, 240),
-				TextSize = 12,
+				TextSize = 13,
 				TextXAlignment = Enum.TextXAlignment.Left,
 				Size = UDim2.new(1, 0, 0, 32),
 				Position = Pos,

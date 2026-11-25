@@ -22,13 +22,13 @@ function Card.New(Parent)
 		},
 	}, {
 		New("UICorner", {
-			CornerRadius = UDim.new(0, 14),
+			CornerRadius = UDim.new(0, 12),
 		}),
 		New("UIPadding", {
-			PaddingTop = UDim.new(0, 4),
-			PaddingBottom = UDim.new(0, 4),
-			PaddingLeft = UDim.new(0, 4),
-			PaddingRight = UDim.new(0, 4),
+			PaddingTop = UDim.new(0, 5),
+			PaddingBottom = UDim.new(0, 5),
+			PaddingLeft = UDim.new(0, 5),
+			PaddingRight = UDim.new(0, 5),
 		}),
 		New("UIListLayout", {
 			SortOrder = Enum.SortOrder.LayoutOrder,
