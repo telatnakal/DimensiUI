@@ -52,6 +52,16 @@ function Element:New(Idx, Config)
 		New("UICorner", {
 			CornerRadius = UDim.new(1, 0),
 		}),
+<<<<<<< HEAD
+=======
+		New("UIStroke", {
+			Thickness = 2,
+			ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+			ThemeTag = {
+				Color = "Accent",
+			},
+		}),
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 	})
 
 	local SliderRail = New("Frame", {
@@ -90,9 +100,15 @@ function Element:New(Idx, Config)
 	})
 
 	local SliderInner = New("Frame", {
+<<<<<<< HEAD
 		Size = UDim2.new(0, 96, 0, 4),
 		AnchorPoint = Vector2.new(1, 0.5),
 		Position = UDim2.new(1, -48, 0.5, 0),
+=======
+		Size = UDim2.new(0.42, 0, 0, 6),
+		AnchorPoint = Vector2.new(1, 0.5),
+		Position = UDim2.new(1, -10, 0.5, 0),
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 		BackgroundTransparency = 0,
 		Parent = SliderFrame.Frame,
 		ThemeTag = {
@@ -102,6 +118,13 @@ function Element:New(Idx, Config)
 		New("UICorner", {
 			CornerRadius = UDim.new(1, 0),
 		}),
+<<<<<<< HEAD
+=======
+		New("UISizeConstraint", {
+			MinSize = Vector2.new(84, 6),
+			MaxSize = Vector2.new(150, math.huge),
+		}),
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 		SliderDisplay,
 		SliderFill,
 		SliderRail,

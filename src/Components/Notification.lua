@@ -75,7 +75,11 @@ function Notification:New(Config)
 		Closed = false,
 	}
 
+<<<<<<< HEAD
 	NewNotification.Surface = Surface("Card", true)
+=======
+	NewNotification.Surface = Surface()
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 
 	NewNotification.Title = New("TextLabel", {
 		Position = UDim2.new(0, 14, 0, 17),

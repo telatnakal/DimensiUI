@@ -51,6 +51,23 @@ return function(Config)
 	local MinimizeNotif = false
 
 	Window.Surface = Surface()
+<<<<<<< HEAD
+=======
+
+	local Selector = New("Frame", {
+		Size = UDim2.fromOffset(4, 0),
+		BackgroundColor3 = Color3.fromRGB(76, 194, 255),
+		Position = UDim2.fromOffset(0, 17),
+		AnchorPoint = Vector2.new(0, 0.5),
+		ThemeTag = {
+			BackgroundColor3 = "Accent",
+		},
+	}, {
+		New("UICorner", {
+			CornerRadius = UDim.new(0, 2),
+		}),
+	})
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 
 	local ResizeStartFrame = New("Frame", {
 		Size = UDim2.fromOffset(28, 28),
@@ -106,6 +123,16 @@ return function(Config)
 		Window.TabHolder,
 	})
 
+	Window.Divider = New("Frame", {
+		Size = UDim2.new(0, 1, 1, -66),
+		Position = UDim2.fromOffset(Window.TabWidth + 19, 54),
+		BackgroundTransparency = 0,
+		BorderSizePixel = 0,
+		ThemeTag = {
+			BackgroundColor3 = "Divider",
+		},
+	})
+
 	Window.TabDisplay = New("TextLabel", {
 		RichText = true,
 		Text = "Tab",
@@ -137,10 +164,14 @@ return function(Config)
 		Active = true,
 	}, {
 		Window.Surface.Frame,
+<<<<<<< HEAD
 		Window.Sidebar,
+=======
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 		Window.TabDisplay,
 		Window.ContainerHolder,
 		TabFrame,
+		Window.Divider,
 		ResizeStartFrame,
 	})
 
@@ -280,6 +311,7 @@ return function(Config)
 		Window.TabWidth = isMobile and math.clamp(Window.TabWidth, 92, 108) or math.clamp(Window.TabWidth, 120, 220)
 		SizeMotor:setGoal({ X = Instant(width), Y = Instant(height) })
 		PosMotor:setGoal({ X = Instant(x), Y = Instant(y) })
+<<<<<<< HEAD
 		Window.Sidebar.Size = UDim2.new(0, Window.TabWidth + 24, 1, 0)
 		TabFrame.Size = UDim2.new(0, Window.TabWidth, 1, -76)
 		Window.TitleBar.Brand.Size = UDim2.fromOffset(math.max(96, Window.TabWidth - 12), 34)
@@ -287,6 +319,13 @@ return function(Config)
 		Window.TabDisplay.Position = UDim2.fromOffset(Window.TabWidth + 48, 14)
 		Window.ContainerHolder.Size = UDim2.new(1, -(Window.TabWidth + 72), 1, -(Window.ContentTop + 20))
 		Window.ContainerHolder.Position = UDim2.fromOffset(Window.TabWidth + 48, Window.ContentTop)
+=======
+		TabFrame.Size = UDim2.new(0, Window.TabWidth, 1, -66)
+		Window.Divider.Position = UDim2.fromOffset(Window.TabWidth + 19, 54)
+		Window.TabDisplay.Position = UDim2.fromOffset(Window.TabWidth + 26, 56)
+		Window.ContainerHolder.Size = UDim2.new(1, -Window.TabWidth - 32, 1, -102)
+		Window.ContainerHolder.Position = UDim2.fromOffset(Window.TabWidth + 26, 90)
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 	end
 
 	local ViewportConnection

@@ -306,6 +306,7 @@ end
 function Library:ToggleTransparency(Value)
 	if type(Value) ~= "boolean" then return false end
 	if Library.Window and Library.Window.Surface and Library.Window.Surface.Frame then
+<<<<<<< HEAD
 		local Alpha = Value and 0.15 or 0
 		local Background = Library.Window.Surface.Frame:FindFirstChild("Background")
 		if Background then
@@ -318,6 +319,11 @@ function Library:ToggleTransparency(Value)
 			if Patch then
 				Patch.BackgroundTransparency = Alpha
 			end
+=======
+		local Background = Library.Window.Surface.Frame:FindFirstChild("Background")
+		if Background then
+			Background.BackgroundTransparency = Value and 0.15 or 0
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 		end
 		return true
 	end

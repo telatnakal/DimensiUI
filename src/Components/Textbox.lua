@@ -37,9 +37,15 @@ return function(Parent, InElement)
 
 	Textbox.Stroke = New("UIStroke", {
 		ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+<<<<<<< HEAD
 		Transparency = 1,
 		ThemeTag = {
 			Color = "Accent",
+=======
+		Transparency = 0,
+		ThemeTag = {
+			Color = InElement and "InputBorder" or "DialogButtonBorder",
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 		},
 	})
 
@@ -48,11 +54,19 @@ return function(Parent, InElement)
 		BackgroundTransparency = 0,
 		Parent = Parent,
 		ThemeTag = {
+<<<<<<< HEAD
 			BackgroundColor3 = "Tone",
 		},
 	}, {
 		New("UICorner", {
 			CornerRadius = UDim.new(0, 8),
+=======
+			BackgroundColor3 = InElement and "Input" or "DialogInput",
+		},
+	}, {
+		New("UICorner", {
+			CornerRadius = UDim.new(0, 6),
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 		}),
 		Textbox.Stroke,
 		Textbox.Container,
@@ -92,12 +106,22 @@ return function(Parent, InElement)
 
 	Creator.AddSignal(Textbox.Input.Focused, function()
 		Update()
+<<<<<<< HEAD
 		Textbox.Stroke.Transparency = 0
+=======
+		Creator.OverrideTag(Textbox.Frame, { BackgroundColor3 = InElement and "InputFocused" or "DialogHolder" })
+		Creator.OverrideTag(Textbox.Stroke, { Color = "Accent" })
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 	end, Textbox.Frame)
 
 	Creator.AddSignal(Textbox.Input.FocusLost, function()
 		Update()
+<<<<<<< HEAD
 		Textbox.Stroke.Transparency = 1
+=======
+		Creator.OverrideTag(Textbox.Frame, { BackgroundColor3 = InElement and "Input" or "DialogInput" })
+		Creator.OverrideTag(Textbox.Stroke, { Color = InElement and "InputBorder" or "DialogButtonBorder" })
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 	end, Textbox.Frame)
 
 	return Textbox

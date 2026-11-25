@@ -449,6 +449,7 @@ end
 function Library:ToggleTransparency(Value)
 	if type(Value) ~= "boolean" then return false end
 	if Library.Window and Library.Window.Surface and Library.Window.Surface.Frame then
+<<<<<<< HEAD
 		local Alpha = Value and 0.15 or 0
 		local Background = Library.Window.Surface.Frame:FindFirstChild("Background")
 		if Background then
@@ -461,6 +462,11 @@ function Library:ToggleTransparency(Value)
 			if Patch then
 				Patch.BackgroundTransparency = Alpha
 			end
+=======
+		local Background = Library.Window.Surface.Frame:FindFirstChild("Background")
+		if Background then
+			Background.BackgroundTransparency = Value and 0.15 or 0
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 		end
 		return true
 	end
@@ -1622,13 +1628,18 @@ return {
 end
 
 __DimensiModules['Surface'] = function(script, require)
+<<<<<<< HEAD
 -- Solid surface: flat fill, rounded corners, no blur and no textures.
 -- ColorKey picks the theme color (default WindowBackground). Outline adds a 1px hairline.
+=======
+-- Solid window/notification surface. Flat fill with a 1px border (no blur, no textures).
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 local Root = script.Parent
 local Creator = require(Root.Creator)
 
 local New = Creator.New
 
+<<<<<<< HEAD
 return function(ColorKey, Outline)
 	local Surface = {}
 
@@ -1651,6 +1662,11 @@ return function(ColorKey, Outline)
 		)
 	end
 
+=======
+return function()
+	local Surface = {}
+
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 	Surface.Frame = New("Frame", {
 		Name = "Surface",
 		Size = UDim2.fromScale(1, 1),
@@ -1663,9 +1679,27 @@ return function(ColorKey, Outline)
 			BackgroundTransparency = 0,
 			BorderSizePixel = 0,
 			ThemeTag = {
+<<<<<<< HEAD
 				BackgroundColor3 = ColorKey or "WindowBackground",
 			},
 		}, Children),
+=======
+				BackgroundColor3 = "WindowBackground",
+			},
+		}, {
+			New("UICorner", {
+				CornerRadius = UDim.new(0, 10),
+			}),
+			New("UIStroke", {
+				Thickness = 1,
+				Transparency = 0,
+				ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+				ThemeTag = {
+					Color = "WindowBorder",
+				},
+			}),
+		}),
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 	})
 
 	return Surface
@@ -1755,7 +1789,11 @@ return function(Theme, Parent, DialogCheck)
 		},
 	}, {
 		New("UICorner", {
+<<<<<<< HEAD
 			CornerRadius = UDim.new(0, 8),
+=======
+			CornerRadius = UDim.new(0, 6),
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 		}),
 	})
 
@@ -1767,7 +1805,18 @@ return function(Theme, Parent, DialogCheck)
 		},
 	}, {
 		New("UICorner", {
+<<<<<<< HEAD
 			CornerRadius = UDim.new(0, 8),
+=======
+			CornerRadius = UDim.new(0, 6),
+		}),
+		New("UIStroke", {
+			ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+			Transparency = 0,
+			ThemeTag = {
+				Color = "DialogButtonBorder",
+			},
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 		}),
 		Button.HoverFrame,
 		Button.Title,
@@ -1898,7 +1947,11 @@ function Dialog:Create()
 		Parent = Dialog.Window.Root,
 	}, {
 		New("UICorner", {
+<<<<<<< HEAD
 			CornerRadius = UDim.new(0, 12),
+=======
+			CornerRadius = UDim.new(0, 10),
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 		}),
 	})
 
@@ -1966,7 +2019,11 @@ function Dialog:Create()
 		},
 	}, {
 		New("UICorner", {
+<<<<<<< HEAD
 			CornerRadius = UDim.new(0, 12),
+=======
+			CornerRadius = UDim.new(0, 10),
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 		}),
 		New("UIStroke", {
 			Transparency = 0,
@@ -2111,8 +2168,8 @@ return function(Title, Desc, Parent, Hover)
 			VerticalAlignment = Enum.VerticalAlignment.Center,
 		}),
 		New("UIPadding", {
-			PaddingBottom = UDim.new(0, 10),
-			PaddingTop = UDim.new(0, 10),
+			PaddingBottom = UDim.new(0, 12),
+			PaddingTop = UDim.new(0, 12),
 		}),
 		New("UISizeConstraint", {
 			MinSize = Vector2.new(0, 48),
@@ -2121,11 +2178,18 @@ return function(Title, Desc, Parent, Hover)
 		Element.DescLabel,
 	})
 
+<<<<<<< HEAD
 	Element.Separator = New("Frame", {
 		Position = UDim2.fromOffset(12, 0),
 		Size = UDim2.new(1, -24, 0, 1),
 		BackgroundTransparency = 0,
 		BorderSizePixel = 0,
+=======
+	Element.Border = New("UIStroke", {
+		Transparency = 0,
+		ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+		Color = Color3.fromRGB(46, 52, 64),
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 		ThemeTag = {
 			BackgroundColor3 = "Divider",
 		},
@@ -2146,7 +2210,11 @@ return function(Title, Desc, Parent, Hover)
 		},
 	}, {
 		New("UICorner", {
+<<<<<<< HEAD
 			CornerRadius = UDim.new(0, 10),
+=======
+			CornerRadius = UDim.new(0, 8),
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 		}),
 		Element.Separator,
 		Element.LabelHolder,
@@ -2294,7 +2362,11 @@ function Notification:New(Config)
 		Closed = false,
 	}
 
+<<<<<<< HEAD
 	NewNotification.Surface = Surface("Card", true)
+=======
+	NewNotification.Surface = Surface()
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 
 	NewNotification.Title = New("TextLabel", {
 		Position = UDim2.new(0, 14, 0, 17),
@@ -2516,10 +2588,24 @@ local New = Creator.New
 return function(Title, Parent)
 	local Section = {}
 
+<<<<<<< HEAD
 	-- Section.Container is the card that holds this section's rows.
 	Section.Container = Card.New(nil)
 	Section.Container.Position = UDim2.fromOffset(0, 26)
 	Section.Layout = Section.Container:FindFirstChildOfClass("UIListLayout")
+=======
+	Section.Layout = New("UIListLayout", {
+		Padding = UDim.new(0, 7),
+	})
+
+	Section.Container = New("Frame", {
+		Size = UDim2.new(1, 0, 0, 26),
+		Position = UDim2.fromOffset(0, 30),
+		BackgroundTransparency = 1,
+	}, {
+		Section.Layout,
+	})
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 
 	Section.Root = New("Frame", {
 		BackgroundTransparency = 1,
@@ -2531,6 +2617,7 @@ return function(Title, Parent)
 			RichText = true,
 			Text = Title,
 			TextTransparency = 0,
+<<<<<<< HEAD
 			FontFace = Typography.Medium,
 			TextSize = 12,
 			TextXAlignment = "Left",
@@ -2538,6 +2625,14 @@ return function(Title, Parent)
 			Size = UDim2.new(1, -16, 0, 18),
 			Position = UDim2.fromOffset(4, 0),
 			BackgroundTransparency = 1,
+=======
+			FontFace = Typography.SemiBold,
+			TextSize = 13,
+			TextXAlignment = "Left",
+			TextYAlignment = "Center",
+			Size = UDim2.new(1, -16, 0, 18),
+			Position = UDim2.fromOffset(2, 8),
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 			ThemeTag = {
 				TextColor3 = "SubText",
 			},
@@ -2547,7 +2642,12 @@ return function(Title, Parent)
 
 	-- Card height = rows + 8px of inner padding; the title takes the first 26px.
 	Creator.AddSignal(Section.Layout:GetPropertyChangedSignal("AbsoluteContentSize"), function()
+<<<<<<< HEAD
 		Section.Root.Size = UDim2.new(1, 0, 0, Section.Layout.AbsoluteContentSize.Y + 8 + 26)
+=======
+		Section.Container.Size = UDim2.new(1, 0, 0, Section.Layout.AbsoluteContentSize.Y)
+		Section.Root.Size = UDim2.new(1, 0, 0, Section.Layout.AbsoluteContentSize.Y + 30)
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 	end, Section.Root)
 
 	return Section
@@ -2572,6 +2672,23 @@ local TINT_HOVER = 0.6
 local TINT_PRESSED = 0.4
 local TINT_SELECTED = 0
 local TINT_SELECTED_HOVER = 0.12
+
+local function SetActive(Item, Active)
+	if Item.Label then
+		Item.Label.FontFace = Active and Typography.Medium or Typography.Regular
+		Creator.OverrideTag(Item.Label, { TextColor3 = Active and "Text" or "SubText" })
+	end
+	if Item.IconImage then
+		Creator.OverrideTag(Item.IconImage, { ImageColor3 = Active and "Accent" or "SubText" })
+	end
+end
+
+-- Background tint (Tab theme color) per interaction state
+local TINT_IDLE = 1
+local TINT_HOVER = 0.93
+local TINT_PRESSED = 0.9
+local TINT_SELECTED = 0.86
+local TINT_SELECTED_HOVER = 0.82
 
 local function SetActive(Item, Active)
 	if Item.Label then
@@ -2624,7 +2741,11 @@ function TabModule:New(Title, Icon, Parent)
 
 	Tab.Label = New("TextLabel", {
 		AnchorPoint = Vector2.new(0, 0.5),
+<<<<<<< HEAD
 		Position = Icon and UDim2.new(0, 40, 0.5, 0) or UDim2.new(0, 12, 0.5, 0),
+=======
+		Position = Icon and UDim2.new(0, 34, 0.5, 0) or UDim2.new(0, 14, 0.5, 0),
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 		Text = Title,
 		RichText = true,
 		TextTransparency = 0,
@@ -2632,7 +2753,11 @@ function TabModule:New(Title, Icon, Parent)
 		TextSize = 13,
 		TextXAlignment = "Left",
 		TextYAlignment = "Center",
+<<<<<<< HEAD
 		Size = UDim2.new(1, Icon and -48 or -20, 1, 0),
+=======
+		Size = UDim2.new(1, -40, 1, 0),
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 		BackgroundTransparency = 1,
 		TextTruncate = Enum.TextTruncate.AtEnd,
 		ThemeTag = {
@@ -2660,7 +2785,11 @@ function TabModule:New(Title, Icon, Parent)
 		},
 	}, {
 		New("UICorner", {
+<<<<<<< HEAD
 			CornerRadius = UDim.new(0, 10),
+=======
+			CornerRadius = UDim.new(0, 8),
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 		}),
 		Tab.Label,
 		Tab.IconImage,
@@ -2817,9 +2946,15 @@ return function(Parent, InElement)
 
 	Textbox.Stroke = New("UIStroke", {
 		ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+<<<<<<< HEAD
 		Transparency = 1,
 		ThemeTag = {
 			Color = "Accent",
+=======
+		Transparency = 0,
+		ThemeTag = {
+			Color = InElement and "InputBorder" or "DialogButtonBorder",
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 		},
 	})
 
@@ -2828,11 +2963,19 @@ return function(Parent, InElement)
 		BackgroundTransparency = 0,
 		Parent = Parent,
 		ThemeTag = {
+<<<<<<< HEAD
 			BackgroundColor3 = "Tone",
 		},
 	}, {
 		New("UICorner", {
 			CornerRadius = UDim.new(0, 8),
+=======
+			BackgroundColor3 = InElement and "Input" or "DialogInput",
+		},
+	}, {
+		New("UICorner", {
+			CornerRadius = UDim.new(0, 6),
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 		}),
 		Textbox.Stroke,
 		Textbox.Container,
@@ -2872,12 +3015,22 @@ return function(Parent, InElement)
 
 	Creator.AddSignal(Textbox.Input.Focused, function()
 		Update()
+<<<<<<< HEAD
 		Textbox.Stroke.Transparency = 0
+=======
+		Creator.OverrideTag(Textbox.Frame, { BackgroundColor3 = InElement and "InputFocused" or "DialogHolder" })
+		Creator.OverrideTag(Textbox.Stroke, { Color = "Accent" })
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 	end, Textbox.Frame)
 
 	Creator.AddSignal(Textbox.Input.FocusLost, function()
 		Update()
+<<<<<<< HEAD
 		Textbox.Stroke.Transparency = 1
+=======
+		Creator.OverrideTag(Textbox.Frame, { BackgroundColor3 = InElement and "Input" or "DialogInput" })
+		Creator.OverrideTag(Textbox.Stroke, { Color = InElement and "InputBorder" or "DialogButtonBorder" })
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 	end, Textbox.Frame)
 
 	return Textbox
@@ -2959,6 +3112,7 @@ return function(Config)
 		Size = UDim2.fromOffset(math.max(96, (Config.Window and Config.Window.TabWidth or 160) - 12), 34),
 		BackgroundTransparency = 1,
 	}, {
+<<<<<<< HEAD
 		New("UIListLayout", {
 			Padding = UDim.new(0, 2),
 			SortOrder = Enum.SortOrder.LayoutOrder,
@@ -2974,6 +3128,52 @@ return function(Config)
 			Size = UDim2.new(1, 0, 0, 17),
 			BackgroundTransparency = 1,
 			LayoutOrder = 1,
+=======
+		New("Frame", {
+			Size = UDim2.new(1, -16, 1, 0),
+			Position = UDim2.new(0, 16, 0, 0),
+			BackgroundTransparency = 1,
+		}, {
+			New("UIListLayout", {
+				Padding = UDim.new(0, 5),
+				FillDirection = Enum.FillDirection.Horizontal,
+				SortOrder = Enum.SortOrder.LayoutOrder,
+			}),
+			New("TextLabel", {
+				RichText = true,
+				Text = Config.Title,
+				FontFace = Typography.SemiBold,
+				TextSize = 13,
+				TextXAlignment = "Left",
+				TextYAlignment = "Center",
+				Size = UDim2.fromScale(0, 1),
+				AutomaticSize = Enum.AutomaticSize.X,
+				BackgroundTransparency = 1,
+				ThemeTag = {
+					TextColor3 = "Text",
+				},
+			}),
+			New("TextLabel", {
+				RichText = true,
+				Text = Config.SubTitle,
+				TextTransparency = 0,
+				FontFace = Typography.Regular,
+				TextSize = 12,
+				TextXAlignment = "Left",
+				TextYAlignment = "Center",
+				Size = UDim2.fromScale(0, 1),
+				AutomaticSize = Enum.AutomaticSize.X,
+				BackgroundTransparency = 1,
+				ThemeTag = {
+					TextColor3 = "SubText",
+				},
+			}),
+		}),
+		New("Frame", {
+			BackgroundTransparency = 0,
+			Size = UDim2.new(1, 0, 0, 1),
+			Position = UDim2.new(0, 0, 1, 0),
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 			ThemeTag = {
 				TextColor3 = "Text",
 			},
@@ -3083,6 +3283,23 @@ return function(Config)
 	local MinimizeNotif = false
 
 	Window.Surface = Surface()
+<<<<<<< HEAD
+=======
+
+	local Selector = New("Frame", {
+		Size = UDim2.fromOffset(4, 0),
+		BackgroundColor3 = Color3.fromRGB(76, 194, 255),
+		Position = UDim2.fromOffset(0, 17),
+		AnchorPoint = Vector2.new(0, 0.5),
+		ThemeTag = {
+			BackgroundColor3 = "Accent",
+		},
+	}, {
+		New("UICorner", {
+			CornerRadius = UDim.new(0, 2),
+		}),
+	})
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 
 	local ResizeStartFrame = New("Frame", {
 		Size = UDim2.fromOffset(28, 28),
@@ -3138,6 +3355,16 @@ return function(Config)
 		Window.TabHolder,
 	})
 
+	Window.Divider = New("Frame", {
+		Size = UDim2.new(0, 1, 1, -66),
+		Position = UDim2.fromOffset(Window.TabWidth + 19, 54),
+		BackgroundTransparency = 0,
+		BorderSizePixel = 0,
+		ThemeTag = {
+			BackgroundColor3 = "Divider",
+		},
+	})
+
 	Window.TabDisplay = New("TextLabel", {
 		RichText = true,
 		Text = "Tab",
@@ -3169,10 +3396,14 @@ return function(Config)
 		Active = true,
 	}, {
 		Window.Surface.Frame,
+<<<<<<< HEAD
 		Window.Sidebar,
+=======
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 		Window.TabDisplay,
 		Window.ContainerHolder,
 		TabFrame,
+		Window.Divider,
 		ResizeStartFrame,
 	})
 
@@ -3312,6 +3543,7 @@ return function(Config)
 		Window.TabWidth = isMobile and math.clamp(Window.TabWidth, 92, 108) or math.clamp(Window.TabWidth, 120, 220)
 		SizeMotor:setGoal({ X = Instant(width), Y = Instant(height) })
 		PosMotor:setGoal({ X = Instant(x), Y = Instant(y) })
+<<<<<<< HEAD
 		Window.Sidebar.Size = UDim2.new(0, Window.TabWidth + 24, 1, 0)
 		TabFrame.Size = UDim2.new(0, Window.TabWidth, 1, -76)
 		Window.TitleBar.Brand.Size = UDim2.fromOffset(math.max(96, Window.TabWidth - 12), 34)
@@ -3319,6 +3551,13 @@ return function(Config)
 		Window.TabDisplay.Position = UDim2.fromOffset(Window.TabWidth + 48, 14)
 		Window.ContainerHolder.Size = UDim2.new(1, -(Window.TabWidth + 72), 1, -(Window.ContentTop + 20))
 		Window.ContainerHolder.Position = UDim2.fromOffset(Window.TabWidth + 48, Window.ContentTop)
+=======
+		TabFrame.Size = UDim2.new(0, Window.TabWidth, 1, -66)
+		Window.Divider.Position = UDim2.fromOffset(Window.TabWidth + 19, 54)
+		Window.TabDisplay.Position = UDim2.fromOffset(Window.TabWidth + 26, 56)
+		Window.ContainerHolder.Size = UDim2.new(1, -Window.TabWidth - 32, 1, -102)
+		Window.ContainerHolder.Position = UDim2.fromOffset(Window.TabWidth + 26, 90)
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 	end
 
 	local ViewportConnection
@@ -4100,6 +4339,7 @@ function Element:New(Idx, Config)
 		Position = UDim2.new(1, -12, 0.5, 0),
 		AnchorPoint = Vector2.new(1, 0.5),
 		BackgroundTransparency = 0,
+<<<<<<< HEAD
 		AutoButtonColor = false,
 		Text = "",
 		Parent = DropdownFrame.Frame,
@@ -4109,6 +4349,26 @@ function Element:New(Idx, Config)
 	}, {
 		New("UICorner", {
 			CornerRadius = UDim.new(0, 8),
+=======
+		Parent = DropdownFrame.Frame,
+		ThemeTag = {
+			BackgroundColor3 = "Input",
+		},
+	}, {
+		New("UICorner", {
+			CornerRadius = UDim.new(0, 6),
+		}),
+		New("UISizeConstraint", {
+			MinSize = Vector2.new(84, 32),
+			MaxSize = Vector2.new(160, 32),
+		}),
+		New("UIStroke", {
+			Transparency = 0,
+			ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+			ThemeTag = {
+				Color = "InputBorder",
+			},
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 		}),
 		DropdownIco,
 		DropdownDisplay,
@@ -4706,15 +4966,40 @@ function Element:New(Idx, Config)
 		Position = UDim2.new(1, -12, 0.5, 0),
 		AnchorPoint = Vector2.new(1, 0.5),
 		BackgroundTransparency = 0,
+<<<<<<< HEAD
 		AutoButtonColor = false,
 		Text = "",
+=======
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 		Parent = KeybindFrame.Frame,
 		ThemeTag = {
+<<<<<<< HEAD
 			BackgroundColor3 = "Tone",
 		},
 	}, {
 		New("UICorner", {
 			CornerRadius = UDim.new(0, 8),
+=======
+			BackgroundColor3 = "Input",
+		},
+	}, {
+		New("UICorner", {
+			CornerRadius = UDim.new(0, 6),
+		}),
+		New("UISizeConstraint", {
+			MaxSize = Vector2.new(104, 32),
+		}),
+		New("UIPadding", {
+			PaddingLeft = UDim.new(0, 8),
+			PaddingRight = UDim.new(0, 8),
+		}),
+		New("UIStroke", {
+			Transparency = 0,
+			ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+			ThemeTag = {
+				Color = "InputBorder",
+			},
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 		}),
 		KeybindDisplayLabel,
 	})
@@ -4871,6 +5156,14 @@ function Paragraph:New(Idx, Config)
 	Config.Content = Config.Content or ""
 
 	local Paragraph = require(Components.Element)(Config.Title, Config.Content, Paragraph.Container, false)
+<<<<<<< HEAD
+=======
+	-- Info boxes use a quieter fill than interactive rows; drop the shared transparency tag so it persists.
+	Creator.OverrideTag(Paragraph.Frame, { BackgroundColor3 = "Element" })
+	Paragraph.Frame.BackgroundTransparency = 0.7
+	Paragraph.Border.Transparency = 0.3
+
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 	return Paragraph
 end
 
@@ -4932,6 +5225,16 @@ function Element:New(Idx, Config)
 		New("UICorner", {
 			CornerRadius = UDim.new(1, 0),
 		}),
+<<<<<<< HEAD
+=======
+		New("UIStroke", {
+			Thickness = 2,
+			ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+			ThemeTag = {
+				Color = "Accent",
+			},
+		}),
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 	})
 
 	local SliderRail = New("Frame", {
@@ -4970,9 +5273,15 @@ function Element:New(Idx, Config)
 	})
 
 	local SliderInner = New("Frame", {
+<<<<<<< HEAD
 		Size = UDim2.new(0, 96, 0, 4),
 		AnchorPoint = Vector2.new(1, 0.5),
 		Position = UDim2.new(1, -48, 0.5, 0),
+=======
+		Size = UDim2.new(0.42, 0, 0, 6),
+		AnchorPoint = Vector2.new(1, 0.5),
+		Position = UDim2.new(1, -10, 0.5, 0),
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 		BackgroundTransparency = 0,
 		Parent = SliderFrame.Frame,
 		ThemeTag = {
@@ -4982,6 +5291,13 @@ function Element:New(Idx, Config)
 		New("UICorner", {
 			CornerRadius = UDim.new(1, 0),
 		}),
+<<<<<<< HEAD
+=======
+		New("UISizeConstraint", {
+			MinSize = Vector2.new(84, 6),
+			MaxSize = Vector2.new(150, math.huge),
+		}),
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 		SliderDisplay,
 		SliderFill,
 		SliderRail,
@@ -5080,7 +5396,11 @@ function Element:New(Idx, Config)
 	}
 
 	local ToggleFrame = require(Components.Element)(Config.Title, Config.Description, self.Container, true)
+<<<<<<< HEAD
 	ToggleFrame.LabelHolder.Size = UDim2.new(1, -76, 0, 0)
+=======
+	ToggleFrame.LabelHolder.Size = UDim2.new(1, -70, 0, 0)
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 	ToggleFrame.DescLabel.Size = UDim2.new(1, 0, 0, 0)
 
 	Toggle.SetTitle = ToggleFrame.SetTitle
@@ -5176,6 +5496,7 @@ return {
     -- Brand
     Accent = Color3.fromRGB(168, 85, 247),
 
+<<<<<<< HEAD
     -- Surfaces (separated by tone, not by borders)
     WindowBackground = Color3.fromRGB(16, 18, 23),
     Sidebar = Color3.fromRGB(13, 15, 19),
@@ -5217,6 +5538,55 @@ return {
 
     -- Interaction
     Hover = Color3.fromRGB(192, 132, 252),
+=======
+    -- Window
+    WindowBackground = Color3.fromRGB(15, 17, 21),
+    WindowBorder = Color3.fromRGB(40, 46, 57),
+
+    TitleBarLine = Color3.fromRGB(40, 46, 57),
+    Divider = Color3.fromRGB(33, 38, 48),
+    Tab = Color3.fromRGB(168, 85, 247),
+
+    -- Elements (the base fill is lightened on hover by HoverChange)
+    Element = Color3.fromRGB(33, 37, 46),
+    ElementBorder = Color3.fromRGB(46, 52, 64),
+    ElementTransparency = 0.4,
+
+    -- Toggle
+    ToggleOff = Color3.fromRGB(58, 66, 80),
+    ToggleKnob = Color3.fromRGB(241, 243, 247),
+
+    -- Slider
+    SliderRail = Color3.fromRGB(58, 66, 80),
+    SliderKnob = Color3.fromRGB(241, 243, 247),
+
+    -- Dropdown / keybind
+    DropdownHolder = Color3.fromRGB(21, 24, 30),
+    DropdownBorder = Color3.fromRGB(46, 52, 64),
+    DropdownOption = Color3.fromRGB(74, 48, 99),
+
+    -- Inputs
+    Input = Color3.fromRGB(21, 24, 30),
+    InputFocused = Color3.fromRGB(21, 24, 30),
+    InputBorder = Color3.fromRGB(58, 66, 80),
+
+    -- Dialog
+    Dialog = Color3.fromRGB(21, 24, 30),
+    DialogHolder = Color3.fromRGB(17, 19, 24),
+    DialogHolderLine = Color3.fromRGB(40, 46, 57),
+    DialogButton = Color3.fromRGB(33, 37, 46),
+    DialogButtonBorder = Color3.fromRGB(58, 66, 80),
+    DialogBorder = Color3.fromRGB(46, 52, 64),
+    DialogInput = Color3.fromRGB(15, 17, 21),
+
+    -- Text
+    Text = Color3.fromRGB(241, 243, 247),
+    SubText = Color3.fromRGB(150, 158, 172),
+
+    -- Interaction
+    Hover = Color3.fromRGB(192, 132, 252),
+    HoverChange = 0.12,
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 }
 end
 

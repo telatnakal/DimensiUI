@@ -85,6 +85,7 @@ function Element:New(Idx, Config)
 		Position = UDim2.new(1, -12, 0.5, 0),
 		AnchorPoint = Vector2.new(1, 0.5),
 		BackgroundTransparency = 0,
+<<<<<<< HEAD
 		AutoButtonColor = false,
 		Text = "",
 		Parent = DropdownFrame.Frame,
@@ -94,6 +95,26 @@ function Element:New(Idx, Config)
 	}, {
 		New("UICorner", {
 			CornerRadius = UDim.new(0, 8),
+=======
+		Parent = DropdownFrame.Frame,
+		ThemeTag = {
+			BackgroundColor3 = "Input",
+		},
+	}, {
+		New("UICorner", {
+			CornerRadius = UDim.new(0, 6),
+		}),
+		New("UISizeConstraint", {
+			MinSize = Vector2.new(84, 32),
+			MaxSize = Vector2.new(160, 32),
+		}),
+		New("UIStroke", {
+			Transparency = 0,
+			ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+			ThemeTag = {
+				Color = "InputBorder",
+			},
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 		}),
 		DropdownIco,
 		DropdownDisplay,

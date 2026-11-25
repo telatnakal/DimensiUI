@@ -34,7 +34,11 @@ return function(Theme, Parent, DialogCheck)
 		},
 	}, {
 		New("UICorner", {
+<<<<<<< HEAD
 			CornerRadius = UDim.new(0, 8),
+=======
+			CornerRadius = UDim.new(0, 6),
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 		}),
 	})
 
@@ -46,7 +50,18 @@ return function(Theme, Parent, DialogCheck)
 		},
 	}, {
 		New("UICorner", {
+<<<<<<< HEAD
 			CornerRadius = UDim.new(0, 8),
+=======
+			CornerRadius = UDim.new(0, 6),
+		}),
+		New("UIStroke", {
+			ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+			Transparency = 0,
+			ThemeTag = {
+				Color = "DialogButtonBorder",
+			},
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 		}),
 		Button.HoverFrame,
 		Button.Title,

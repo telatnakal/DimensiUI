@@ -26,6 +26,23 @@ local function SetActive(Item, Active)
 	end
 end
 
+-- Background tint (Tab theme color) per interaction state
+local TINT_IDLE = 1
+local TINT_HOVER = 0.93
+local TINT_PRESSED = 0.9
+local TINT_SELECTED = 0.86
+local TINT_SELECTED_HOVER = 0.82
+
+local function SetActive(Item, Active)
+	if Item.Label then
+		Item.Label.FontFace = Active and Typography.Medium or Typography.Regular
+		Creator.OverrideTag(Item.Label, { TextColor3 = Active and "Text" or "SubText" })
+	end
+	if Item.IconImage then
+		Creator.OverrideTag(Item.IconImage, { ImageColor3 = Active and "Accent" or "SubText" })
+	end
+end
+
 local TabModule = {
 	Window = nil,
 	Tabs = {},
@@ -67,7 +84,11 @@ function TabModule:New(Title, Icon, Parent)
 
 	Tab.Label = New("TextLabel", {
 		AnchorPoint = Vector2.new(0, 0.5),
+<<<<<<< HEAD
 		Position = Icon and UDim2.new(0, 40, 0.5, 0) or UDim2.new(0, 12, 0.5, 0),
+=======
+		Position = Icon and UDim2.new(0, 34, 0.5, 0) or UDim2.new(0, 14, 0.5, 0),
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 		Text = Title,
 		RichText = true,
 		TextTransparency = 0,
@@ -75,7 +96,11 @@ function TabModule:New(Title, Icon, Parent)
 		TextSize = 13,
 		TextXAlignment = "Left",
 		TextYAlignment = "Center",
+<<<<<<< HEAD
 		Size = UDim2.new(1, Icon and -48 or -20, 1, 0),
+=======
+		Size = UDim2.new(1, -40, 1, 0),
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 		BackgroundTransparency = 1,
 		TextTruncate = Enum.TextTruncate.AtEnd,
 		ThemeTag = {
@@ -103,7 +128,11 @@ function TabModule:New(Title, Icon, Parent)
 		},
 	}, {
 		New("UICorner", {
+<<<<<<< HEAD
 			CornerRadius = UDim.new(0, 10),
+=======
+			CornerRadius = UDim.new(0, 8),
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 		}),
 		Tab.Label,
 		Tab.IconImage,

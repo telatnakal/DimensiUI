@@ -20,8 +20,12 @@
 - Single Dimensi theme with runtime accent customization
 - Shared typography resolver with Builder Sans candidate and Roblox font fallbacks
 - Responsive window sizing and viewport-aware controls
+<<<<<<< HEAD
 - Clean, border-free layout: tonal sidebar, rounded cards with hairline row dividers, and a right-aligned control column
 - Solid surfaces with optional window transparency (no blur effects)
+=======
+- Clean solid surfaces with optional window transparency (no blur effects)
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 - Instance factory APIs: `NewInstance()` and `CreateInstance()`
 - Instance-owned cleanup callbacks through `AddCleanup()`
 - SaveManager and InterfaceManager addons with per-instance factories

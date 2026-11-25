@@ -46,7 +46,11 @@ function Dialog:Create()
 		Parent = Dialog.Window.Root,
 	}, {
 		New("UICorner", {
+<<<<<<< HEAD
 			CornerRadius = UDim.new(0, 12),
+=======
+			CornerRadius = UDim.new(0, 10),
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 		}),
 	})
 
@@ -114,7 +118,11 @@ function Dialog:Create()
 		},
 	}, {
 		New("UICorner", {
+<<<<<<< HEAD
 			CornerRadius = UDim.new(0, 12),
+=======
+			CornerRadius = UDim.new(0, 10),
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 		}),
 		New("UIStroke", {
 			Transparency = 0,

@@ -72,6 +72,7 @@ return function(Config)
 		Size = UDim2.fromOffset(math.max(96, (Config.Window and Config.Window.TabWidth or 160) - 12), 34),
 		BackgroundTransparency = 1,
 	}, {
+<<<<<<< HEAD
 		New("UIListLayout", {
 			Padding = UDim.new(0, 2),
 			SortOrder = Enum.SortOrder.LayoutOrder,
@@ -87,6 +88,52 @@ return function(Config)
 			Size = UDim2.new(1, 0, 0, 17),
 			BackgroundTransparency = 1,
 			LayoutOrder = 1,
+=======
+		New("Frame", {
+			Size = UDim2.new(1, -16, 1, 0),
+			Position = UDim2.new(0, 16, 0, 0),
+			BackgroundTransparency = 1,
+		}, {
+			New("UIListLayout", {
+				Padding = UDim.new(0, 5),
+				FillDirection = Enum.FillDirection.Horizontal,
+				SortOrder = Enum.SortOrder.LayoutOrder,
+			}),
+			New("TextLabel", {
+				RichText = true,
+				Text = Config.Title,
+				FontFace = Typography.SemiBold,
+				TextSize = 13,
+				TextXAlignment = "Left",
+				TextYAlignment = "Center",
+				Size = UDim2.fromScale(0, 1),
+				AutomaticSize = Enum.AutomaticSize.X,
+				BackgroundTransparency = 1,
+				ThemeTag = {
+					TextColor3 = "Text",
+				},
+			}),
+			New("TextLabel", {
+				RichText = true,
+				Text = Config.SubTitle,
+				TextTransparency = 0,
+				FontFace = Typography.Regular,
+				TextSize = 12,
+				TextXAlignment = "Left",
+				TextYAlignment = "Center",
+				Size = UDim2.fromScale(0, 1),
+				AutomaticSize = Enum.AutomaticSize.X,
+				BackgroundTransparency = 1,
+				ThemeTag = {
+					TextColor3 = "SubText",
+				},
+			}),
+		}),
+		New("Frame", {
+			BackgroundTransparency = 0,
+			Size = UDim2.new(1, 0, 0, 1),
+			Position = UDim2.new(0, 0, 1, 0),
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 			ThemeTag = {
 				TextColor3 = "Text",
 			},

@@ -63,8 +63,8 @@ return function(Title, Desc, Parent, Hover)
 			VerticalAlignment = Enum.VerticalAlignment.Center,
 		}),
 		New("UIPadding", {
-			PaddingBottom = UDim.new(0, 10),
-			PaddingTop = UDim.new(0, 10),
+			PaddingBottom = UDim.new(0, 12),
+			PaddingTop = UDim.new(0, 12),
 		}),
 		New("UISizeConstraint", {
 			MinSize = Vector2.new(0, 48),
@@ -73,11 +73,18 @@ return function(Title, Desc, Parent, Hover)
 		Element.DescLabel,
 	})
 
+<<<<<<< HEAD
 	Element.Separator = New("Frame", {
 		Position = UDim2.fromOffset(12, 0),
 		Size = UDim2.new(1, -24, 0, 1),
 		BackgroundTransparency = 0,
 		BorderSizePixel = 0,
+=======
+	Element.Border = New("UIStroke", {
+		Transparency = 0,
+		ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+		Color = Color3.fromRGB(46, 52, 64),
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 		ThemeTag = {
 			BackgroundColor3 = "Divider",
 		},
@@ -98,7 +105,11 @@ return function(Title, Desc, Parent, Hover)
 		},
 	}, {
 		New("UICorner", {
+<<<<<<< HEAD
 			CornerRadius = UDim.new(0, 10),
+=======
+			CornerRadius = UDim.new(0, 8),
+>>>>>>> 00e015507899790ef9c108a8b3a8e5c2a22a47ed
 		}),
 		Element.Separator,
 		Element.LabelHolder,
