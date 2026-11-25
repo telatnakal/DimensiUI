@@ -1,0 +1,14 @@
+# Operating system / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Local build and test artifacts
+*.log
+*.rbxl
+*.rbxlx
+*.rbxm
+*.rbxmx
+__pycache__/
+*.py[cod]
