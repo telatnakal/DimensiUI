@@ -174,10 +174,11 @@ local Library = {
 	Name = "DimensiUI",
 	Author = "telatnakal",
 	Credit = "telatnakal",
-	Version = "1.2.0",
+	Version = "1.2.1",
 
 	OpenFrames = {},
 	Options = {},
+	_CleanupCallbacks = {},
 	Themes = { "Dimensi" },
 
 	Window = nil,
@@ -256,16 +257,19 @@ Library.Elements = Elements
 
 function Library:NewInstance()
 	assert(not Library.Unloaded, "DimensiUI has been destroyed")
-	assert(Root and type(Root.Clone) == "function", "DimensiUI:NewInstance requires a cloneable root ModuleScript")
+	assert(typeof(Root) == "Instance" and Root:IsA("ModuleScript"), "DimensiUI:NewInstance requires a ModuleScript root")
+	assert(Root.Archivable, "DimensiUI:NewInstance requires the root ModuleScript to be Archivable")
 
 	local Clone
 	local Success, Result = pcall(function()
 		Clone = Root:Clone()
-		if typeof(Clone) == "Instance" then
-			Clone.Parent = Root.Parent
-		end
+		assert(Clone, "Root ModuleScript could not be cloned")
+		Clone.Name = Root.Name .. "_Instance"
+		Clone.Parent = Root.Parent
 		local NewLibrary = require(Clone)
+		assert(type(NewLibrary) == "table" and NewLibrary ~= Library, "Cloned ModuleScript did not create an isolated library")
 		NewLibrary._RootClone = Clone
+		NewLibrary._InstanceParent = Root.Parent
 		return NewLibrary
 	end)
 
@@ -277,6 +281,20 @@ function Library:NewInstance()
 	end
 
 	return Result
+end
+
+function Library:CreateInstance()
+	return self:NewInstance()
+end
+
+function Library:AddCleanup(Callback)
+	assert(type(Callback) == "function", "AddCleanup expects a function")
+	if Library.Unloaded then
+		pcall(Callback)
+		return false
+	end
+	table.insert(Library._CleanupCallbacks, Callback)
+	return true
 end
 
 function Library:CreateWindow(Config)
@@ -360,6 +378,13 @@ function Library:Destroy()
 			Library.Window.AcrylicPaint.Model:Destroy()
 		end)
 	end
+	for Index = #Library._CleanupCallbacks, 1, -1 do
+		local Callback = table.remove(Library._CleanupCallbacks, Index)
+		pcall(Callback)
+	end
+	if Acrylic and type(Acrylic.Destroy) == "function" then
+		pcall(Acrylic.Destroy)
+	end
 	Creator.Disconnect()
 	if Library.GUI then
 		Library.GUI:Destroy()
@@ -373,6 +398,8 @@ function Library:Destroy()
 	TabModule.TabCount = 0
 	TabModule.SelectionGeneration += 1
 	Library.Window = nil
+	table.clear(Library.Options)
+	table.clear(Library.OpenFrames)
 	local RootClone = Library._RootClone
 	Library._RootClone = nil
 	if RootClone and typeof(RootClone) == "Instance" then
@@ -430,54 +457,91 @@ return Library
 end
 
 __DimensiModules['Acrylic'] = function(script, require)
+local Lighting = game:GetService("Lighting")
+local Workspace = game:GetService("Workspace")
+
 local Acrylic = {
 	AcrylicBlur = require(script.AcrylicBlur),
 	CreateAcrylic = require(script.CreateAcrylic),
 	AcrylicPaint = require(script.AcrylicPaint),
 }
 
+local BaseEffect
+local DepthOfFieldDefaults = {}
+local Initialized = false
+local Destroyed = false
+
+local function CaptureDefaults()
+	table.clear(DepthOfFieldDefaults)
+	local function Capture(Parent)
+		if not Parent then return end
+		for _, Object in ipairs(Parent:GetChildren()) do
+			if Object:IsA("DepthOfFieldEffect") and Object ~= BaseEffect then
+				DepthOfFieldDefaults[Object] = Object.Enabled
+			end
+		end
+	end
+	Capture(Lighting)
+	Capture(Workspace.CurrentCamera)
+end
+
 function Acrylic.init()
-	local baseEffect = Instance.new("DepthOfFieldEffect")
-	baseEffect.FarIntensity = 0
-	baseEffect.InFocusRadius = 0.1
-	baseEffect.NearIntensity = 1
-
-	local depthOfFieldDefaults = {}
-
-	function Acrylic.Enable()
-		for _, effect in pairs(depthOfFieldDefaults) do
-			effect.Enabled = false
-		end
-		baseEffect.Parent = game:GetService("Lighting")
+	if Destroyed then return false end
+	if Initialized then
+		Acrylic.Enable()
+		return true
 	end
 
-	function Acrylic.Disable()
-		for _, effect in pairs(depthOfFieldDefaults) do
-			effect.Enabled = effect.enabled
-		end
-		baseEffect.Parent = nil
+	BaseEffect = Instance.new("DepthOfFieldEffect")
+	BaseEffect.Name = "DimensiUI_AcrylicBlur"
+	BaseEffect.FarIntensity = 0
+	BaseEffect.InFocusRadius = 0.1
+	BaseEffect.NearIntensity = 1
+	CaptureDefaults()
+	for Effect in pairs(DepthOfFieldDefaults) do
+		pcall(function() Effect.Enabled = false end)
 	end
+	BaseEffect.Parent = Lighting
+	Initialized = true
+	return true
+end
 
-	local function registerDefaults()
-		local function register(object)
-			if object:IsA("DepthOfFieldEffect") then
-				depthOfFieldDefaults[object] = { enabled = object.Enabled }
-			end
-		end
-
-		for _, child in pairs(game:GetService("Lighting"):GetChildren()) do
-			register(child)
-		end
-
-		if game:GetService("Workspace").CurrentCamera then
-			for _, child in pairs(game:GetService("Workspace").CurrentCamera:GetChildren()) do
-				register(child)
-			end
+function Acrylic.Enable()
+	if Destroyed or not BaseEffect then return false end
+	for Effect in pairs(DepthOfFieldDefaults) do
+		if Effect and Effect.Parent then
+			pcall(function() Effect.Enabled = false end)
 		end
 	end
+	BaseEffect.Parent = Lighting
+	return true
+end
 
-	registerDefaults()
-	Acrylic.Enable()
+function Acrylic.Disable()
+	if Destroyed or not BaseEffect then return false end
+	BaseEffect.Parent = nil
+	for Effect, WasEnabled in pairs(DepthOfFieldDefaults) do
+		if Effect and Effect.Parent then
+			pcall(function() Effect.Enabled = WasEnabled end)
+		end
+	end
+	return true
+end
+
+function Acrylic.Destroy()
+	if Destroyed then return end
+	Destroyed = true
+	if BaseEffect then
+		pcall(function() BaseEffect:Destroy() end)
+		BaseEffect = nil
+	end
+	for Effect, WasEnabled in pairs(DepthOfFieldDefaults) do
+		if Effect and Effect.Parent then
+			pcall(function() Effect.Enabled = WasEnabled end)
+		end
+	end
+	table.clear(DepthOfFieldDefaults)
+	Initialized = false
 end
 
 return Acrylic

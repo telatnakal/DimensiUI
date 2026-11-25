@@ -73,7 +73,11 @@ assert "Themes.Dark" not in (SRC / "Creator.lua").read_text(), "Legacy theme fal
 
 assert (ROOT / "src/Packages/DimensiMotion/init.lua").exists(), "Native motion package missing"
 assert not (ROOT / "src/Packages/Flipper").exists(), "Legacy motion package still exists"
-assert 'Version = "1.2.0"' in (SRC / "init.lua").read_text(), "Version metadata mismatch"
+assert 'Version = "1.2.1"' in (SRC / "init.lua").read_text(), "Version metadata mismatch"
+assert 'function Library:CreateInstance()' in (SRC / "init.lua").read_text(), "CreateInstance alias is missing"
+assert 'function Library:AddCleanup(Callback)' in (SRC / "init.lua").read_text(), "Instance cleanup registration is missing"
+assert 'function Acrylic.Destroy()' in (SRC / "Acrylic/init.lua").read_text(), "Acrylic lifecycle cleanup is missing"
+assert 'pcall(Acrylic.Destroy)' in (SRC / "init.lua").read_text(), "Library destroy must release Acrylic"
 assert 'function Library:NewInstance()' in (SRC / "init.lua").read_text(), "Multi Instance factory is missing"
 assert 'local __DimensiCaches = setmetatable({}, { __mode = "k" })' in bundle, "Bundle per-root module cache is missing"
 assert 'function node:Clone()' in bundle, "Bundle root clone support is missing"

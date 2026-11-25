@@ -70,3 +70,20 @@ Author and project credit displayed by this library: **telatnakal**. License and
 ## Multiple instances
 
 Each library instance owns an independent root module tree and its own GUI, theme registry, tab state, notifications, motion resources, and cleanup lifecycle. Create additional instances with `local OtherUI = DimensiUI:NewInstance()`. Each instance can create one window using the existing `CreateWindow` API. Destroy instances independently with `OtherUI:Destroy()`; destroying one instance is not intended to unload another.
+
+
+### Instance isolation and cleanup
+
+Each library instance owns its own cloned ModuleScript tree and module cache. Create an independent instance with either `Library:NewInstance()` or `Library:CreateInstance()`. Each instance can create one window and can be destroyed independently.
+
+```lua
+local UI = require(path.to.DimensiUI)
+local UI2 = UI:CreateInstance()
+
+UI:CreateWindow({ Title = "Primary" })
+UI2:CreateWindow({ Title = "Secondary" })
+
+UI2:Destroy() -- does not destroy UI
+```
+
+Register instance-owned cleanup work with `Library:AddCleanup(function() ... end)`. Callbacks are run in reverse registration order when that instance is destroyed. Acrylic's owned DepthOfField effect is also released during destruction and previously captured effect states are restored.

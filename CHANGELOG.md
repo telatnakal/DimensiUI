@@ -27,3 +27,12 @@
 - Added per-root module caching and root-tree cloning to the standalone bundle runtime.
 - Each cloned library instance owns its GUI and module lifecycle; destroying one instance does not reset another instance's module state.
 - Runtime behavior still requires verification in Roblox Studio/client.
+
+
+## 1.2.1
+
+- Added `CreateInstance()` as an alias for the isolated `NewInstance()` factory.
+- Added `AddCleanup(callback)` for instance-owned teardown callbacks.
+- Added explicit Acrylic lifecycle cleanup and restoration of captured DepthOfField states during library destruction.
+- Library destruction now clears option and open-frame registries after releasing owned resources.
+- Rebuilt the standalone bundle from the modular source.

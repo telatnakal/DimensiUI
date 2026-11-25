@@ -47,10 +47,11 @@ local Library = {
 	Name = "DimensiUI",
 	Author = "telatnakal",
 	Credit = "telatnakal",
-	Version = "1.2.0",
+	Version = "1.2.1",
 
 	OpenFrames = {},
 	Options = {},
+	_CleanupCallbacks = {},
 	Themes = { "Dimensi" },
 
 	Window = nil,
@@ -129,16 +130,19 @@ Library.Elements = Elements
 
 function Library:NewInstance()
 	assert(not Library.Unloaded, "DimensiUI has been destroyed")
-	assert(Root and type(Root.Clone) == "function", "DimensiUI:NewInstance requires a cloneable root ModuleScript")
+	assert(typeof(Root) == "Instance" and Root:IsA("ModuleScript"), "DimensiUI:NewInstance requires a ModuleScript root")
+	assert(Root.Archivable, "DimensiUI:NewInstance requires the root ModuleScript to be Archivable")
 
 	local Clone
 	local Success, Result = pcall(function()
 		Clone = Root:Clone()
-		if typeof(Clone) == "Instance" then
-			Clone.Parent = Root.Parent
-		end
+		assert(Clone, "Root ModuleScript could not be cloned")
+		Clone.Name = Root.Name .. "_Instance"
+		Clone.Parent = Root.Parent
 		local NewLibrary = require(Clone)
+		assert(type(NewLibrary) == "table" and NewLibrary ~= Library, "Cloned ModuleScript did not create an isolated library")
 		NewLibrary._RootClone = Clone
+		NewLibrary._InstanceParent = Root.Parent
 		return NewLibrary
 	end)
 
@@ -150,6 +154,20 @@ function Library:NewInstance()
 	end
 
 	return Result
+end
+
+function Library:CreateInstance()
+	return self:NewInstance()
+end
+
+function Library:AddCleanup(Callback)
+	assert(type(Callback) == "function", "AddCleanup expects a function")
+	if Library.Unloaded then
+		pcall(Callback)
+		return false
+	end
+	table.insert(Library._CleanupCallbacks, Callback)
+	return true
 end
 
 function Library:CreateWindow(Config)
@@ -233,6 +251,13 @@ function Library:Destroy()
 			Library.Window.AcrylicPaint.Model:Destroy()
 		end)
 	end
+	for Index = #Library._CleanupCallbacks, 1, -1 do
+		local Callback = table.remove(Library._CleanupCallbacks, Index)
+		pcall(Callback)
+	end
+	if Acrylic and type(Acrylic.Destroy) == "function" then
+		pcall(Acrylic.Destroy)
+	end
 	Creator.Disconnect()
 	if Library.GUI then
 		Library.GUI:Destroy()
@@ -246,6 +271,8 @@ function Library:Destroy()
 	TabModule.TabCount = 0
 	TabModule.SelectionGeneration += 1
 	Library.Window = nil
+	table.clear(Library.Options)
+	table.clear(Library.OpenFrames)
 	local RootClone = Library._RootClone
 	Library._RootClone = nil
 	if RootClone and typeof(RootClone) == "Instance" then
