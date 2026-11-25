@@ -6,8 +6,7 @@ local function CreateInterfaceManager()
 	InterfaceManager.Folder = "DimensiUISettings"
     InterfaceManager.Settings = {
         Theme = "Dimensi",
-        Acrylic = true,
-        Transparency = true,
+        Transparency = false,
         MenuKeybind = "LeftControl"
     }
 
@@ -67,7 +66,6 @@ local function CreateInterfaceManager()
 		if not decodeOk or type(decoded) ~= "table" then return false, "invalid settings JSON" end
 		local current = self.Settings
 		current.Theme = "Dimensi"
-		if type(decoded.Acrylic) == "boolean" then current.Acrylic = decoded.Acrylic end
 		if type(decoded.Transparency) == "boolean" then current.Transparency = decoded.Transparency end
 		if type(decoded.MenuKeybind) == "string" and Enum.KeyCode[decoded.MenuKeybind] then current.MenuKeybind = decoded.MenuKeybind end
 		return true
@@ -88,22 +86,9 @@ local function CreateInterfaceManager()
 		local section = tab:AddSection("Interface")
 		Settings.Theme = "Dimensi"
 		if Library.Theme ~= "Dimensi" then Library:SetTheme("Dimensi") end
-		if Library.UseAcrylic then
-			section:AddToggle("AcrylicToggle", {
-				Title = "Acrylic",
-				Description = "The blurred background requires graphic quality 8+",
-				Default = Settings.Acrylic,
-				Callback = function(Value)
-					if not Library:ToggleAcrylic(Value) then return end
-                    Settings.Acrylic = Value
-                    Manager:SaveSettings()
-				end
-			})
-		end
-	
 		section:AddToggle("TransparentToggle", {
 			Title = "Transparency",
-			Description = "Makes the interface transparent.",
+			Description = "Slightly lowers the window background opacity.",
 			Default = Settings.Transparency,
 			Callback = function(Value)
 				Library:ToggleTransparency(Value)

@@ -8,7 +8,7 @@ local Root = script.Parent.Parent
 local Typography = require(Root.Typography)
 local Motion = require(Root.Packages.DimensiMotion)
 local Creator = require(Root.Creator)
-local Acrylic = require(Root.Acrylic)
+local Surface = require(Root.Surface)
 local Assets = require(script.Parent.Assets)
 local Components = script.Parent
 
@@ -37,6 +37,7 @@ return function(Config)
 		Minimized = false,
 		Size = UDim2.fromOffset(initialWidth, initialHeight),
 		TabWidth = initialTabWidth,
+		ContentTop = 68,
 		CurrentPos = 0,
 		Position = UDim2.fromOffset(
 			math.max(12, viewport.X / 2 - initialWidth / 2),
@@ -49,21 +50,7 @@ return function(Config)
 	local DragEndConnection
 	local MinimizeNotif = false
 
-	Window.AcrylicPaint = Acrylic.AcrylicPaint()
-
-	local Selector = New("Frame", {
-		Size = UDim2.fromOffset(4, 0),
-		BackgroundColor3 = Color3.fromRGB(76, 194, 255),
-		Position = UDim2.fromOffset(0, 17),
-		AnchorPoint = Vector2.new(0, 0.5),
-		ThemeTag = {
-			BackgroundColor3 = "Accent",
-		},
-	}, {
-		New("UICorner", {
-			CornerRadius = UDim.new(0, 2),
-		}),
-	})
+	Window.Surface = Surface()
 
 	local ResizeStartFrame = New("Frame", {
 		Size = UDim2.fromOffset(28, 28),
@@ -85,14 +72,38 @@ return function(Config)
 		}),
 	})
 
+	Window.Sidebar = New("Frame", {
+		Size = UDim2.new(0, Window.TabWidth + 24, 1, 0),
+		BackgroundTransparency = 0,
+		BorderSizePixel = 0,
+		ThemeTag = {
+			BackgroundColor3 = "Sidebar",
+		},
+	}, {
+		New("UICorner", {
+			CornerRadius = UDim.new(0, 12),
+		}),
+		-- Squares off the sidebar's right-hand corners so only the window's left corners stay round.
+		New("Frame", {
+			Name = "Patch",
+			AnchorPoint = Vector2.new(1, 0),
+			Position = UDim2.fromScale(1, 0),
+			Size = UDim2.new(0, 14, 1, 0),
+			BackgroundTransparency = 0,
+			BorderSizePixel = 0,
+			ThemeTag = {
+				BackgroundColor3 = "Sidebar",
+			},
+		}),
+	})
+
 	local TabFrame = New("Frame", {
-		Size = UDim2.new(0, Window.TabWidth, 1, -66),
-		Position = UDim2.new(0, 12, 0, 54),
+		Size = UDim2.new(0, Window.TabWidth, 1, -76),
+		Position = UDim2.new(0, 12, 0, 64),
 		BackgroundTransparency = 1,
 		ClipsDescendants = true,
 	}, {
 		Window.TabHolder,
-		Selector,
 	})
 
 	Window.TabDisplay = New("TextLabel", {
@@ -100,11 +111,12 @@ return function(Config)
 		Text = "Tab",
 		TextTransparency = 0,
 		FontFace = Typography.SemiBold,
-		TextSize = 20,
+		TextSize = 18,
 		TextXAlignment = "Left",
 		TextYAlignment = "Center",
-		Size = UDim2.new(1, -16, 0, 28),
-		Position = UDim2.fromOffset(Window.TabWidth + 26, 56),
+		TextTruncate = Enum.TextTruncate.AtEnd,
+		Size = UDim2.new(1, -(Window.TabWidth + 144), 0, 28),
+		Position = UDim2.fromOffset(Window.TabWidth + 48, 14),
 		BackgroundTransparency = 1,
 		ThemeTag = {
 			TextColor3 = "Text",
@@ -112,8 +124,8 @@ return function(Config)
 	})
 
 	Window.ContainerHolder = New("CanvasGroup", {
-		Size = UDim2.new(1, -Window.TabWidth - 32, 1, -102),
-		Position = UDim2.fromOffset(Window.TabWidth + 26, 90),
+		Size = UDim2.new(1, -(Window.TabWidth + 72), 1, -(Window.ContentTop + 20)),
+		Position = UDim2.fromOffset(Window.TabWidth + 48, Window.ContentTop),
 		BackgroundTransparency = 1,
 	})
 
@@ -124,7 +136,8 @@ return function(Config)
 		Parent = Config.Parent,
 		Active = true,
 	}, {
-		Window.AcrylicPaint.Frame,
+		Window.Surface.Frame,
+		Window.Sidebar,
 		Window.TabDisplay,
 		Window.ContainerHolder,
 		TabFrame,
@@ -138,10 +151,6 @@ return function(Config)
 		Window = Window,
 	})
 
-	if Library.UseAcrylic then
-		Window.AcrylicPaint.AddParent(Window.Root)
-	end
-
 	local SizeMotor = Creator.TrackMotor(Motion.GroupMotor.new({
 		X = Window.Size.X.Offset,
 		Y = Window.Size.Y.Offset,
@@ -152,10 +161,8 @@ return function(Config)
 		Y = Window.Position.Y.Offset,
 	}), Window.Root)
 
-	Window.SelectorPosMotor = Creator.TrackMotor(Motion.SingleMotor.new(17), Window.Root)
-	Window.SelectorSizeMotor = Creator.TrackMotor(Motion.SingleMotor.new(0), Window.Root)
 	Window.ContainerBackMotor = Creator.TrackMotor(Motion.SingleMotor.new(0), Window.Root)
-	Window.ContainerPosMotor = Creator.TrackMotor(Motion.SingleMotor.new(94), Window.Root)
+	Window.ContainerPosMotor = Creator.TrackMotor(Motion.SingleMotor.new(Window.ContentTop), Window.Root)
 
 	SizeMotor:onStep(function(values)
 		Window.Root.Size = UDim2.new(0, values.X, 0, values.Y)
@@ -165,30 +172,12 @@ return function(Config)
 		Window.Root.Position = UDim2.new(0, values.X, 0, values.Y)
 	end)
 
-	local LastValue = 0
-	local LastTime = 0
-	Window.SelectorPosMotor:onStep(function(Value)
-		Selector.Position = UDim2.new(0, 0, 0, Value + 17)
-		local Now = tick()
-		local DeltaTime = Now - LastTime
-
-		if LastValue ~= nil then
-			Window.SelectorSizeMotor:setGoal(Spring((math.abs(Value - LastValue) / (DeltaTime * 60)) + 16))
-			LastValue = Value
-		end
-		LastTime = Now
-	end)
-
-	Window.SelectorSizeMotor:onStep(function(Value)
-		Selector.Size = UDim2.new(0, 4, 0, Value)
-	end)
-
 	Window.ContainerBackMotor:onStep(function(Value)
 		Window.ContainerHolder.GroupTransparency = Value
 	end)
 
 	Window.ContainerPosMotor:onStep(function(Value)
-		Window.ContainerHolder.Position = UDim2.fromOffset(Window.TabWidth + 26, Value)
+		Window.ContainerHolder.Position = UDim2.fromOffset(Window.TabWidth + 48, Value)
 	end)
 
 	Creator.AddSignal(Window.TitleBar.Frame.InputBegan, function(Input)
@@ -291,10 +280,13 @@ return function(Config)
 		Window.TabWidth = isMobile and math.clamp(Window.TabWidth, 92, 108) or math.clamp(Window.TabWidth, 120, 220)
 		SizeMotor:setGoal({ X = Instant(width), Y = Instant(height) })
 		PosMotor:setGoal({ X = Instant(x), Y = Instant(y) })
-		TabFrame.Size = UDim2.new(0, Window.TabWidth, 1, -66)
-		Window.TabDisplay.Position = UDim2.fromOffset(Window.TabWidth + 26, 56)
-		Window.ContainerHolder.Size = UDim2.new(1, -Window.TabWidth - 32, 1, -102)
-		Window.ContainerHolder.Position = UDim2.fromOffset(Window.TabWidth + 26, 90)
+		Window.Sidebar.Size = UDim2.new(0, Window.TabWidth + 24, 1, 0)
+		TabFrame.Size = UDim2.new(0, Window.TabWidth, 1, -76)
+		Window.TitleBar.Brand.Size = UDim2.fromOffset(math.max(96, Window.TabWidth - 12), 34)
+		Window.TabDisplay.Size = UDim2.new(1, -(Window.TabWidth + 144), 0, 28)
+		Window.TabDisplay.Position = UDim2.fromOffset(Window.TabWidth + 48, 14)
+		Window.ContainerHolder.Size = UDim2.new(1, -(Window.TabWidth + 72), 1, -(Window.ContentTop + 20))
+		Window.ContainerHolder.Position = UDim2.fromOffset(Window.TabWidth + 48, Window.ContentTop)
 	end
 
 	local ViewportConnection
@@ -338,7 +330,7 @@ return function(Config)
 			local Key = Library.MinimizeKeybind and Library.MinimizeKeybind.Value or Library.MinimizeKey.Name
 			Library:Notify({
 				Title = "Interface",
-				Content = "Press " .. Key .. " to toggle the inteface.",
+				Content = "Press " .. Key .. " to toggle the interface.",
 				Duration = 6
 			})
 		end
@@ -349,9 +341,6 @@ return function(Config)
 			local frame = Library.OpenFrames[index]
 			if frame and frame.Parent then pcall(function() frame:Destroy() end) end
 			table.remove(Library.OpenFrames, index)
-		end
-		if Library.UseAcrylic and Window.AcrylicPaint and Window.AcrylicPaint.Model then
-			pcall(function() Window.AcrylicPaint.Model:Destroy() end)
 		end
 		if Window.Root then Window.Root:Destroy() end
 	end
@@ -372,8 +361,8 @@ return function(Config)
 		local Content = New("TextLabel", {
 			FontFace = Typography.Regular,
 			Text = Config.Content,
-			TextColor3 = Color3.fromRGB(240, 240, 240),
-			TextSize = 12,
+			TextColor3 = Color3.fromRGB(150, 158, 172),
+			TextSize = 13,
 			TextWrapped = true,
 			LineHeight = 1.12,
 			TextXAlignment = Enum.TextXAlignment.Left,
@@ -384,7 +373,7 @@ return function(Config)
 			Parent = Dialog.Root,
 			ClipsDescendants = false,
 			ThemeTag = {
-				TextColor3 = "Text",
+				TextColor3 = "SubText",
 			},
 		})
 
@@ -419,12 +408,6 @@ return function(Config)
 		local Index = type(Tab) == "table" and Tab.Index or Tab
 		return TabModule:SelectTab(Index)
 	end
-
-	Creator.AddSignal(Window.TabHolder:GetPropertyChangedSignal("CanvasPosition"), function()
-		LastValue = TabModule:GetCurrentTabPos() + 16
-		LastTime = 0
-		Window.SelectorPosMotor:setGoal(Instant(TabModule:GetCurrentTabPos()))
-	end, Window.Root)
 
 	return Window
 end

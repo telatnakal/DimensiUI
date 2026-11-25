@@ -11,9 +11,9 @@ return function(Theme, Parent, DialogCheck)
 	local Button = {}
 
 	Button.Title = New("TextLabel", {
-		FontFace = Typography.Regular,
-		TextColor3 = Color3.fromRGB(200, 200, 200),
-		TextSize = 14,
+		FontFace = Typography.Medium,
+		TextColor3 = Color3.fromRGB(241, 243, 247),
+		TextSize = 13,
 		TextWrapped = true,
 		TextXAlignment = Enum.TextXAlignment.Center,
 		TextYAlignment = Enum.TextYAlignment.Center,
@@ -34,7 +34,7 @@ return function(Theme, Parent, DialogCheck)
 		},
 	}, {
 		New("UICorner", {
-			CornerRadius = UDim.new(0, 4),
+			CornerRadius = UDim.new(0, 8),
 		}),
 	})
 
@@ -46,14 +46,7 @@ return function(Theme, Parent, DialogCheck)
 		},
 	}, {
 		New("UICorner", {
-			CornerRadius = UDim.new(0, 4),
-		}),
-		New("UIStroke", {
-			ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-			Transparency = 0.65,
-			ThemeTag = {
-				Color = "DialogButtonBorder",
-			},
+			CornerRadius = UDim.new(0, 8),
 		}),
 		Button.HoverFrame,
 		Button.Title,
@@ -61,7 +54,7 @@ return function(Theme, Parent, DialogCheck)
 
 	local Motor, SetTransparency = Creator.SpringMotor(1, Button.HoverFrame, "BackgroundTransparency", DialogCheck)
 	Creator.AddSignal(Button.Frame.MouseEnter, function()
-		SetTransparency(0.97)
+		SetTransparency(0.92)
 	end, Button.Frame)
 	Creator.AddSignal(Button.Frame.MouseLeave, function()
 		SetTransparency(1)
@@ -70,7 +63,7 @@ return function(Theme, Parent, DialogCheck)
 		SetTransparency(1)
 	end, Button.Frame)
 	Creator.AddSignal(Button.Frame.MouseButton1Up, function()
-		SetTransparency(0.97)
+		SetTransparency(0.92)
 	end, Button.Frame)
 
 	return Button

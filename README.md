@@ -20,7 +20,8 @@
 - Single Dimensi theme with runtime accent customization
 - Shared typography resolver with Builder Sans candidate and Roblox font fallbacks
 - Responsive window sizing and viewport-aware controls
-- Optional Acrylic/transparency effects
+- Clean, border-free layout: tonal sidebar, rounded cards with hairline row dividers, and a right-aligned control column
+- Solid surfaces with optional window transparency (no blur effects)
 - Instance factory APIs: `NewInstance()` and `CreateInstance()`
 - Instance-owned cleanup callbacks through `AddCleanup()`
 - SaveManager and InterfaceManager addons with per-instance factories
@@ -31,14 +32,10 @@
 ```text
 DimensiUI/
 ├── Addons/                 # SaveManager and InterfaceManager
-├── docs/                   # Retained internal development history
 ├── dist/                   # Generated standalone distribution
 │   └── main.lua
 ├── scripts/                # Bundle builder and static audit
 ├── src/                    # Authoritative modular source
-├── AUDIT.md                # Scope, validation, and known limitations
-├── BUILDING.md             # Build and release instructions
-├── CHANGELOG.md            # Public v1.0.1 release notes
 ├── Example.lua             # Usage example
 ├── LICENSE                 # MIT License
 └── default.project.json    # Rojo project mapping
@@ -70,7 +67,6 @@ local Window = DimensiUI:CreateWindow({
     SubTitle = "Interface",
     TabWidth = 160,
     Size = UDim2.fromOffset(580, 420),
-    Acrylic = false,
     Theme = "Dimensi",
 })
 
@@ -125,9 +121,14 @@ Use a distinct folder for each manager when configurations must be stored separa
 
 `Dimensi` is the only supported theme. Runtime accent customization is available through `SetAccent(Color3)` and `ResetAccent()`. The typography resolver attempts Builder Sans and falls back to supported Roblox font families when needed. Availability of a font family depends on the Roblox runtime.
 
-## Build and validation
+## Build
 
-See [BUILDING.md](BUILDING.md) for bundle generation, static audit commands, and release steps. See [AUDIT.md](AUDIT.md) for validation results and known limitations.
+Regenerate the standalone bundle after editing `src/`:
+
+```bash
+python3 scripts/build_bundle.py
+python3 scripts/audit_static.py   # optional static checks
+```
 
 ## License and provenance
 

@@ -37,11 +37,10 @@ function Element:New(Idx, Config)
 	Input.SetDesc = InputFrame.SetDesc
 
 	local Textbox = require(Components.Textbox)(InputFrame.Frame, true)
-	Textbox.Frame.Position = UDim2.new(1, -10, 0.5, 0)
+	Textbox.Frame.Position = UDim2.new(1, -12, 0.5, 0)
 	Textbox.Frame.AnchorPoint = Vector2.new(1, 0.5)
-	Textbox.Frame.Size = UDim2.new(0.42, 0, 0, 32)
-	InputFrame.LabelHolder.Size = UDim2.new(0.56, -24, 0, 0)
-	Creator.New("UISizeConstraint", { MinSize = Vector2.new(88, 32), MaxSize = Vector2.new(160, 32), Parent = Textbox.Frame })
+	Textbox.Frame.Size = UDim2.fromOffset(140, 32)
+	InputFrame.LabelHolder.Size = UDim2.new(1, -180, 0, 0)
 	Textbox.Input.Text = Config.Default or ""
 	Textbox.Input.PlaceholderText = Config.Placeholder or ""
 

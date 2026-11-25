@@ -42,7 +42,7 @@ function Element:New(Idx, Config)
 
 	local ColorpickerFrame = require(Components.Element)(Config.Title, Config.Description, self.Container, true)
 
-	ColorpickerFrame.LabelHolder.Size = UDim2.new(1, -54, 0, 0)
+	ColorpickerFrame.LabelHolder.Size = UDim2.new(1, -66, 0, 0)
 	Colorpicker.SetTitle = ColorpickerFrame.SetTitle
 	Colorpicker.SetDesc = ColorpickerFrame.SetDesc
 
@@ -52,13 +52,13 @@ function Element:New(Idx, Config)
 		Parent = ColorpickerFrame.Frame,
 	}, {
 		New("UICorner", {
-			CornerRadius = UDim.new(0, 4),
+			CornerRadius = UDim.new(0, 8),
 		}),
 	})
 
 	local DisplayFrame = New("ImageLabel", {
-		Size = UDim2.fromOffset(26, 26),
-		Position = UDim2.new(1, -10, 0.5, 0),
+		Size = UDim2.fromOffset(28, 28),
+		Position = UDim2.new(1, -12, 0.5, 0),
 		AnchorPoint = Vector2.new(1, 0.5),
 		Parent = ColorpickerFrame.Frame,
 		Image = "https://www.roblox.com/asset/?id=14204231522",
@@ -67,7 +67,7 @@ function Element:New(Idx, Config)
 		TileSize = UDim2.fromOffset(40, 40),
 	}, {
 		New("UICorner", {
-			CornerRadius = UDim.new(0, 4),
+			CornerRadius = UDim.new(0, 8),
 		}),
 		DisplayFrameColor,
 	})

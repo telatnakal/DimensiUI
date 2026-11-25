@@ -46,7 +46,7 @@ function Element:New(Idx, Config)
 	}
 
 	local DropdownFrame = require(Components.Element)(Config.Title, Config.Description, self.Container, false)
-	DropdownFrame.LabelHolder.Size = UDim2.new(0.56, -24, 0, 0)
+	DropdownFrame.LabelHolder.Size = UDim2.new(1, -180, 0, 0)
 	DropdownFrame.DescLabel.Size = UDim2.new(1, 0, 0, 0)
 
 	Dropdown.SetTitle = DropdownFrame.SetTitle
@@ -81,28 +81,19 @@ function Element:New(Idx, Config)
 	})
 
 	local DropdownInner = New("TextButton", {
-		Size = UDim2.new(0.42, 0, 0, 32),
-		Position = UDim2.new(1, -10, 0.5, 0),
+		Size = UDim2.fromOffset(140, 32),
+		Position = UDim2.new(1, -12, 0.5, 0),
 		AnchorPoint = Vector2.new(1, 0.5),
-		BackgroundTransparency = 0.9,
+		BackgroundTransparency = 0,
+		AutoButtonColor = false,
+		Text = "",
 		Parent = DropdownFrame.Frame,
 		ThemeTag = {
-			BackgroundColor3 = "DropdownFrame",
+			BackgroundColor3 = "Tone",
 		},
 	}, {
 		New("UICorner", {
-			CornerRadius = UDim.new(0, 5),
-		}),
-		New("UISizeConstraint", {
-			MinSize = Vector2.new(84, 32),
-			MaxSize = Vector2.new(160, 32),
-		}),
-		New("UIStroke", {
-			Transparency = 0.5,
-			ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-			ThemeTag = {
-				Color = "InElementBorder",
-			},
+			CornerRadius = UDim.new(0, 8),
 		}),
 		DropdownIco,
 		DropdownDisplay,
@@ -136,23 +127,13 @@ function Element:New(Idx, Config)
 	}, {
 		DropdownScrollFrame,
 		New("UICorner", {
-			CornerRadius = UDim.new(0, 7),
+			CornerRadius = UDim.new(0, 10),
 		}),
 		New("UIStroke", {
 			ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
 			ThemeTag = {
 				Color = "DropdownBorder",
 			},
-		}),
-		New("ImageLabel", {
-			BackgroundTransparency = 1,
-			Image = "https://www.roblox.com/asset/?id=5554236805",
-			ScaleType = Enum.ScaleType.Slice,
-			SliceCenter = Rect.new(23, 23, 277, 277),
-			Size = UDim2.fromScale(1, 1) + UDim2.fromOffset(30, 30),
-			Position = UDim2.fromOffset(-15, -15),
-			ImageColor3 = Color3.fromRGB(0, 0, 0),
-			ImageTransparency = 0.1,
 		}),
 	})
 
@@ -335,7 +316,7 @@ function Element:New(Idx, Config)
 				ButtonSelector,
 				ButtonLabel,
 				New("UICorner", {
-					CornerRadius = UDim.new(0, 6),
+					CornerRadius = UDim.new(0, 8),
 				}),
 			})
 

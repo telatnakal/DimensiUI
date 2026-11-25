@@ -77,20 +77,17 @@ local function __MakeNode(path, name, parent, isModule)
 end
 
 local __RootNode = __MakeNode("", "DimensiUI", nil, true)
-local __Node_Acrylic = __MakeNode('Acrylic', 'Acrylic', __RootNode, true)
 local __Node_Components = __MakeNode('Components', 'Components', __RootNode, false)
 local __Node_Creator = __MakeNode('Creator', 'Creator', __RootNode, true)
 local __Node_Elements = __MakeNode('Elements', 'Elements', __RootNode, true)
 local __Node_Icons = __MakeNode('Icons', 'Icons', __RootNode, true)
 local __Node_Packages = __MakeNode('Packages', 'Packages', __RootNode, false)
+local __Node_Surface = __MakeNode('Surface', 'Surface', __RootNode, true)
 local __Node_Themes = __MakeNode('Themes', 'Themes', __RootNode, true)
 local __Node_Typography = __MakeNode('Typography', 'Typography', __RootNode, true)
-local __Node_Acrylic_AcrylicBlur = __MakeNode('Acrylic/AcrylicBlur', 'AcrylicBlur', __Node_Acrylic, true)
-local __Node_Acrylic_AcrylicPaint = __MakeNode('Acrylic/AcrylicPaint', 'AcrylicPaint', __Node_Acrylic, true)
-local __Node_Acrylic_CreateAcrylic = __MakeNode('Acrylic/CreateAcrylic', 'CreateAcrylic', __Node_Acrylic, true)
-local __Node_Acrylic_Utils = __MakeNode('Acrylic/Utils', 'Utils', __Node_Acrylic, true)
 local __Node_Components_Assets = __MakeNode('Components/Assets', 'Assets', __Node_Components, true)
 local __Node_Components_Button = __MakeNode('Components/Button', 'Button', __Node_Components, true)
+local __Node_Components_Card = __MakeNode('Components/Card', 'Card', __Node_Components, true)
 local __Node_Components_Dialog = __MakeNode('Components/Dialog', 'Dialog', __Node_Components, true)
 local __Node_Components_Element = __MakeNode('Components/Element', 'Element', __Node_Components, true)
 local __Node_Components_Notification = __MakeNode('Components/Notification', 'Notification', __Node_Components, true)
@@ -155,7 +152,6 @@ local Mouse = LocalPlayer:GetMouse()
 local Root = script
 local Creator = require(Root.Creator)
 local ElementsTable = require(Root.Elements)
-local Acrylic = require(Root.Acrylic)
 local Components = Root.Components
 local NotificationModule = require(Components.Notification)
 
@@ -207,8 +203,6 @@ local Library = {
 	Theme = "Dimensi",
 	DialogOpen = false,
 	_OpenDialogCount = 0,
-	UseAcrylic = true,
-	Acrylic = true,
 	Transparency = true,
 	MinimizeKeybind = nil,
 	MinimizeKey = Enum.KeyCode.LeftControl,
@@ -358,7 +352,6 @@ function Library:CreateWindow(Config)
 	assert(type(Config.Title) == "string" and Config.Title ~= "", "Window - Missing Title")
 	assert(Config.Size == nil or typeof(Config.Size) == "UDim2", "Window - Size must be a UDim2")
 	assert(Config.TabWidth == nil or (type(Config.TabWidth) == "number" and Config.TabWidth == Config.TabWidth and math.abs(Config.TabWidth) < math.huge and Config.TabWidth >= 100 and Config.TabWidth <= 400), "Window - TabWidth must be between 100 and 400")
-	assert(Config.Acrylic == nil or type(Config.Acrylic) == "boolean", "Window - Acrylic must be boolean")
 	assert(Config.Theme == nil or type(Config.Theme) == "string", "Window - Theme must be a string")
 	assert(Config.MinimizeKey == nil or (typeof(Config.MinimizeKey) == "EnumItem" and Config.MinimizeKey.EnumType == Enum.KeyCode), "Window - MinimizeKey must be a KeyCode")
 	assert(Config.SubTitle == nil or type(Config.SubTitle) == "string", "Window - SubTitle must be a string")
@@ -366,9 +359,6 @@ function Library:CreateWindow(Config)
 	Config.SubTitle = Config.SubTitle or ""
 	Config.TabWidth = Config.TabWidth or 170
 	Config.Size = Config.Size or UDim2.fromOffset(590, 470)
-	if Config.Acrylic == nil then
-		Config.Acrylic = false
-	end
 	Config.Theme = "Dimensi"
 	Config.MinimizeKey = Config.MinimizeKey or Enum.KeyCode.LeftControl
 
@@ -386,11 +376,6 @@ function Library:CreateWindow(Config)
 	})
 
 	Library.MinimizeKey = Config.MinimizeKey
-
-	Library.UseAcrylic = Config.Acrylic
-	if Library.UseAcrylic then
-		Acrylic.init()
-	end
 
 	Library.Window = Window
 	Library:SetTheme(Config.Theme)
@@ -429,17 +414,9 @@ function Library:Destroy()
 	Library.Unloaded = true
 	Library.DialogOpen = false
 	Library._OpenDialogCount = 0
-	if Library.Window and Library.UseAcrylic and Library.Window.AcrylicPaint and Library.Window.AcrylicPaint.Model then
-		pcall(function()
-			Library.Window.AcrylicPaint.Model:Destroy()
-		end)
-	end
 	for Index = #Library._CleanupCallbacks, 1, -1 do
 		local Callback = table.remove(Library._CleanupCallbacks, Index)
 		pcall(Callback)
-	end
-	if Acrylic and type(Acrylic.Destroy) == "function" then
-		pcall(Acrylic.Destroy)
 	end
 	Creator.Disconnect()
 	if Library.GUI then
@@ -469,32 +446,21 @@ function Library:Destroy()
 	end
 end
 
-function Library:ToggleAcrylic(Value)
-	if type(Value) ~= "boolean" then return false end
-	if Library.Window then
-		if Library.UseAcrylic and Library.Window.AcrylicPaint then
-			Library.Acrylic = not not Value
-			local Paint = Library.Window.AcrylicPaint
-			if Paint.Model then
-				Paint.Model.Transparency = Value and 0.98 or 1
-			end
-			if Value then
-				Acrylic.Enable()
-			else
-				Acrylic.Disable()
-			end
-		end
-		return true
-	end
-	return false
-end
-
 function Library:ToggleTransparency(Value)
 	if type(Value) ~= "boolean" then return false end
-	if Library.Window and Library.Window.AcrylicPaint and Library.Window.AcrylicPaint.Frame then
-		local Background = Library.Window.AcrylicPaint.Frame:FindFirstChild("Background")
+	if Library.Window and Library.Window.Surface and Library.Window.Surface.Frame then
+		local Alpha = Value and 0.15 or 0
+		local Background = Library.Window.Surface.Frame:FindFirstChild("Background")
 		if Background then
-			Background.BackgroundTransparency = Value and 0.35 or 0
+			Background.BackgroundTransparency = Alpha
+		end
+		local Sidebar = Library.Window.Sidebar
+		if Sidebar then
+			Sidebar.BackgroundTransparency = Alpha
+			local Patch = Sidebar:FindFirstChild("Patch")
+			if Patch then
+				Patch.BackgroundTransparency = Alpha
+			end
 		end
 		return true
 	end
@@ -516,60 +482,6 @@ if type(getgenv) == "function" then
 end
 
 return Library
-end
-
-__DimensiModules['Acrylic'] = function(script, require)
-local Lighting = game:GetService("Lighting")
-
-local Acrylic = {
-	AcrylicBlur = require(script.AcrylicBlur),
-	CreateAcrylic = require(script.CreateAcrylic),
-	AcrylicPaint = require(script.AcrylicPaint),
-}
-
-local BaseEffect
-local Destroyed = false
-
-local function CreateEffect()
-	local Effect = Instance.new("DepthOfFieldEffect")
-	Effect.Name = "DimensiUI_AcrylicBlur"
-	Effect.FarIntensity = 0
-	Effect.InFocusRadius = 0.1
-	Effect.NearIntensity = 1
-	return Effect
-end
-
-function Acrylic.init()
-	if Destroyed then return false end
-	if not BaseEffect then
-		BaseEffect = CreateEffect()
-	end
-	BaseEffect.Parent = Lighting
-	return true
-end
-
-function Acrylic.Enable()
-	if Destroyed or not BaseEffect then return false end
-	BaseEffect.Parent = Lighting
-	return true
-end
-
-function Acrylic.Disable()
-	if Destroyed or not BaseEffect then return false end
-	BaseEffect.Parent = nil
-	return true
-end
-
-function Acrylic.Destroy()
-	if Destroyed then return end
-	Destroyed = true
-	if BaseEffect then
-		pcall(function() BaseEffect:Destroy() end)
-		BaseEffect = nil
-	end
-end
-
-return Acrylic
 end
 
 __DimensiModules['Creator'] = function(script, require)
@@ -759,18 +671,23 @@ function Creator.GetThemeProperty(Property)
 	return nil
 end
 
+local function ApplyThemeEntry(Instance, Properties)
+	for Property, ColorIdx in next, Properties do
+		local ok, err = pcall(function()
+			Instance[Property] = Creator.GetThemeProperty(ColorIdx)
+		end)
+		if not ok then
+			warn("DimensiUI theme property update failed:", err)
+			Creator.Registry[Instance] = nil
+			return false
+		end
+	end
+	return true
+end
+
 function Creator.UpdateTheme()
 	for Instance, Object in next, Creator.Registry do
-		for Property, ColorIdx in next, Object.Properties do
-			local ok, err = pcall(function()
-				Instance[Property] = Creator.GetThemeProperty(ColorIdx)
-			end)
-			if not ok then
-				warn("DimensiUI theme property update failed:", err)
-			Creator.Registry[Instance] = nil
-			break
-			end
-		end
+		ApplyThemeEntry(Instance, Object.Properties)
 	end
 
 	for _, Motor in next, Creator.TransparencyMotors do
@@ -797,7 +714,7 @@ function Creator.AddThemeObject(Object, Properties)
 		Creator.Registry[Object] = nil
 		Creator.DisconnectSignal(DestroyConnection)
 	end))
-	Creator.UpdateTheme()
+	ApplyThemeEntry(Object, Properties)
 	return Object
 end
 
@@ -807,7 +724,7 @@ function Creator.OverrideTag(Object, Properties)
 		return false
 	end
 	Entry.Properties = Properties
-	Creator.UpdateTheme()
+	ApplyThemeEntry(Object, Properties)
 	return true
 end
 
@@ -1704,6 +1621,57 @@ return {
 }
 end
 
+__DimensiModules['Surface'] = function(script, require)
+-- Solid surface: flat fill, rounded corners, no blur and no textures.
+-- ColorKey picks the theme color (default WindowBackground). Outline adds a 1px hairline.
+local Root = script.Parent
+local Creator = require(Root.Creator)
+
+local New = Creator.New
+
+return function(ColorKey, Outline)
+	local Surface = {}
+
+	local Children = {
+		New("UICorner", {
+			CornerRadius = UDim.new(0, 12),
+		}),
+	}
+
+	if Outline then
+		table.insert(
+			Children,
+			New("UIStroke", {
+				Thickness = 1,
+				ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+				ThemeTag = {
+					Color = "Divider",
+				},
+			})
+		)
+	end
+
+	Surface.Frame = New("Frame", {
+		Name = "Surface",
+		Size = UDim2.fromScale(1, 1),
+		BackgroundTransparency = 1,
+		BorderSizePixel = 0,
+	}, {
+		New("Frame", {
+			Name = "Background",
+			Size = UDim2.fromScale(1, 1),
+			BackgroundTransparency = 0,
+			BorderSizePixel = 0,
+			ThemeTag = {
+				BackgroundColor3 = ColorKey or "WindowBackground",
+			},
+		}, Children),
+	})
+
+	return Surface
+end
+end
+
 __DimensiModules['Themes'] = function(script, require)
 local Dimensi = require(script.Dimensi)
 
@@ -1741,310 +1709,6 @@ return {
 }
 end
 
-__DimensiModules['Acrylic/AcrylicBlur'] = function(script, require)
-local Creator = require(script.Parent.Parent.Creator)
-local createAcrylic = require(script.Parent.CreateAcrylic)
-local viewportPointToWorld, getOffset = unpack(require(script.Parent.Utils))
-
-local function createAcrylicBlur(distance)
-	distance = distance or 0.001
-	local positions = {
-		topLeft = Vector2.new(),
-		topRight = Vector2.new(),
-		bottomRight = Vector2.new(),
-	}
-	local model = Creator.TrackModel(createAcrylic())
-	model.Parent = workspace
-
-	local function updatePositions(size, position)
-		positions.topLeft = position
-		positions.topRight = position + Vector2.new(size.X, 0)
-		positions.bottomRight = position + size
-	end
-
-	local function render()
-		if not model or not model.Parent then return end
-		local currentCamera = game:GetService("Workspace").CurrentCamera
-		if not currentCamera then return end
-		local ok, err = pcall(function()
-			local camera = currentCamera.CFrame
-			local topLeft = positions.topLeft
-			local topRight = positions.topRight
-			local bottomRight = positions.bottomRight
-			local topLeft3D = viewportPointToWorld(topLeft, distance)
-			local topRight3D = viewportPointToWorld(topRight, distance)
-			local bottomRight3D = viewportPointToWorld(bottomRight, distance)
-			local width = (topRight3D - topLeft3D).Magnitude
-			local height = (topRight3D - bottomRight3D).Magnitude
-			model.CFrame = CFrame.fromMatrix((topLeft3D + bottomRight3D) / 2, camera.XVector, camera.YVector, camera.ZVector)
-			model.Mesh.Scale = Vector3.new(width, height, 0)
-		end)
-		if not ok then warn("DimensiUI acrylic render failed:", err) end
-	end
-
-	local function onChange(rbx)
-		local offset = getOffset()
-		local size = rbx.AbsoluteSize - Vector2.new(offset, offset)
-		local position = rbx.AbsolutePosition + Vector2.new(offset / 2, offset / 2)
-
-		updatePositions(size, position)
-		task.spawn(render)
-	end
-
-	local boundCamera
-	local cameraConnections = {}
-	local function disconnectCamera()
-		for _, connection in ipairs(cameraConnections) do
-			Creator.DisconnectSignal(connection)
-		end
-		table.clear(cameraConnections)
-		boundCamera = nil
-	end
-	local function bindCamera(camera)
-		if camera == boundCamera then return end
-		disconnectCamera()
-		boundCamera = camera
-		if not camera then return end
-		table.insert(cameraConnections, Creator.TrackConnection(camera:GetPropertyChangedSignal("CFrame"):Connect(render)))
-		table.insert(cameraConnections, Creator.TrackConnection(camera:GetPropertyChangedSignal("ViewportSize"):Connect(render)))
-		table.insert(cameraConnections, Creator.TrackConnection(camera:GetPropertyChangedSignal("FieldOfView"):Connect(render)))
-		task.spawn(render)
-	end
-	local workspaceService = game:GetService("Workspace")
-	local currentCameraConnection = Creator.TrackConnection(workspaceService:GetPropertyChangedSignal("CurrentCamera"):Connect(function()
-		bindCamera(workspaceService.CurrentCamera)
-	end))
-	bindCamera(workspaceService.CurrentCamera)
-
-	local modelDestroyConnection
-	modelDestroyConnection = Creator.TrackConnection(model.Destroying:Connect(function()
-		disconnectCamera()
-		Creator.DisconnectSignal(currentCameraConnection)
-		Creator.DisconnectSignal(modelDestroyConnection)
-	end))
-
-
-	return onChange, model
-end
-
-return function(distance)
-	local Blur = {}
-	local onChange, model = createAcrylicBlur(distance)
-
-	local comp = Creator.New("Frame", {
-		BackgroundTransparency = 1,
-		Size = UDim2.fromScale(1, 1),
-	})
-
-	Creator.AddSignal(comp:GetPropertyChangedSignal("AbsolutePosition"), function()
-		onChange(comp)
-	end, comp)
-
-	Creator.AddSignal(comp:GetPropertyChangedSignal("AbsoluteSize"), function()
-		onChange(comp)
-	end, comp)
-
-	Blur.AddParent = function(Parent)
-		Creator.AddSignal(Parent:GetPropertyChangedSignal("Visible"), function()
-			Blur.SetVisibility(Parent.Visible)
-		end, Parent)
-	end
-
-	Blur.SetVisibility = function(Value)
-		model.Transparency = Value and 0.98 or 1
-	end
-
-	Blur.Frame = comp
-	Blur.Model = model
-
-	return Blur
-end
-end
-
-__DimensiModules['Acrylic/AcrylicPaint'] = function(script, require)
-
-local Creator = require(script.Parent.Parent.Creator)
-local AcrylicBlur = require(script.Parent.AcrylicBlur)
-
-local New = Creator.New
-
-return function(props)
-    local AcrylicPaint = {}
-
-    AcrylicPaint.Frame = New("Frame", {
-        Size = UDim2.fromScale(1, 1),
-        BackgroundColor3 = Color3.fromRGB(13, 10, 20),
-        BackgroundTransparency = 0,
-        BorderSizePixel = 0,
-    }, {
-        New("ImageLabel", {
-            Image = "rbxassetid://8992230677",
-            ScaleType = "Slice",
-            SliceCenter = Rect.new(
-                Vector2.new(99, 99),
-                Vector2.new(99, 99)
-            ),
-            AnchorPoint = Vector2.new(0.5, 0.5),
-            Size = UDim2.new(1, 120, 1, 116),
-            Position = UDim2.fromScale(0.5, 0.5),
-            BackgroundTransparency = 1,
-            ImageColor3 = Color3.fromRGB(0, 0, 0),
-            ImageTransparency = 0.7,
-        }),
-
-        New("UICorner", {
-            CornerRadius = UDim.new(0, 8),
-        }),
-
-        -- Solid main background
-        New("Frame", {
-            Name = "Background",
-            Size = UDim2.fromScale(1, 1),
-            BackgroundTransparency = 0,
-            BorderSizePixel = 0,
-            ThemeTag = {
-                BackgroundColor3 = "AcrylicMain",
-            },
-        }, {
-            New("UICorner", {
-                CornerRadius = UDim.new(0, 8),
-            }),
-        }),
-
-        -- Solid gradient overlay
-        New("Frame", {
-            Size = UDim2.fromScale(1, 1),
-            BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-            BackgroundTransparency = 0,
-            BorderSizePixel = 0,
-        }, {
-            New("UICorner", {
-                CornerRadius = UDim.new(0, 8),
-            }),
-
-            New("UIGradient", {
-                Rotation = 90,
-                ThemeTag = {
-                    Color = "AcrylicGradient",
-                },
-            }),
-        }),
-
-        -- Decorative texture
-        New("ImageLabel", {
-            Image = "rbxassetid://9968344105",
-            ImageTransparency = 0.98,
-            ScaleType = Enum.ScaleType.Tile,
-            TileSize = UDim2.fromOffset(128, 128),
-            Size = UDim2.fromScale(1, 1),
-            BackgroundTransparency = 1,
-        }, {
-            New("UICorner", {
-                CornerRadius = UDim.new(0, 8),
-            }),
-        }),
-
-        New("ImageLabel", {
-            Image = "rbxassetid://9968344227",
-            ImageTransparency = 0.94,
-            ScaleType = Enum.ScaleType.Tile,
-            TileSize = UDim2.fromOffset(128, 128),
-            Size = UDim2.fromScale(1, 1),
-            BackgroundTransparency = 1,
-            ThemeTag = {
-                ImageTransparency = "AcrylicNoise",
-            },
-        }, {
-            New("UICorner", {
-                CornerRadius = UDim.new(0, 8),
-            }),
-        }),
-
-        -- Border
-        New("Frame", {
-            Size = UDim2.fromScale(1, 1),
-            BackgroundTransparency = 1,
-            ZIndex = 2,
-        }, {
-            New("UICorner", {
-                CornerRadius = UDim.new(0, 8),
-            }),
-
-            New("UIStroke", {
-                Transparency = 0.5,
-                Thickness = 1,
-                ThemeTag = {
-                    Color = "AcrylicBorder",
-                },
-            }),
-        }),
-    })
-
-    local Blur
-
-    if require(script.Parent.Parent).UseAcrylic then
-        Blur = AcrylicBlur()
-        Blur.Frame.Parent = AcrylicPaint.Frame
-
-        AcrylicPaint.Model = Blur.Model
-        AcrylicPaint.AddParent = Blur.AddParent
-        AcrylicPaint.SetVisibility = Blur.SetVisibility
-    end
-
-    return AcrylicPaint
-end
-end
-
-__DimensiModules['Acrylic/CreateAcrylic'] = function(script, require)
-local Root = script.Parent.Parent
-local Creator = require(Root.Creator)
-
-local function createAcrylic()
-	local Part = Creator.New("Part", {
-		Name = "Body",
-		Color = Color3.new(0, 0, 0),
-		Material = Enum.Material.Glass,
-		Size = Vector3.new(1, 1, 0),
-		Anchored = true,
-		CanCollide = false,
-		Locked = true,
-		CastShadow = false,
-		Transparency = 0.98,
-	}, {
-		Creator.New("SpecialMesh", {
-			MeshType = Enum.MeshType.Brick,
-			Offset = Vector3.new(0, 0, -0.000001),
-		}),
-	})
-
-	return Part
-end
-
-return createAcrylic
-end
-
-__DimensiModules['Acrylic/Utils'] = function(script, require)
-local function map(value, inMin, inMax, outMin, outMax)
-	return (value - inMin) * (outMax - outMin) / (inMax - inMin) + outMin
-end
-
-local function viewportPointToWorld(location, distance)
-	local camera = game:GetService("Workspace").CurrentCamera
-	if not camera then return Vector3.zero end
-	local unitRay = camera:ScreenPointToRay(location.X, location.Y)
-	return unitRay.Origin + unitRay.Direction * distance
-end
-
-local function getOffset()
-	local camera = game:GetService("Workspace").CurrentCamera
-	if not camera then return 0 end
-	local viewportSizeY = camera.ViewportSize.Y
-	return map(viewportSizeY, 0, 2560, 8, 56)
-end
-
-return { viewportPointToWorld, getOffset }
-end
-
 __DimensiModules['Components/Assets'] = function(script, require)
 return {
 	Close = "rbxassetid://9886659671",
@@ -2068,9 +1732,9 @@ return function(Theme, Parent, DialogCheck)
 	local Button = {}
 
 	Button.Title = New("TextLabel", {
-		FontFace = Typography.Regular,
-		TextColor3 = Color3.fromRGB(200, 200, 200),
-		TextSize = 14,
+		FontFace = Typography.Medium,
+		TextColor3 = Color3.fromRGB(241, 243, 247),
+		TextSize = 13,
 		TextWrapped = true,
 		TextXAlignment = Enum.TextXAlignment.Center,
 		TextYAlignment = Enum.TextYAlignment.Center,
@@ -2091,7 +1755,7 @@ return function(Theme, Parent, DialogCheck)
 		},
 	}, {
 		New("UICorner", {
-			CornerRadius = UDim.new(0, 4),
+			CornerRadius = UDim.new(0, 8),
 		}),
 	})
 
@@ -2103,14 +1767,7 @@ return function(Theme, Parent, DialogCheck)
 		},
 	}, {
 		New("UICorner", {
-			CornerRadius = UDim.new(0, 4),
-		}),
-		New("UIStroke", {
-			ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-			Transparency = 0.65,
-			ThemeTag = {
-				Color = "DialogButtonBorder",
-			},
+			CornerRadius = UDim.new(0, 8),
 		}),
 		Button.HoverFrame,
 		Button.Title,
@@ -2118,7 +1775,7 @@ return function(Theme, Parent, DialogCheck)
 
 	local Motor, SetTransparency = Creator.SpringMotor(1, Button.HoverFrame, "BackgroundTransparency", DialogCheck)
 	Creator.AddSignal(Button.Frame.MouseEnter, function()
-		SetTransparency(0.97)
+		SetTransparency(0.92)
 	end, Button.Frame)
 	Creator.AddSignal(Button.Frame.MouseLeave, function()
 		SetTransparency(1)
@@ -2127,11 +1784,69 @@ return function(Theme, Parent, DialogCheck)
 		SetTransparency(1)
 	end, Button.Frame)
 	Creator.AddSignal(Button.Frame.MouseButton1Up, function()
-		SetTransparency(0.97)
+		SetTransparency(0.92)
 	end, Button.Frame)
 
 	return Button
 end
+end
+
+__DimensiModules['Components/Card'] = function(script, require)
+-- Card: a rounded container that groups rows. Rows are separated by hairlines, not borders.
+local Root = script.Parent.Parent
+local Creator = require(Root.Creator)
+
+local New = Creator.New
+
+local Card = {}
+
+-- One implicit card per tab container, used by elements added directly to a tab.
+local AutoCards = setmetatable({}, { __mode = "k" })
+
+function Card.New(Parent)
+	return New("Frame", {
+		Size = UDim2.new(1, 0, 0, 0),
+		AutomaticSize = Enum.AutomaticSize.Y,
+		BackgroundTransparency = 0,
+		BorderSizePixel = 0,
+		LayoutOrder = 7,
+		Parent = Parent,
+		ThemeTag = {
+			BackgroundColor3 = "Card",
+		},
+	}, {
+		New("UICorner", {
+			CornerRadius = UDim.new(0, 14),
+		}),
+		New("UIPadding", {
+			PaddingTop = UDim.new(0, 4),
+			PaddingBottom = UDim.new(0, 4),
+			PaddingLeft = UDim.new(0, 4),
+			PaddingRight = UDim.new(0, 4),
+		}),
+		New("UIListLayout", {
+			SortOrder = Enum.SortOrder.LayoutOrder,
+			Padding = UDim.new(0, 0),
+		}),
+	})
+end
+
+function Card.Auto(Parent)
+	local Existing = AutoCards[Parent]
+	if Existing and Existing.Parent == Parent then
+		return Existing
+	end
+	local Frame = Card.New(Parent)
+	AutoCards[Parent] = Frame
+	return Frame
+end
+
+-- Called when a section is added so later loose elements start a fresh card below it.
+function Card.Reset(Parent)
+	AutoCards[Parent] = nil
+end
+
+return Card
 end
 
 __DimensiModules['Components/Dialog'] = function(script, require)
@@ -2183,7 +1898,7 @@ function Dialog:Create()
 		Parent = Dialog.Window.Root,
 	}, {
 		New("UICorner", {
-			CornerRadius = UDim.new(0, 8),
+			CornerRadius = UDim.new(0, 12),
 		}),
 	})
 
@@ -2222,7 +1937,7 @@ function Dialog:Create()
 	NewDialog.Title = New("TextLabel", {
 		FontFace = Typography.SemiBold,
 		Text = "Dialog",
-		TextColor3 = Color3.fromRGB(240, 240, 240),
+		TextColor3 = Color3.fromRGB(241, 243, 247),
 		TextSize = 16,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		Size = UDim2.new(1, 0, 0, 22),
@@ -2251,10 +1966,10 @@ function Dialog:Create()
 		},
 	}, {
 		New("UICorner", {
-			CornerRadius = UDim.new(0, 8),
+			CornerRadius = UDim.new(0, 12),
 		}),
 		New("UIStroke", {
-			Transparency = 0.5,
+			Transparency = 0,
 			ThemeTag = {
 				Color = "DialogBorder",
 			},
@@ -2337,15 +2052,22 @@ local Motion = require(Root.Packages.DimensiMotion)
 local Creator = require(Root.Creator)
 local New = Creator.New
 
+local Card = require(script.Parent.Card)
+
 local Spring = Motion.Spring.new
 
 return function(Title, Desc, Parent, Hover)
 	local Element = {}
 
+	-- Elements added straight to a tab are grouped into one implicit card.
+	if Parent and Parent:IsA("ScrollingFrame") then
+		Parent = Card.Auto(Parent)
+	end
+
 	Element.TitleLabel = New("TextLabel", {
 		FontFace = Typography.Medium,
 		Text = Title,
-		TextColor3 = Color3.fromRGB(240, 240, 240),
+		TextColor3 = Color3.fromRGB(241, 243, 247),
 		TextSize = 13,
 		TextWrapped = true,
 		LineHeight = 1.12,
@@ -2362,7 +2084,7 @@ return function(Title, Desc, Parent, Hover)
 	Element.DescLabel = New("TextLabel", {
 		FontFace = Typography.Regular,
 		Text = Desc,
-		TextColor3 = Color3.fromRGB(200, 200, 200),
+		TextColor3 = Color3.fromRGB(150, 158, 172),
 		TextSize = 12,
 		TextWrapped = true,
 		LineHeight = 1.12,
@@ -2392,38 +2114,54 @@ return function(Title, Desc, Parent, Hover)
 			PaddingBottom = UDim.new(0, 10),
 			PaddingTop = UDim.new(0, 10),
 		}),
+		New("UISizeConstraint", {
+			MinSize = Vector2.new(0, 48),
+		}),
 		Element.TitleLabel,
 		Element.DescLabel,
 	})
 
-	Element.Border = New("UIStroke", {
-		Transparency = 0.5,
-		ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-		Color = Color3.fromRGB(0, 0, 0),
+	Element.Separator = New("Frame", {
+		Position = UDim2.fromOffset(12, 0),
+		Size = UDim2.new(1, -24, 0, 1),
+		BackgroundTransparency = 0,
+		BorderSizePixel = 0,
 		ThemeTag = {
-			Color = "ElementBorder",
+			BackgroundColor3 = "Divider",
 		},
 	})
 
 	Element.Frame = New("TextButton", {
 		Size = UDim2.new(1, 0, 0, 0),
-		BackgroundTransparency = 0.89,
-		BackgroundColor3 = Color3.fromRGB(130, 130, 130),
+		BackgroundTransparency = 1,
+		BackgroundColor3 = Color3.fromRGB(33, 38, 48),
 		Parent = Parent,
 		AutomaticSize = Enum.AutomaticSize.Y,
+		AutoButtonColor = false,
 		Text = "",
 		LayoutOrder = 7,
 		ThemeTag = {
-			BackgroundColor3 = "Element",
+			BackgroundColor3 = "Tone",
 			BackgroundTransparency = "ElementTransparency",
 		},
 	}, {
 		New("UICorner", {
-			CornerRadius = UDim.new(0, 6),
+			CornerRadius = UDim.new(0, 10),
 		}),
-		Element.Border,
+		Element.Separator,
 		Element.LabelHolder,
 	})
+
+	-- Hairline above every row except the first one in its card.
+	local Rows = 0
+	if Parent then
+		for _, Child in next, Parent:GetChildren() do
+			if Child:IsA("GuiObject") then
+				Rows += 1
+			end
+		end
+	end
+	Element.Separator.Visible = Rows > 1
 
 	function Element:SetTitle(Set)
 		assert(type(Set) == "string", "Element:SetTitle expects a string")
@@ -2467,7 +2205,7 @@ return function(Title, Desc, Parent, Hover)
 			SetTransparency(Creator.GetThemeProperty("ElementTransparency"))
 		end, Element.Frame)
 		Creator.AddSignal(Element.Frame.MouseButton1Down, function()
-			SetTransparency(Creator.GetThemeProperty("ElementTransparency") + Creator.GetThemeProperty("HoverChange"))
+			SetTransparency(Creator.GetThemeProperty("ElementTransparency") - Creator.GetThemeProperty("HoverChange") - 0.15)
 		end, Element.Frame)
 		Creator.AddSignal(Element.Frame.MouseButton1Up, function()
 			SetTransparency(Creator.GetThemeProperty("ElementTransparency") - Creator.GetThemeProperty("HoverChange"))
@@ -2483,7 +2221,7 @@ local Root = script.Parent.Parent
 local Typography = require(Root.Typography)
 local Motion = require(Root.Packages.DimensiMotion)
 local Creator = require(Root.Creator)
-local Acrylic = require(Root.Acrylic)
+local Surface = require(Root.Surface)
 
 local Spring = Motion.Spring.new
 local Instant = Motion.Instant.new
@@ -2556,15 +2294,15 @@ function Notification:New(Config)
 		Closed = false,
 	}
 
-	NewNotification.AcrylicPaint = Acrylic.AcrylicPaint()
+	NewNotification.Surface = Surface("Card", true)
 
 	NewNotification.Title = New("TextLabel", {
 		Position = UDim2.new(0, 14, 0, 17),
 		Text = Config.Title,
 		RichText = true,
-		TextColor3 = Color3.fromRGB(255, 255, 255),
+		TextColor3 = Color3.fromRGB(241, 243, 247),
 		TextTransparency = 0,
-		FontFace = Typography.Regular,
+		FontFace = Typography.SemiBold,
 		TextSize = 13,
 		TextXAlignment = "Left",
 		TextYAlignment = "Center",
@@ -2588,7 +2326,7 @@ function Notification:New(Config)
 		BackgroundTransparency = 1,
 		TextWrapped = true,
 		ThemeTag = {
-			TextColor3 = "Text",
+			TextColor3 = "SubText",
 		},
 	})
 
@@ -2643,12 +2381,26 @@ function Notification:New(Config)
 		}),
 	})
 
+	NewNotification.Accent = New("Frame", {
+		Position = UDim2.new(0, 6, 0, 12),
+		Size = UDim2.new(0, 3, 1, -24),
+		BackgroundTransparency = 0,
+		ThemeTag = {
+			BackgroundColor3 = "Accent",
+		},
+	}, {
+		New("UICorner", {
+			CornerRadius = UDim.new(1, 0),
+		}),
+	})
+
 	NewNotification.Root = New("Frame", {
 		BackgroundTransparency = 1,
 		Size = UDim2.new(1, 0, 1, 0),
 		Position = UDim2.fromScale(1, 0),
 	}, {
-		NewNotification.AcrylicPaint.Frame,
+		NewNotification.Surface.Frame,
+		NewNotification.Accent,
 		NewNotification.Title,
 		NewNotification.CloseButton,
 		NewNotification.LabelHolder,
@@ -2672,13 +2424,6 @@ function Notification:New(Config)
 
 	Creator.AddSignal(NewNotification.CloseButton.MouseButton1Click, function()
 		NewNotification:Close()
-	end, NewNotification.Holder)
-
-	Creator.AddSignal(NewNotification.Holder.Destroying, function()
-		local Paint = NewNotification.AcrylicPaint
-		if Paint and Paint.Model and Paint.Model.Parent then
-			pcall(function() Paint.Model:Destroy() end)
-		end
 	end, NewNotification.Holder)
 
 	local RootMotor = Creator.TrackMotor(Motion.GroupMotor.new({
@@ -2713,10 +2458,6 @@ function Notification:New(Config)
 				Offset = Spring(60, { frequency = 5 }),
 			})
 			task.wait(0.4)
-			if require(Root).UseAcrylic then
-				local Paint = NewNotification.AcrylicPaint
-				if Paint and Paint.Model then pcall(function() Paint.Model:Destroy() end) end
-			end
 			if NewNotification.Holder and NewNotification.Holder.Parent then
 				NewNotification.Holder:Destroy()
 			end
@@ -2768,27 +2509,21 @@ __DimensiModules['Components/Section'] = function(script, require)
 local Root = script.Parent.Parent
 local Typography = require(Root.Typography)
 local Creator = require(Root.Creator)
+local Card = require(script.Parent.Card)
 
 local New = Creator.New
 
 return function(Title, Parent)
 	local Section = {}
 
-	Section.Layout = New("UIListLayout", {
-		Padding = UDim.new(0, 7),
-	})
-
-	Section.Container = New("Frame", {
-		Size = UDim2.new(1, 0, 0, 26),
-		Position = UDim2.fromOffset(0, 24),
-		BackgroundTransparency = 1,
-	}, {
-		Section.Layout,
-	})
+	-- Section.Container is the card that holds this section's rows.
+	Section.Container = Card.New(nil)
+	Section.Container.Position = UDim2.fromOffset(0, 26)
+	Section.Layout = Section.Container:FindFirstChildOfClass("UIListLayout")
 
 	Section.Root = New("Frame", {
 		BackgroundTransparency = 1,
-		Size = UDim2.new(1, 0, 0, 26),
+		Size = UDim2.new(1, 0, 0, 34),
 		LayoutOrder = 7,
 		Parent = Parent,
 	}, {
@@ -2796,23 +2531,25 @@ return function(Title, Parent)
 			RichText = true,
 			Text = Title,
 			TextTransparency = 0,
-			FontFace = Typography.SemiBold,
-			TextSize = 14,
+			FontFace = Typography.Medium,
+			TextSize = 12,
 			TextXAlignment = "Left",
 			TextYAlignment = "Center",
 			Size = UDim2.new(1, -16, 0, 18),
-			Position = UDim2.fromOffset(0, 2),
+			Position = UDim2.fromOffset(4, 0),
+			BackgroundTransparency = 1,
 			ThemeTag = {
-				TextColor3 = "Text",
+				TextColor3 = "SubText",
 			},
 		}),
 		Section.Container,
 	})
 
+	-- Card height = rows + 8px of inner padding; the title takes the first 26px.
 	Creator.AddSignal(Section.Layout:GetPropertyChangedSignal("AbsoluteContentSize"), function()
-		Section.Container.Size = UDim2.new(1, 0, 0, Section.Layout.AbsoluteContentSize.Y)
-		Section.Root.Size = UDim2.new(1, 0, 0, Section.Layout.AbsoluteContentSize.Y + 25)
+		Section.Root.Size = UDim2.new(1, 0, 0, Section.Layout.AbsoluteContentSize.Y + 8 + 26)
 	end, Section.Root)
+
 	return Section
 end
 end
@@ -2827,6 +2564,24 @@ local New = Creator.New
 local Spring = Motion.Spring.new
 local Instant = Motion.Instant.new
 local Components = Root.Components
+local Card = require(Components.Card)
+
+-- Background tint (Tab theme color) per interaction state
+local TINT_IDLE = 1
+local TINT_HOVER = 0.6
+local TINT_PRESSED = 0.4
+local TINT_SELECTED = 0
+local TINT_SELECTED_HOVER = 0.12
+
+local function SetActive(Item, Active)
+	if Item.Label then
+		Item.Label.FontFace = Active and Typography.Medium or Typography.Regular
+		Creator.OverrideTag(Item.Label, { TextColor3 = Active and "Text" or "SubText" })
+	end
+	if Item.IconImage then
+		Creator.OverrideTag(Item.IconImage, { ImageColor3 = Active and "Accent" or "SubText" })
+	end
+end
 
 local TabModule = {
 	Window = nil,
@@ -2840,13 +2595,6 @@ local TabModule = {
 function TabModule:Init(Window)
 	TabModule.Window = Window
 	return TabModule
-end
-
-function TabModule:GetCurrentTabPos()
-	local Window = TabModule.Window
-	local Selected = TabModule.Tabs[TabModule.SelectedTab]
-	if not Window or not Window.TabHolder or not Selected or not Selected.Frame then return 0 end
-	return Selected.Frame.AbsolutePosition.Y - Window.TabHolder.AbsolutePosition.Y
 end
 
 function TabModule:New(Title, Icon, Parent)
@@ -2874,8 +2622,37 @@ function TabModule:New(Title, Icon, Parent)
 		Icon = nil
 	end
 
+	Tab.Label = New("TextLabel", {
+		AnchorPoint = Vector2.new(0, 0.5),
+		Position = Icon and UDim2.new(0, 40, 0.5, 0) or UDim2.new(0, 12, 0.5, 0),
+		Text = Title,
+		RichText = true,
+		TextTransparency = 0,
+		FontFace = Typography.Regular,
+		TextSize = 13,
+		TextXAlignment = "Left",
+		TextYAlignment = "Center",
+		Size = UDim2.new(1, Icon and -48 or -20, 1, 0),
+		BackgroundTransparency = 1,
+		TextTruncate = Enum.TextTruncate.AtEnd,
+		ThemeTag = {
+			TextColor3 = "SubText",
+		},
+	})
+
+	Tab.IconImage = New("ImageLabel", {
+		AnchorPoint = Vector2.new(0, 0.5),
+		Size = UDim2.fromOffset(16, 16),
+		Position = UDim2.new(0, 12, 0.5, 0),
+		BackgroundTransparency = 1,
+		Image = Icon and Icon or nil,
+		ThemeTag = {
+			ImageColor3 = "SubText",
+		},
+	})
+
 	Tab.Frame = New("TextButton", {
-		Size = UDim2.new(1, 0, 0, 38),
+		Size = UDim2.new(1, 0, 0, 36),
 		BackgroundTransparency = 1,
 		Parent = Parent,
 		ThemeTag = {
@@ -2883,39 +2660,14 @@ function TabModule:New(Title, Icon, Parent)
 		},
 	}, {
 		New("UICorner", {
-			CornerRadius = UDim.new(0, 6),
+			CornerRadius = UDim.new(0, 10),
 		}),
-		New("TextLabel", {
-			AnchorPoint = Vector2.new(0, 0.5),
-			Position = Icon and UDim2.new(0, 30, 0.5, 0) or UDim2.new(0, 12, 0.5, 0),
-			Text = Title,
-			RichText = true,
-			TextColor3 = Color3.fromRGB(255, 255, 255),
-			TextTransparency = 0,
-			FontFace = Typography.Regular,
-			TextSize = 12,
-			TextXAlignment = "Left",
-			TextYAlignment = "Center",
-			Size = UDim2.new(1, -12, 1, 0),
-			BackgroundTransparency = 1,
-			ThemeTag = {
-				TextColor3 = "Text",
-			},
-		}),
-		New("ImageLabel", {
-			AnchorPoint = Vector2.new(0, 0.5),
-			Size = UDim2.fromOffset(16, 16),
-			Position = UDim2.new(0, 8, 0.5, 0),
-			BackgroundTransparency = 1,
-			Image = Icon and Icon or nil,
-			ThemeTag = {
-				ImageColor3 = "Text",
-			},
-		}),
+		Tab.Label,
+		Tab.IconImage,
 	})
 
 	local ContainerLayout = New("UIListLayout", {
-		Padding = UDim.new(0, 8),
+		Padding = UDim.new(0, 20),
 		SortOrder = Enum.SortOrder.LayoutOrder,
 	})
 
@@ -2927,8 +2679,8 @@ function TabModule:New(Title, Icon, Parent)
 		BottomImage = "rbxassetid://6889812791",
 		MidImage = "rbxassetid://6889812721",
 		TopImage = "rbxassetid://6276641225",
-		ScrollBarImageColor3 = Color3.fromRGB(255, 255, 255),
-		ScrollBarImageTransparency = 0.95,
+		ScrollBarImageColor3 = Color3.fromRGB(150, 158, 172),
+		ScrollBarImageTransparency = 0.7,
 		ScrollBarThickness = 3,
 		BorderSizePixel = 0,
 		CanvasSize = UDim2.fromScale(0, 0),
@@ -2936,7 +2688,7 @@ function TabModule:New(Title, Icon, Parent)
 	}, {
 		ContainerLayout,
 		New("UIPadding", {
-			PaddingRight = UDim.new(0, 10),
+			PaddingRight = UDim.new(0, 8),
 			PaddingLeft = UDim.new(0, 1),
 			PaddingTop = UDim.new(0, 1),
 			PaddingBottom = UDim.new(0, 1),
@@ -2950,16 +2702,16 @@ function TabModule:New(Title, Icon, Parent)
 	Tab.Motor, Tab.SetTransparency = Creator.SpringMotor(1, Tab.Frame, "BackgroundTransparency")
 
 	Creator.AddSignal(Tab.Frame.MouseEnter, function()
-		Tab.SetTransparency(Tab.Selected and 0.85 or 0.89)
+		Tab.SetTransparency(Tab.Selected and TINT_SELECTED_HOVER or TINT_HOVER)
 	end, Tab.Frame)
 	Creator.AddSignal(Tab.Frame.MouseLeave, function()
-		Tab.SetTransparency(Tab.Selected and 0.89 or 1)
+		Tab.SetTransparency(Tab.Selected and TINT_SELECTED or TINT_IDLE)
 	end, Tab.Frame)
 	Creator.AddSignal(Tab.Frame.MouseButton1Down, function()
-		Tab.SetTransparency(0.92)
+		Tab.SetTransparency(TINT_PRESSED)
 	end, Tab.Frame)
 	Creator.AddSignal(Tab.Frame.MouseButton1Up, function()
-		Tab.SetTransparency(Tab.Selected and 0.85 or 0.89)
+		Tab.SetTransparency(Tab.Selected and TINT_SELECTED_HOVER or TINT_HOVER)
 	end, Tab.Frame)
 	Creator.AddSignal(Tab.Frame.MouseButton1Click, function()
 		TabModule:SelectTab(TabIndex)
@@ -2974,6 +2726,7 @@ function TabModule:New(Title, Icon, Parent)
 	function Tab:AddSection(SectionTitle)
 		assert(type(SectionTitle) == "string" and SectionTitle ~= "", "Section title must be a non-empty string")
 		local Section = { Type = "Section" }
+		Card.Reset(Tab.Container)
 
 		local SectionFrame = require(Components.Section)(SectionTitle, Tab.Container)
 		Section.Container = SectionFrame.Container
@@ -2996,16 +2749,17 @@ function TabModule:SelectTab(Tab)
 	local Generation = TabModule.SelectionGeneration
 	TabModule.SelectedTab = Tab
 	for _, Item in next, TabModule.Tabs do
-		Item.SetTransparency(1)
+		Item.SetTransparency(TINT_IDLE)
 		Item.Selected = false
+		SetActive(Item, false)
 	end
-	TabObject.SetTransparency(0.89)
+	TabObject.SetTransparency(TINT_SELECTED)
 	TabObject.Selected = true
+	SetActive(TabObject, true)
 	Window.TabDisplay.Text = TabObject.Name
-	Window.SelectorPosMotor:setGoal(Spring(TabModule:GetCurrentTabPos(), { frequency = 6 }))
 	task.spawn(function()
 		if Generation ~= TabModule.SelectionGeneration or require(Root).Unloaded then return end
-		Window.ContainerPosMotor:setGoal(Spring(110, { frequency = 10 }))
+		Window.ContainerPosMotor:setGoal(Spring(Window.ContentTop + 16, { frequency = 10 }))
 		Window.ContainerBackMotor:setGoal(Spring(1, { frequency = 10 }))
 		task.wait(0.15)
 		if Generation ~= TabModule.SelectionGeneration or require(Root).Unloaded then return end
@@ -3014,7 +2768,7 @@ function TabModule:SelectTab(Tab)
 		end
 		local SelectedContainer = TabModule.Containers[Tab]
 		if SelectedContainer and SelectedContainer.Parent then SelectedContainer.Visible = true end
-		Window.ContainerPosMotor:setGoal(Spring(94, { frequency = 5 }))
+		Window.ContainerPosMotor:setGoal(Spring(Window.ContentTop, { frequency = 5 }))
 		Window.ContainerBackMotor:setGoal(Spring(0, { frequency = 8 }))
 	end)
 	return true
@@ -3031,13 +2785,13 @@ local Motion = require(Root.Packages.DimensiMotion)
 local Creator = require(Root.Creator)
 local New = Creator.New
 
-return function(Parent, Acrylic)
-	Acrylic = Acrylic or false
+return function(Parent, InElement)
+	InElement = InElement or false
 	local Textbox = {}
 
 	Textbox.Input = New("TextBox", {
 		FontFace = Typography.Regular,
-		TextColor3 = Color3.fromRGB(200, 200, 200),
+		TextColor3 = Color3.fromRGB(241, 243, 247),
 		TextSize = 12,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		TextYAlignment = Enum.TextYAlignment.Center,
@@ -3061,35 +2815,26 @@ return function(Parent, Acrylic)
 		Textbox.Input,
 	})
 
-	Textbox.Indicator = New("Frame", {
-		Size = UDim2.new(1, -4, 0, 1),
-		Position = UDim2.new(0, 2, 1, 0),
-		AnchorPoint = Vector2.new(0, 1),
-		BackgroundTransparency = Acrylic and 0.5 or 0,
+	Textbox.Stroke = New("UIStroke", {
+		ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+		Transparency = 1,
 		ThemeTag = {
-			BackgroundColor3 = Acrylic and "InputIndicator" or "DialogInputLine",
+			Color = "Accent",
 		},
 	})
 
 	Textbox.Frame = New("Frame", {
 		Size = UDim2.new(0, 0, 0, 30),
-		BackgroundTransparency = Acrylic and 0.9 or 0,
+		BackgroundTransparency = 0,
 		Parent = Parent,
 		ThemeTag = {
-			BackgroundColor3 = Acrylic and "Input" or "DialogInput",
+			BackgroundColor3 = "Tone",
 		},
 	}, {
 		New("UICorner", {
-			CornerRadius = UDim.new(0, 4),
+			CornerRadius = UDim.new(0, 8),
 		}),
-		New("UIStroke", {
-			ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-			Transparency = Acrylic and 0.5 or 0.65,
-			ThemeTag = {
-				Color = Acrylic and "InElementBorder" or "DialogButtonBorder",
-			},
-		}),
-		Textbox.Indicator,
+		Textbox.Stroke,
 		Textbox.Container,
 	})
 
@@ -3127,20 +2872,12 @@ return function(Parent, Acrylic)
 
 	Creator.AddSignal(Textbox.Input.Focused, function()
 		Update()
-		Textbox.Indicator.Size = UDim2.new(1, -2, 0, 2)
-		Textbox.Indicator.Position = UDim2.new(0, 1, 1, 0)
-		Textbox.Indicator.BackgroundTransparency = 0
-		Creator.OverrideTag(Textbox.Frame, { BackgroundColor3 = Acrylic and "InputFocused" or "DialogHolder" })
-		Creator.OverrideTag(Textbox.Indicator, { BackgroundColor3 = "Accent" })
+		Textbox.Stroke.Transparency = 0
 	end, Textbox.Frame)
 
 	Creator.AddSignal(Textbox.Input.FocusLost, function()
 		Update()
-		Textbox.Indicator.Size = UDim2.new(1, -4, 0, 1)
-		Textbox.Indicator.Position = UDim2.new(0, 2, 1, 0)
-		Textbox.Indicator.BackgroundTransparency = 0.5
-		Creator.OverrideTag(Textbox.Frame, { BackgroundColor3 = Acrylic and "Input" or "DialogInput" })
-		Creator.OverrideTag(Textbox.Indicator, { BackgroundColor3 = Acrylic and "InputIndicator" or "DialogInputLine" })
+		Textbox.Stroke.Transparency = 1
 	end, Textbox.Frame)
 
 	return Textbox
@@ -3168,7 +2905,7 @@ return function(Config)
 		}
 
 		Button.Frame = New("TextButton", {
-			Size = UDim2.new(0, 34, 1, -8),
+			Size = UDim2.fromOffset(32, 32),
 			AnchorPoint = Vector2.new(1, 0),
 			BackgroundTransparency = 1,
 			Parent = Parent,
@@ -3179,7 +2916,7 @@ return function(Config)
 			},
 		}, {
 			New("UICorner", {
-				CornerRadius = UDim.new(0, 7),
+				CornerRadius = UDim.new(0, 8),
 			}),
 			New("ImageLabel", {
 				Image = Icon,
@@ -3217,62 +2954,57 @@ return function(Config)
 		return Button
 	end
 
-	TitleBar.Frame = New("Frame", {
-		Size = UDim2.new(1, 0, 0, 42),
+	TitleBar.Brand = New("Frame", {
+		Position = UDim2.fromOffset(24, 12),
+		Size = UDim2.fromOffset(math.max(96, (Config.Window and Config.Window.TabWidth or 160) - 12), 34),
 		BackgroundTransparency = 1,
-		Parent = Config.Parent,
 	}, {
-		New("Frame", {
-			Size = UDim2.new(1, -16, 1, 0),
-			Position = UDim2.new(0, 16, 0, 0),
-			BackgroundTransparency = 1,
-		}, {
-			New("UIListLayout", {
-				Padding = UDim.new(0, 5),
-				FillDirection = Enum.FillDirection.Horizontal,
-				SortOrder = Enum.SortOrder.LayoutOrder,
-			}),
-			New("TextLabel", {
-				RichText = true,
-				Text = Config.Title,
-				FontFace = Typography.SemiBold,
-				TextSize = 13,
-				TextXAlignment = "Left",
-				TextYAlignment = "Center",
-				Size = UDim2.fromScale(0, 1),
-				AutomaticSize = Enum.AutomaticSize.X,
-				BackgroundTransparency = 1,
-				ThemeTag = {
-					TextColor3 = "Text",
-				},
-			}),
-			New("TextLabel", {
-				RichText = true,
-				Text = Config.SubTitle,
-				TextTransparency = 0.4,
-				FontFace = Typography.Regular,
-				TextSize = 12,
-				TextXAlignment = "Left",
-				TextYAlignment = "Center",
-				Size = UDim2.fromScale(0, 1),
-				AutomaticSize = Enum.AutomaticSize.X,
-				BackgroundTransparency = 1,
-				ThemeTag = {
-					TextColor3 = "Text",
-				},
-			}),
+		New("UIListLayout", {
+			Padding = UDim.new(0, 2),
+			SortOrder = Enum.SortOrder.LayoutOrder,
 		}),
-		New("Frame", {
-			BackgroundTransparency = 0.5,
-			Size = UDim2.new(1, 0, 0, 1),
-			Position = UDim2.new(0, 0, 1, 0),
+		New("TextLabel", {
+			RichText = true,
+			Text = Config.Title,
+			FontFace = Typography.SemiBold,
+			TextSize = 14,
+			TextXAlignment = "Left",
+			TextYAlignment = "Center",
+			TextTruncate = Enum.TextTruncate.AtEnd,
+			Size = UDim2.new(1, 0, 0, 17),
+			BackgroundTransparency = 1,
+			LayoutOrder = 1,
 			ThemeTag = {
-				BackgroundColor3 = "TitleBarLine",
+				TextColor3 = "Text",
+			},
+		}),
+		New("TextLabel", {
+			RichText = true,
+			Text = Config.SubTitle,
+			TextTransparency = 0,
+			FontFace = Typography.Regular,
+			TextSize = 11,
+			TextXAlignment = "Left",
+			TextYAlignment = "Center",
+			TextTruncate = Enum.TextTruncate.AtEnd,
+			Size = UDim2.new(1, 0, 0, 14),
+			BackgroundTransparency = 1,
+			LayoutOrder = 2,
+			ThemeTag = {
+				TextColor3 = "SubText",
 			},
 		}),
 	})
 
-	TitleBar.CloseButton = BarButton(Assets.Close, UDim2.new(1, -4, 0, 4), TitleBar.Frame, function()
+	TitleBar.Frame = New("Frame", {
+		Size = UDim2.new(1, 0, 0, 56),
+		BackgroundTransparency = 1,
+		Parent = Config.Parent,
+	}, {
+		TitleBar.Brand,
+	})
+
+	TitleBar.CloseButton = BarButton(Assets.Close, UDim2.new(1, -12, 0, 12), TitleBar.Frame, function()
 		Library.Window:Dialog({
 			Title = "Close",
 			Content = "Are you sure you want to unload the interface?",
@@ -3289,7 +3021,7 @@ return function(Config)
 			},
 		})
 	end)
-	TitleBar.MinButton = BarButton(Assets.Min, UDim2.new(1, -40, 0, 4), TitleBar.Frame, function()
+	TitleBar.MinButton = BarButton(Assets.Min, UDim2.new(1, -48, 0, 12), TitleBar.Frame, function()
 		Library.Window:Minimize()
 	end)
 
@@ -3308,7 +3040,7 @@ local Root = script.Parent.Parent
 local Typography = require(Root.Typography)
 local Motion = require(Root.Packages.DimensiMotion)
 local Creator = require(Root.Creator)
-local Acrylic = require(Root.Acrylic)
+local Surface = require(Root.Surface)
 local Assets = require(script.Parent.Assets)
 local Components = script.Parent
 
@@ -3337,6 +3069,7 @@ return function(Config)
 		Minimized = false,
 		Size = UDim2.fromOffset(initialWidth, initialHeight),
 		TabWidth = initialTabWidth,
+		ContentTop = 68,
 		CurrentPos = 0,
 		Position = UDim2.fromOffset(
 			math.max(12, viewport.X / 2 - initialWidth / 2),
@@ -3349,21 +3082,7 @@ return function(Config)
 	local DragEndConnection
 	local MinimizeNotif = false
 
-	Window.AcrylicPaint = Acrylic.AcrylicPaint()
-
-	local Selector = New("Frame", {
-		Size = UDim2.fromOffset(4, 0),
-		BackgroundColor3 = Color3.fromRGB(76, 194, 255),
-		Position = UDim2.fromOffset(0, 17),
-		AnchorPoint = Vector2.new(0, 0.5),
-		ThemeTag = {
-			BackgroundColor3 = "Accent",
-		},
-	}, {
-		New("UICorner", {
-			CornerRadius = UDim.new(0, 2),
-		}),
-	})
+	Window.Surface = Surface()
 
 	local ResizeStartFrame = New("Frame", {
 		Size = UDim2.fromOffset(28, 28),
@@ -3385,14 +3104,38 @@ return function(Config)
 		}),
 	})
 
+	Window.Sidebar = New("Frame", {
+		Size = UDim2.new(0, Window.TabWidth + 24, 1, 0),
+		BackgroundTransparency = 0,
+		BorderSizePixel = 0,
+		ThemeTag = {
+			BackgroundColor3 = "Sidebar",
+		},
+	}, {
+		New("UICorner", {
+			CornerRadius = UDim.new(0, 12),
+		}),
+		-- Squares off the sidebar's right-hand corners so only the window's left corners stay round.
+		New("Frame", {
+			Name = "Patch",
+			AnchorPoint = Vector2.new(1, 0),
+			Position = UDim2.fromScale(1, 0),
+			Size = UDim2.new(0, 14, 1, 0),
+			BackgroundTransparency = 0,
+			BorderSizePixel = 0,
+			ThemeTag = {
+				BackgroundColor3 = "Sidebar",
+			},
+		}),
+	})
+
 	local TabFrame = New("Frame", {
-		Size = UDim2.new(0, Window.TabWidth, 1, -66),
-		Position = UDim2.new(0, 12, 0, 54),
+		Size = UDim2.new(0, Window.TabWidth, 1, -76),
+		Position = UDim2.new(0, 12, 0, 64),
 		BackgroundTransparency = 1,
 		ClipsDescendants = true,
 	}, {
 		Window.TabHolder,
-		Selector,
 	})
 
 	Window.TabDisplay = New("TextLabel", {
@@ -3400,11 +3143,12 @@ return function(Config)
 		Text = "Tab",
 		TextTransparency = 0,
 		FontFace = Typography.SemiBold,
-		TextSize = 20,
+		TextSize = 18,
 		TextXAlignment = "Left",
 		TextYAlignment = "Center",
-		Size = UDim2.new(1, -16, 0, 28),
-		Position = UDim2.fromOffset(Window.TabWidth + 26, 56),
+		TextTruncate = Enum.TextTruncate.AtEnd,
+		Size = UDim2.new(1, -(Window.TabWidth + 144), 0, 28),
+		Position = UDim2.fromOffset(Window.TabWidth + 48, 14),
 		BackgroundTransparency = 1,
 		ThemeTag = {
 			TextColor3 = "Text",
@@ -3412,8 +3156,8 @@ return function(Config)
 	})
 
 	Window.ContainerHolder = New("CanvasGroup", {
-		Size = UDim2.new(1, -Window.TabWidth - 32, 1, -102),
-		Position = UDim2.fromOffset(Window.TabWidth + 26, 90),
+		Size = UDim2.new(1, -(Window.TabWidth + 72), 1, -(Window.ContentTop + 20)),
+		Position = UDim2.fromOffset(Window.TabWidth + 48, Window.ContentTop),
 		BackgroundTransparency = 1,
 	})
 
@@ -3424,7 +3168,8 @@ return function(Config)
 		Parent = Config.Parent,
 		Active = true,
 	}, {
-		Window.AcrylicPaint.Frame,
+		Window.Surface.Frame,
+		Window.Sidebar,
 		Window.TabDisplay,
 		Window.ContainerHolder,
 		TabFrame,
@@ -3438,10 +3183,6 @@ return function(Config)
 		Window = Window,
 	})
 
-	if Library.UseAcrylic then
-		Window.AcrylicPaint.AddParent(Window.Root)
-	end
-
 	local SizeMotor = Creator.TrackMotor(Motion.GroupMotor.new({
 		X = Window.Size.X.Offset,
 		Y = Window.Size.Y.Offset,
@@ -3452,10 +3193,8 @@ return function(Config)
 		Y = Window.Position.Y.Offset,
 	}), Window.Root)
 
-	Window.SelectorPosMotor = Creator.TrackMotor(Motion.SingleMotor.new(17), Window.Root)
-	Window.SelectorSizeMotor = Creator.TrackMotor(Motion.SingleMotor.new(0), Window.Root)
 	Window.ContainerBackMotor = Creator.TrackMotor(Motion.SingleMotor.new(0), Window.Root)
-	Window.ContainerPosMotor = Creator.TrackMotor(Motion.SingleMotor.new(94), Window.Root)
+	Window.ContainerPosMotor = Creator.TrackMotor(Motion.SingleMotor.new(Window.ContentTop), Window.Root)
 
 	SizeMotor:onStep(function(values)
 		Window.Root.Size = UDim2.new(0, values.X, 0, values.Y)
@@ -3465,30 +3204,12 @@ return function(Config)
 		Window.Root.Position = UDim2.new(0, values.X, 0, values.Y)
 	end)
 
-	local LastValue = 0
-	local LastTime = 0
-	Window.SelectorPosMotor:onStep(function(Value)
-		Selector.Position = UDim2.new(0, 0, 0, Value + 17)
-		local Now = tick()
-		local DeltaTime = Now - LastTime
-
-		if LastValue ~= nil then
-			Window.SelectorSizeMotor:setGoal(Spring((math.abs(Value - LastValue) / (DeltaTime * 60)) + 16))
-			LastValue = Value
-		end
-		LastTime = Now
-	end)
-
-	Window.SelectorSizeMotor:onStep(function(Value)
-		Selector.Size = UDim2.new(0, 4, 0, Value)
-	end)
-
 	Window.ContainerBackMotor:onStep(function(Value)
 		Window.ContainerHolder.GroupTransparency = Value
 	end)
 
 	Window.ContainerPosMotor:onStep(function(Value)
-		Window.ContainerHolder.Position = UDim2.fromOffset(Window.TabWidth + 26, Value)
+		Window.ContainerHolder.Position = UDim2.fromOffset(Window.TabWidth + 48, Value)
 	end)
 
 	Creator.AddSignal(Window.TitleBar.Frame.InputBegan, function(Input)
@@ -3591,10 +3312,13 @@ return function(Config)
 		Window.TabWidth = isMobile and math.clamp(Window.TabWidth, 92, 108) or math.clamp(Window.TabWidth, 120, 220)
 		SizeMotor:setGoal({ X = Instant(width), Y = Instant(height) })
 		PosMotor:setGoal({ X = Instant(x), Y = Instant(y) })
-		TabFrame.Size = UDim2.new(0, Window.TabWidth, 1, -66)
-		Window.TabDisplay.Position = UDim2.fromOffset(Window.TabWidth + 26, 56)
-		Window.ContainerHolder.Size = UDim2.new(1, -Window.TabWidth - 32, 1, -102)
-		Window.ContainerHolder.Position = UDim2.fromOffset(Window.TabWidth + 26, 90)
+		Window.Sidebar.Size = UDim2.new(0, Window.TabWidth + 24, 1, 0)
+		TabFrame.Size = UDim2.new(0, Window.TabWidth, 1, -76)
+		Window.TitleBar.Brand.Size = UDim2.fromOffset(math.max(96, Window.TabWidth - 12), 34)
+		Window.TabDisplay.Size = UDim2.new(1, -(Window.TabWidth + 144), 0, 28)
+		Window.TabDisplay.Position = UDim2.fromOffset(Window.TabWidth + 48, 14)
+		Window.ContainerHolder.Size = UDim2.new(1, -(Window.TabWidth + 72), 1, -(Window.ContentTop + 20))
+		Window.ContainerHolder.Position = UDim2.fromOffset(Window.TabWidth + 48, Window.ContentTop)
 	end
 
 	local ViewportConnection
@@ -3638,7 +3362,7 @@ return function(Config)
 			local Key = Library.MinimizeKeybind and Library.MinimizeKeybind.Value or Library.MinimizeKey.Name
 			Library:Notify({
 				Title = "Interface",
-				Content = "Press " .. Key .. " to toggle the inteface.",
+				Content = "Press " .. Key .. " to toggle the interface.",
 				Duration = 6
 			})
 		end
@@ -3649,9 +3373,6 @@ return function(Config)
 			local frame = Library.OpenFrames[index]
 			if frame and frame.Parent then pcall(function() frame:Destroy() end) end
 			table.remove(Library.OpenFrames, index)
-		end
-		if Library.UseAcrylic and Window.AcrylicPaint and Window.AcrylicPaint.Model then
-			pcall(function() Window.AcrylicPaint.Model:Destroy() end)
 		end
 		if Window.Root then Window.Root:Destroy() end
 	end
@@ -3672,8 +3393,8 @@ return function(Config)
 		local Content = New("TextLabel", {
 			FontFace = Typography.Regular,
 			Text = Config.Content,
-			TextColor3 = Color3.fromRGB(240, 240, 240),
-			TextSize = 12,
+			TextColor3 = Color3.fromRGB(150, 158, 172),
+			TextSize = 13,
 			TextWrapped = true,
 			LineHeight = 1.12,
 			TextXAlignment = Enum.TextXAlignment.Left,
@@ -3684,7 +3405,7 @@ return function(Config)
 			Parent = Dialog.Root,
 			ClipsDescendants = false,
 			ThemeTag = {
-				TextColor3 = "Text",
+				TextColor3 = "SubText",
 			},
 		})
 
@@ -3720,12 +3441,6 @@ return function(Config)
 		return TabModule:SelectTab(Index)
 	end
 
-	Creator.AddSignal(Window.TabHolder:GetPropertyChangedSignal("CanvasPosition"), function()
-		LastValue = TabModule:GetCurrentTabPos() + 16
-		LastTime = 0
-		Window.SelectorPosMotor:setGoal(Instant(TabModule:GetCurrentTabPos()))
-	end, Window.Root)
-
 	return Window
 end
 end
@@ -3758,13 +3473,14 @@ function Element:New(Idx, Config)
 		Image = "rbxassetid://10709791437",
 		Size = UDim2.fromOffset(16, 16),
 		AnchorPoint = Vector2.new(1, 0.5),
-		Position = UDim2.new(1, -10, 0.5, 0),
+		Position = UDim2.new(1, -12, 0.5, 0),
 		BackgroundTransparency = 1,
 		Parent = ButtonFrame.Frame,
 		ThemeTag = {
-			ImageColor3 = "Text",
+			ImageColor3 = "SubText",
 		},
 	})
+	ButtonFrame.LabelHolder.Size = UDim2.new(1, -56, 0, 0)
 
 	Creator.AddSignal(ButtonFrame.Frame.MouseButton1Click, function()
 		self.Library:SafeCallback(Config.Callback)
@@ -3821,7 +3537,7 @@ function Element:New(Idx, Config)
 
 	local ColorpickerFrame = require(Components.Element)(Config.Title, Config.Description, self.Container, true)
 
-	ColorpickerFrame.LabelHolder.Size = UDim2.new(1, -54, 0, 0)
+	ColorpickerFrame.LabelHolder.Size = UDim2.new(1, -66, 0, 0)
 	Colorpicker.SetTitle = ColorpickerFrame.SetTitle
 	Colorpicker.SetDesc = ColorpickerFrame.SetDesc
 
@@ -3831,13 +3547,13 @@ function Element:New(Idx, Config)
 		Parent = ColorpickerFrame.Frame,
 	}, {
 		New("UICorner", {
-			CornerRadius = UDim.new(0, 4),
+			CornerRadius = UDim.new(0, 8),
 		}),
 	})
 
 	local DisplayFrame = New("ImageLabel", {
-		Size = UDim2.fromOffset(26, 26),
-		Position = UDim2.new(1, -10, 0.5, 0),
+		Size = UDim2.fromOffset(28, 28),
+		Position = UDim2.new(1, -12, 0.5, 0),
 		AnchorPoint = Vector2.new(1, 0.5),
 		Parent = ColorpickerFrame.Frame,
 		Image = "https://www.roblox.com/asset/?id=14204231522",
@@ -3846,7 +3562,7 @@ function Element:New(Idx, Config)
 		TileSize = UDim2.fromOffset(40, 40),
 	}, {
 		New("UICorner", {
-			CornerRadius = UDim.new(0, 4),
+			CornerRadius = UDim.new(0, 8),
 		}),
 		DisplayFrameColor,
 	})
@@ -4345,7 +4061,7 @@ function Element:New(Idx, Config)
 	}
 
 	local DropdownFrame = require(Components.Element)(Config.Title, Config.Description, self.Container, false)
-	DropdownFrame.LabelHolder.Size = UDim2.new(0.56, -24, 0, 0)
+	DropdownFrame.LabelHolder.Size = UDim2.new(1, -180, 0, 0)
 	DropdownFrame.DescLabel.Size = UDim2.new(1, 0, 0, 0)
 
 	Dropdown.SetTitle = DropdownFrame.SetTitle
@@ -4380,28 +4096,19 @@ function Element:New(Idx, Config)
 	})
 
 	local DropdownInner = New("TextButton", {
-		Size = UDim2.new(0.42, 0, 0, 32),
-		Position = UDim2.new(1, -10, 0.5, 0),
+		Size = UDim2.fromOffset(140, 32),
+		Position = UDim2.new(1, -12, 0.5, 0),
 		AnchorPoint = Vector2.new(1, 0.5),
-		BackgroundTransparency = 0.9,
+		BackgroundTransparency = 0,
+		AutoButtonColor = false,
+		Text = "",
 		Parent = DropdownFrame.Frame,
 		ThemeTag = {
-			BackgroundColor3 = "DropdownFrame",
+			BackgroundColor3 = "Tone",
 		},
 	}, {
 		New("UICorner", {
-			CornerRadius = UDim.new(0, 5),
-		}),
-		New("UISizeConstraint", {
-			MinSize = Vector2.new(84, 32),
-			MaxSize = Vector2.new(160, 32),
-		}),
-		New("UIStroke", {
-			Transparency = 0.5,
-			ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-			ThemeTag = {
-				Color = "InElementBorder",
-			},
+			CornerRadius = UDim.new(0, 8),
 		}),
 		DropdownIco,
 		DropdownDisplay,
@@ -4435,23 +4142,13 @@ function Element:New(Idx, Config)
 	}, {
 		DropdownScrollFrame,
 		New("UICorner", {
-			CornerRadius = UDim.new(0, 7),
+			CornerRadius = UDim.new(0, 10),
 		}),
 		New("UIStroke", {
 			ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
 			ThemeTag = {
 				Color = "DropdownBorder",
 			},
-		}),
-		New("ImageLabel", {
-			BackgroundTransparency = 1,
-			Image = "https://www.roblox.com/asset/?id=5554236805",
-			ScaleType = Enum.ScaleType.Slice,
-			SliceCenter = Rect.new(23, 23, 277, 277),
-			Size = UDim2.fromScale(1, 1) + UDim2.fromOffset(30, 30),
-			Position = UDim2.fromOffset(-15, -15),
-			ImageColor3 = Color3.fromRGB(0, 0, 0),
-			ImageTransparency = 0.1,
 		}),
 	})
 
@@ -4634,7 +4331,7 @@ function Element:New(Idx, Config)
 				ButtonSelector,
 				ButtonLabel,
 				New("UICorner", {
-					CornerRadius = UDim.new(0, 6),
+					CornerRadius = UDim.new(0, 8),
 				}),
 			})
 
@@ -4886,11 +4583,10 @@ function Element:New(Idx, Config)
 	Input.SetDesc = InputFrame.SetDesc
 
 	local Textbox = require(Components.Textbox)(InputFrame.Frame, true)
-	Textbox.Frame.Position = UDim2.new(1, -10, 0.5, 0)
+	Textbox.Frame.Position = UDim2.new(1, -12, 0.5, 0)
 	Textbox.Frame.AnchorPoint = Vector2.new(1, 0.5)
-	Textbox.Frame.Size = UDim2.new(0.42, 0, 0, 32)
-	InputFrame.LabelHolder.Size = UDim2.new(0.56, -24, 0, 0)
-	Creator.New("UISizeConstraint", { MinSize = Vector2.new(88, 32), MaxSize = Vector2.new(160, 32), Parent = Textbox.Frame })
+	Textbox.Frame.Size = UDim2.fromOffset(140, 32)
+	InputFrame.LabelHolder.Size = UDim2.new(1, -180, 0, 0)
 	Textbox.Input.Text = Config.Default or ""
 	Textbox.Input.PlaceholderText = Config.Placeholder or ""
 
@@ -4984,7 +4680,7 @@ function Element:New(Idx, Config)
 
 	local KeybindFrame = require(Components.Element)(Config.Title, Config.Description, self.Container, true)
 
-	KeybindFrame.LabelHolder.Size = UDim2.new(1, -112, 0, 0)
+	KeybindFrame.LabelHolder.Size = UDim2.new(1, -180, 0, 0)
 	Keybind.SetTitle = KeybindFrame.SetTitle
 	Keybind.SetDesc = KeybindFrame.SetDesc
 
@@ -4995,8 +4691,8 @@ function Element:New(Idx, Config)
 		TextSize = 12,
 		TextXAlignment = Enum.TextXAlignment.Center,
 		Size = UDim2.new(0, 0, 0, 14),
-		Position = UDim2.new(0, 0, 0.5, 0),
-		AnchorPoint = Vector2.new(0, 0.5),
+		Position = UDim2.new(0.5, 0, 0.5, 0),
+		AnchorPoint = Vector2.new(0.5, 0.5),
 		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 		AutomaticSize = Enum.AutomaticSize.X,
 		BackgroundTransparency = 1,
@@ -5006,32 +4702,19 @@ function Element:New(Idx, Config)
 	})
 
 	local KeybindDisplayFrame = New("TextButton", {
-		Size = UDim2.fromOffset(0, 30),
-		Position = UDim2.new(1, -10, 0.5, 0),
+		Size = UDim2.fromOffset(140, 32),
+		Position = UDim2.new(1, -12, 0.5, 0),
 		AnchorPoint = Vector2.new(1, 0.5),
-		BackgroundTransparency = 0.9,
+		BackgroundTransparency = 0,
+		AutoButtonColor = false,
+		Text = "",
 		Parent = KeybindFrame.Frame,
-		AutomaticSize = Enum.AutomaticSize.X,
 		ThemeTag = {
-			BackgroundColor3 = "Keybind",
+			BackgroundColor3 = "Tone",
 		},
 	}, {
 		New("UICorner", {
-			CornerRadius = UDim.new(0, 5),
-		}),
-		New("UISizeConstraint", {
-			MaxSize = Vector2.new(104, 32),
-		}),
-		New("UIPadding", {
-			PaddingLeft = UDim.new(0, 8),
-			PaddingRight = UDim.new(0, 8),
-		}),
-		New("UIStroke", {
-			Transparency = 0.5,
-			ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-			ThemeTag = {
-				Color = "InElementBorder",
-			},
+			CornerRadius = UDim.new(0, 8),
 		}),
 		KeybindDisplayLabel,
 	})
@@ -5188,9 +4871,6 @@ function Paragraph:New(Idx, Config)
 	Config.Content = Config.Content or ""
 
 	local Paragraph = require(Components.Element)(Config.Title, Config.Content, Paragraph.Container, false)
-	Paragraph.Frame.BackgroundTransparency = 0.82
-	Paragraph.Border.Transparency = 0.6
-
 	return Paragraph
 end
 
@@ -5234,20 +4914,24 @@ function Element:New(Idx, Config)
 	local Dragging = false
 
 	local SliderFrame = require(Components.Element)(Config.Title, Config.Description, self.Container, false)
-	SliderFrame.LabelHolder.Size = UDim2.new(0.56, -24, 0, 0)
+	SliderFrame.LabelHolder.Size = UDim2.new(1, -172, 0, 0)
 	SliderFrame.DescLabel.Size = UDim2.new(1, 0, 0, 0)
 
 	Slider.SetTitle = SliderFrame.SetTitle
 	Slider.SetDesc = SliderFrame.SetDesc
 
-	local SliderDot = New("ImageLabel", {
+	local SliderDot = New("Frame", {
 		AnchorPoint = Vector2.new(0, 0.5),
 		Position = UDim2.new(0, -7, 0.5, 0),
 		Size = UDim2.fromOffset(14, 14),
-		Image = "https://www.roblox.com/asset/?id=12266946128",
+		BackgroundTransparency = 0,
 		ThemeTag = {
-			ImageColor3 = "Accent",
+			BackgroundColor3 = "SliderKnob",
 		},
+	}, {
+		New("UICorner", {
+			CornerRadius = UDim.new(1, 0),
+		}),
 	})
 
 	local SliderRail = New("Frame", {
@@ -5277,19 +4961,19 @@ function Element:New(Idx, Config)
 		TextXAlignment = Enum.TextXAlignment.Right,
 		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 		BackgroundTransparency = 1,
-		Size = UDim2.new(0, 100, 0, 14),
-		Position = UDim2.new(0, -4, 0.5, 0),
-		AnchorPoint = Vector2.new(1, 0.5),
+		Size = UDim2.new(0, 32, 0, 14),
+		Position = UDim2.new(1, 4, 0.5, 0),
+		AnchorPoint = Vector2.new(0, 0.5),
 		ThemeTag = {
 			TextColor3 = "SubText",
 		},
 	})
 
 	local SliderInner = New("Frame", {
-		Size = UDim2.new(0.42, 0, 0, 4),
+		Size = UDim2.new(0, 96, 0, 4),
 		AnchorPoint = Vector2.new(1, 0.5),
-		Position = UDim2.new(1, -10, 0.5, 0),
-		BackgroundTransparency = 0.4,
+		Position = UDim2.new(1, -48, 0.5, 0),
+		BackgroundTransparency = 0,
 		Parent = SliderFrame.Frame,
 		ThemeTag = {
 			BackgroundColor3 = "SliderRail",
@@ -5297,10 +4981,6 @@ function Element:New(Idx, Config)
 	}, {
 		New("UICorner", {
 			CornerRadius = UDim.new(1, 0),
-		}),
-		New("UISizeConstraint", {
-			MinSize = Vector2.new(84, 4),
-			MaxSize = Vector2.new(150, math.huge),
 		}),
 		SliderDisplay,
 		SliderFill,
@@ -5400,45 +5080,45 @@ function Element:New(Idx, Config)
 	}
 
 	local ToggleFrame = require(Components.Element)(Config.Title, Config.Description, self.Container, true)
-	ToggleFrame.LabelHolder.Size = UDim2.new(1, -38, 0, 0)
+	ToggleFrame.LabelHolder.Size = UDim2.new(1, -76, 0, 0)
 	ToggleFrame.DescLabel.Size = UDim2.new(1, 0, 0, 0)
 
 	Toggle.SetTitle = ToggleFrame.SetTitle
 	Toggle.SetDesc = ToggleFrame.SetDesc
 
-	local ToggleCircle = New("ImageLabel", {
+	local KNOB_SIZE = 14
+	local TRACK_WIDTH = 36
+	local TRACK_HEIGHT = 20
+	local KNOB_PAD = 3
+
+	local ToggleKnob = New("Frame", {
 		AnchorPoint = Vector2.new(0, 0.5),
-		Size = UDim2.fromOffset(7, 7),
-		Position = UDim2.new(0, 2, 0.5, 0),
-		Image = "https://www.roblox.com/asset/?id=12266946128",
-		ImageTransparency = 0.5,
+		Size = UDim2.fromOffset(KNOB_SIZE, KNOB_SIZE),
+		Position = UDim2.new(0, KNOB_PAD, 0.5, 0),
+		BackgroundTransparency = 0,
 		ThemeTag = {
-			ImageColor3 = "ToggleSlider",
-		},
-	})
-
-	local ToggleBorder = New("UIStroke", {
-		Transparency = 0.5,
-		ThemeTag = {
-			Color = "ToggleSlider",
-		},
-	})
-
-	local ToggleSlider = New("Frame", {
-		Size = UDim2.fromOffset(20, 12),
-		AnchorPoint = Vector2.new(1, 0.5),
-		Position = UDim2.new(1, -10, 0.5, 0),
-		Parent = ToggleFrame.Frame,
-		BackgroundTransparency = 1,
-		ThemeTag = {
-			BackgroundColor3 = "Accent",
+			BackgroundColor3 = "ToggleKnob",
 		},
 	}, {
 		New("UICorner", {
-			CornerRadius = UDim.new(0, 6),
+			CornerRadius = UDim.new(1, 0),
 		}),
-		ToggleBorder,
-		ToggleCircle,
+	})
+
+	local ToggleTrack = New("Frame", {
+		Size = UDim2.fromOffset(TRACK_WIDTH, TRACK_HEIGHT),
+		AnchorPoint = Vector2.new(1, 0.5),
+		Position = UDim2.new(1, -12, 0.5, 0),
+		Parent = ToggleFrame.Frame,
+		BackgroundTransparency = 0,
+		ThemeTag = {
+			BackgroundColor3 = "ToggleOff",
+		},
+	}, {
+		New("UICorner", {
+			CornerRadius = UDim.new(1, 0),
+		}),
+		ToggleKnob,
 	})
 
 	function Toggle:OnChanged(Func)
@@ -5450,19 +5130,12 @@ function Element:New(Idx, Config)
 		Value = not not Value
 		Toggle.Value = Value
 
-		Creator.OverrideTag(ToggleBorder, { Color = Toggle.Value and "Accent" or "ToggleSlider" })
-		Creator.OverrideTag(ToggleCircle, { ImageColor3 = Toggle.Value and "ToggleToggled" or "ToggleSlider" })
+		Creator.OverrideTag(ToggleTrack, { BackgroundColor3 = Toggle.Value and "Accent" or "ToggleOff" })
 		TweenService:Create(
-			ToggleCircle,
-			TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
-			{ Position = UDim2.new(0, Toggle.Value and 11 or 2, 0.5, 0) }
+			ToggleKnob,
+			TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
+			{ Position = UDim2.new(0, Toggle.Value and (TRACK_WIDTH - KNOB_SIZE - KNOB_PAD) or KNOB_PAD, 0.5, 0) }
 		):Play()
-		TweenService:Create(
-			ToggleSlider,
-			TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
-			{ BackgroundTransparency = Toggle.Value and 0 or 1 }
-		):Play()
-		ToggleCircle.ImageTransparency = Toggle.Value and 0 or 0.5
 
 		Library:SafeCallback(Toggle.Callback, Toggle.Value)
 		Library:SafeCallback(Toggle.Changed, Toggle.Value)
@@ -5500,52 +5173,50 @@ __DimensiModules['Themes/Dimensi'] = function(script, require)
 return {
     Name = "Dimensi",
 
+    -- Brand
     Accent = Color3.fromRGB(168, 85, 247),
 
-    AcrylicMain = Color3.fromRGB(17, 19, 24),
-    AcrylicBorder = Color3.fromRGB(52, 60, 73),
-    AcrylicGradient = ColorSequence.new(
-        Color3.fromRGB(34, 40, 51),
-        Color3.fromRGB(17, 19, 24)
-    ),
-    AcrylicNoise = 0.97,
+    -- Surfaces (separated by tone, not by borders)
+    WindowBackground = Color3.fromRGB(16, 18, 23),
+    Sidebar = Color3.fromRGB(13, 15, 19),
+    Card = Color3.fromRGB(23, 26, 33),
+    Tone = Color3.fromRGB(33, 38, 48),
+    Divider = Color3.fromRGB(36, 41, 51),
 
-    TitleBarLine = Color3.fromRGB(52, 60, 73),
-    Tab = Color3.fromRGB(161, 168, 181),
+    -- Sidebar tab (selected / hover tint)
+    Tab = Color3.fromRGB(33, 38, 48),
 
-    Element = Color3.fromRGB(25, 29, 36),
-    ElementBorder = Color3.fromRGB(52, 60, 73),
-    InElementBorder = Color3.fromRGB(64, 73, 88),
-    ElementTransparency = 0,
+    -- Rows are transparent; hover fades the Tone fill in by HoverChange
+    ElementTransparency = 1,
+    HoverChange = 0.6,
 
-    ToggleSlider = Color3.fromRGB(192, 132, 252),
-    ToggleToggled = Color3.fromRGB(34, 40, 51),
-    SliderRail = Color3.fromRGB(168, 85, 247),
+    -- Toggle
+    ToggleOff = Color3.fromRGB(58, 66, 80),
+    ToggleKnob = Color3.fromRGB(238, 240, 244),
 
-    DropdownFrame = Color3.fromRGB(34, 40, 51),
-    DropdownHolder = Color3.fromRGB(25, 29, 36),
-    DropdownBorder = Color3.fromRGB(52, 60, 73),
+    -- Slider
+    SliderRail = Color3.fromRGB(48, 54, 68),
+    SliderKnob = Color3.fromRGB(238, 240, 244),
+
+    -- Dropdown popup
+    DropdownHolder = Color3.fromRGB(27, 31, 40),
+    DropdownBorder = Color3.fromRGB(46, 52, 64),
     DropdownOption = Color3.fromRGB(74, 48, 99),
-    Keybind = Color3.fromRGB(34, 40, 51),
 
-    Input = Color3.fromRGB(34, 40, 51),
-    InputFocused = Color3.fromRGB(25, 29, 36),
-    InputIndicator = Color3.fromRGB(168, 85, 247),
+    -- Dialog
+    Dialog = Color3.fromRGB(21, 24, 30),
+    DialogHolder = Color3.fromRGB(16, 18, 23),
+    DialogHolderLine = Color3.fromRGB(36, 41, 51),
+    DialogButton = Color3.fromRGB(33, 38, 48),
+    DialogBorder = Color3.fromRGB(36, 41, 51),
+    DialogInput = Color3.fromRGB(33, 38, 48),
 
-    Dialog = Color3.fromRGB(34, 40, 51),
-    DialogHolder = Color3.fromRGB(25, 29, 36),
-    DialogHolderLine = Color3.fromRGB(52, 60, 73),
-    DialogButton = Color3.fromRGB(34, 40, 51),
-    DialogButtonBorder = Color3.fromRGB(64, 73, 88),
-    DialogBorder = Color3.fromRGB(52, 60, 73),
-    DialogInput = Color3.fromRGB(25, 29, 36),
-    DialogInputLine = Color3.fromRGB(168, 85, 247),
+    -- Text
+    Text = Color3.fromRGB(238, 240, 244),
+    SubText = Color3.fromRGB(138, 147, 163),
 
-    Text = Color3.fromRGB(241, 243, 247),
-    SubText = Color3.fromRGB(161, 168, 181),
-
+    -- Interaction
     Hover = Color3.fromRGB(192, 132, 252),
-    HoverChange = 0,
 }
 end
 

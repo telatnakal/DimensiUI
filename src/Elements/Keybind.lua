@@ -36,7 +36,7 @@ function Element:New(Idx, Config)
 
 	local KeybindFrame = require(Components.Element)(Config.Title, Config.Description, self.Container, true)
 
-	KeybindFrame.LabelHolder.Size = UDim2.new(1, -112, 0, 0)
+	KeybindFrame.LabelHolder.Size = UDim2.new(1, -180, 0, 0)
 	Keybind.SetTitle = KeybindFrame.SetTitle
 	Keybind.SetDesc = KeybindFrame.SetDesc
 
@@ -47,8 +47,8 @@ function Element:New(Idx, Config)
 		TextSize = 12,
 		TextXAlignment = Enum.TextXAlignment.Center,
 		Size = UDim2.new(0, 0, 0, 14),
-		Position = UDim2.new(0, 0, 0.5, 0),
-		AnchorPoint = Vector2.new(0, 0.5),
+		Position = UDim2.new(0.5, 0, 0.5, 0),
+		AnchorPoint = Vector2.new(0.5, 0.5),
 		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 		AutomaticSize = Enum.AutomaticSize.X,
 		BackgroundTransparency = 1,
@@ -58,32 +58,19 @@ function Element:New(Idx, Config)
 	})
 
 	local KeybindDisplayFrame = New("TextButton", {
-		Size = UDim2.fromOffset(0, 30),
-		Position = UDim2.new(1, -10, 0.5, 0),
+		Size = UDim2.fromOffset(140, 32),
+		Position = UDim2.new(1, -12, 0.5, 0),
 		AnchorPoint = Vector2.new(1, 0.5),
-		BackgroundTransparency = 0.9,
+		BackgroundTransparency = 0,
+		AutoButtonColor = false,
+		Text = "",
 		Parent = KeybindFrame.Frame,
-		AutomaticSize = Enum.AutomaticSize.X,
 		ThemeTag = {
-			BackgroundColor3 = "Keybind",
+			BackgroundColor3 = "Tone",
 		},
 	}, {
 		New("UICorner", {
-			CornerRadius = UDim.new(0, 5),
-		}),
-		New("UISizeConstraint", {
-			MaxSize = Vector2.new(104, 32),
-		}),
-		New("UIPadding", {
-			PaddingLeft = UDim.new(0, 8),
-			PaddingRight = UDim.new(0, 8),
-		}),
-		New("UIStroke", {
-			Transparency = 0.5,
-			ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-			ThemeTag = {
-				Color = "InElementBorder",
-			},
+			CornerRadius = UDim.new(0, 8),
 		}),
 		KeybindDisplayLabel,
 	})

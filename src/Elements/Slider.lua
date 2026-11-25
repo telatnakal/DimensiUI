@@ -34,20 +34,24 @@ function Element:New(Idx, Config)
 	local Dragging = false
 
 	local SliderFrame = require(Components.Element)(Config.Title, Config.Description, self.Container, false)
-	SliderFrame.LabelHolder.Size = UDim2.new(0.56, -24, 0, 0)
+	SliderFrame.LabelHolder.Size = UDim2.new(1, -172, 0, 0)
 	SliderFrame.DescLabel.Size = UDim2.new(1, 0, 0, 0)
 
 	Slider.SetTitle = SliderFrame.SetTitle
 	Slider.SetDesc = SliderFrame.SetDesc
 
-	local SliderDot = New("ImageLabel", {
+	local SliderDot = New("Frame", {
 		AnchorPoint = Vector2.new(0, 0.5),
 		Position = UDim2.new(0, -7, 0.5, 0),
 		Size = UDim2.fromOffset(14, 14),
-		Image = "https://www.roblox.com/asset/?id=12266946128",
+		BackgroundTransparency = 0,
 		ThemeTag = {
-			ImageColor3 = "Accent",
+			BackgroundColor3 = "SliderKnob",
 		},
+	}, {
+		New("UICorner", {
+			CornerRadius = UDim.new(1, 0),
+		}),
 	})
 
 	local SliderRail = New("Frame", {
@@ -77,19 +81,19 @@ function Element:New(Idx, Config)
 		TextXAlignment = Enum.TextXAlignment.Right,
 		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 		BackgroundTransparency = 1,
-		Size = UDim2.new(0, 100, 0, 14),
-		Position = UDim2.new(0, -4, 0.5, 0),
-		AnchorPoint = Vector2.new(1, 0.5),
+		Size = UDim2.new(0, 32, 0, 14),
+		Position = UDim2.new(1, 4, 0.5, 0),
+		AnchorPoint = Vector2.new(0, 0.5),
 		ThemeTag = {
 			TextColor3 = "SubText",
 		},
 	})
 
 	local SliderInner = New("Frame", {
-		Size = UDim2.new(0.42, 0, 0, 4),
+		Size = UDim2.new(0, 96, 0, 4),
 		AnchorPoint = Vector2.new(1, 0.5),
-		Position = UDim2.new(1, -10, 0.5, 0),
-		BackgroundTransparency = 0.4,
+		Position = UDim2.new(1, -48, 0.5, 0),
+		BackgroundTransparency = 0,
 		Parent = SliderFrame.Frame,
 		ThemeTag = {
 			BackgroundColor3 = "SliderRail",
@@ -97,10 +101,6 @@ function Element:New(Idx, Config)
 	}, {
 		New("UICorner", {
 			CornerRadius = UDim.new(1, 0),
-		}),
-		New("UISizeConstraint", {
-			MinSize = Vector2.new(84, 4),
-			MaxSize = Vector2.new(150, math.huge),
 		}),
 		SliderDisplay,
 		SliderFill,

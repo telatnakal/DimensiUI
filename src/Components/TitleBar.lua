@@ -18,7 +18,7 @@ return function(Config)
 		}
 
 		Button.Frame = New("TextButton", {
-			Size = UDim2.new(0, 34, 1, -8),
+			Size = UDim2.fromOffset(32, 32),
 			AnchorPoint = Vector2.new(1, 0),
 			BackgroundTransparency = 1,
 			Parent = Parent,
@@ -29,7 +29,7 @@ return function(Config)
 			},
 		}, {
 			New("UICorner", {
-				CornerRadius = UDim.new(0, 7),
+				CornerRadius = UDim.new(0, 8),
 			}),
 			New("ImageLabel", {
 				Image = Icon,
@@ -67,62 +67,57 @@ return function(Config)
 		return Button
 	end
 
-	TitleBar.Frame = New("Frame", {
-		Size = UDim2.new(1, 0, 0, 42),
+	TitleBar.Brand = New("Frame", {
+		Position = UDim2.fromOffset(24, 12),
+		Size = UDim2.fromOffset(math.max(96, (Config.Window and Config.Window.TabWidth or 160) - 12), 34),
 		BackgroundTransparency = 1,
-		Parent = Config.Parent,
 	}, {
-		New("Frame", {
-			Size = UDim2.new(1, -16, 1, 0),
-			Position = UDim2.new(0, 16, 0, 0),
-			BackgroundTransparency = 1,
-		}, {
-			New("UIListLayout", {
-				Padding = UDim.new(0, 5),
-				FillDirection = Enum.FillDirection.Horizontal,
-				SortOrder = Enum.SortOrder.LayoutOrder,
-			}),
-			New("TextLabel", {
-				RichText = true,
-				Text = Config.Title,
-				FontFace = Typography.SemiBold,
-				TextSize = 13,
-				TextXAlignment = "Left",
-				TextYAlignment = "Center",
-				Size = UDim2.fromScale(0, 1),
-				AutomaticSize = Enum.AutomaticSize.X,
-				BackgroundTransparency = 1,
-				ThemeTag = {
-					TextColor3 = "Text",
-				},
-			}),
-			New("TextLabel", {
-				RichText = true,
-				Text = Config.SubTitle,
-				TextTransparency = 0.4,
-				FontFace = Typography.Regular,
-				TextSize = 12,
-				TextXAlignment = "Left",
-				TextYAlignment = "Center",
-				Size = UDim2.fromScale(0, 1),
-				AutomaticSize = Enum.AutomaticSize.X,
-				BackgroundTransparency = 1,
-				ThemeTag = {
-					TextColor3 = "Text",
-				},
-			}),
+		New("UIListLayout", {
+			Padding = UDim.new(0, 2),
+			SortOrder = Enum.SortOrder.LayoutOrder,
 		}),
-		New("Frame", {
-			BackgroundTransparency = 0.5,
-			Size = UDim2.new(1, 0, 0, 1),
-			Position = UDim2.new(0, 0, 1, 0),
+		New("TextLabel", {
+			RichText = true,
+			Text = Config.Title,
+			FontFace = Typography.SemiBold,
+			TextSize = 14,
+			TextXAlignment = "Left",
+			TextYAlignment = "Center",
+			TextTruncate = Enum.TextTruncate.AtEnd,
+			Size = UDim2.new(1, 0, 0, 17),
+			BackgroundTransparency = 1,
+			LayoutOrder = 1,
 			ThemeTag = {
-				BackgroundColor3 = "TitleBarLine",
+				TextColor3 = "Text",
+			},
+		}),
+		New("TextLabel", {
+			RichText = true,
+			Text = Config.SubTitle,
+			TextTransparency = 0,
+			FontFace = Typography.Regular,
+			TextSize = 11,
+			TextXAlignment = "Left",
+			TextYAlignment = "Center",
+			TextTruncate = Enum.TextTruncate.AtEnd,
+			Size = UDim2.new(1, 0, 0, 14),
+			BackgroundTransparency = 1,
+			LayoutOrder = 2,
+			ThemeTag = {
+				TextColor3 = "SubText",
 			},
 		}),
 	})
 
-	TitleBar.CloseButton = BarButton(Assets.Close, UDim2.new(1, -4, 0, 4), TitleBar.Frame, function()
+	TitleBar.Frame = New("Frame", {
+		Size = UDim2.new(1, 0, 0, 56),
+		BackgroundTransparency = 1,
+		Parent = Config.Parent,
+	}, {
+		TitleBar.Brand,
+	})
+
+	TitleBar.CloseButton = BarButton(Assets.Close, UDim2.new(1, -12, 0, 12), TitleBar.Frame, function()
 		Library.Window:Dialog({
 			Title = "Close",
 			Content = "Are you sure you want to unload the interface?",
@@ -139,7 +134,7 @@ return function(Config)
 			},
 		})
 	end)
-	TitleBar.MinButton = BarButton(Assets.Min, UDim2.new(1, -40, 0, 4), TitleBar.Frame, function()
+	TitleBar.MinButton = BarButton(Assets.Min, UDim2.new(1, -48, 0, 12), TitleBar.Frame, function()
 		Library.Window:Minimize()
 	end)
 
