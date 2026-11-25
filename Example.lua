@@ -1,76 +1,94 @@
--- =========================================================
--- DIMENSI-HUB | DIMENSI
--- Example configuration for the compact DimensiUI layout
--- Author / Credit: telatnakal
--- =========================================================
-
 local DimensiUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/telatnakal/DimensiUI/main/dist/main.lua"))()
 local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/telatnakal/DimensiUI/main/Addons/SaveManager.lua"))()
 local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/telatnakal/DimensiUI/main/Addons/InterfaceManager.lua"))()
 
 local Window = DimensiUI:CreateWindow({
-    Title = "DIMENSI-HUB | FOREST MARKET",
-    TabWidth = 160,
-    Size = UDim2.fromOffset(580, 460),
-    Theme = "Dimensi",
-    MinimizeKey = Enum.KeyCode.LeftControl,
+	Title = "DimensiUI",
+	SubTitle = "v" .. DimensiUI.Version,
+	TabWidth = 160,
+	Size = UDim2.fromOffset(580, 460),
+	Theme = "Dimensi",
+	MinimizeKey = Enum.KeyCode.LeftControl,
 })
 
 local Tabs = {
-    Main = Window:AddTab({ Title = "Main", Icon = "layers" }),
-    Automation = Window:AddTab({ Title = "Automation", Icon = "sliders" }),
-    Settings = Window:AddTab({ Title = "Settings", Icon = "settings" }),
+	Main = Window:AddTab({ Title = "Main", Icon = "layers" }),
+	Automation = Window:AddTab({ Title = "Automation", Icon = "sliders" }),
+	Settings = Window:AddTab({ Title = "Settings", Icon = "settings" }),
 }
 
 local Options = DimensiUI.Options
 
-DimensiUI:Notify({
-    Title = "Dimensi-Hub",
-    Content = "Compact interface loaded.",
-    Duration = 4,
-})
+do
+	DimensiUI:Notify({
+		Title = "DimensiUI",
+		Content = "Interface siap digunakan dengan ikon aktif.",
+		SubContent = "Icon: " .. tostring(DimensiUI:GetIcon("layers")),
+		Duration = 4,
+	})
 
-Tabs.Main:AddParagraph({
-    Title = "Welcome",
-    Content = "DIMENSI-HUB compact layout. Theme colors remain unchanged.",
-})
+	Tabs.Main:AddParagraph({
+		Title = "DimensiUI Rebuild",
+		Content = "DimensiUI — clean dark-purple interface library. Author: telatnakal.",
+	})
 
-Tabs.Main:AddButton({
-    Title = "Test Dialog",
-    Description = "Show a confirmation dialog",
-    Callback = function()
-        Window:Dialog({
-            Title = "Confirmation",
-            Content = "Run a test action?",
-            Buttons = {
-                { Title = "Yes", Callback = function() print("Confirmed") end },
-                { Title = "Cancel", Callback = function() print("Cancelled") end },
-            },
-        })
-    end,
-})
+	Tabs.Main:AddButton({
+		Title = "Test Dialog",
+		Description = "Menampilkan dialog konfirmasi",
+		Callback = function()
+			Window:Dialog({
+				Title = "Konfirmasi",
+				Content = "Jalankan aksi pada DimensiUI?",
+				Buttons = {
+					{
+						Title = "Ya",
+						Callback = function()
+							print("Aksi dikonfirmasi")
+						end,
+					},
+					{
+						Title = "Batal",
+						Callback = function()
+							print("Aksi dibatalkan")
+						end,
+					},
+				},
+			})
+		end,
+	})
 
-local Toggle = Tabs.Automation:AddToggle("SampleToggle", {
-    Title = "Auto Feature",
-    Default = false,
-})
-Toggle:OnChanged(function()
-    print("SampleToggle:", Options.SampleToggle.Value)
-end)
+	local Toggle = Tabs.Automation:AddToggle("SampleToggle", {
+		Title = "Auto Feature",
+		Default = false,
+	})
 
-Tabs.Automation:AddSlider("SampleSlider", {
-    Title = "Delay (seconds)",
-    Description = "Set execution interval",
-    Default = 1, Min = 0, Max = 10, Rounding = 1,
-    Callback = function(Value) print("SampleSlider:", Value) end,
-})
+	Toggle:OnChanged(function()
+		print("SampleToggle:", Options.SampleToggle.Value)
+	end)
 
-local Dropdown = Tabs.Automation:AddDropdown("SampleDropdown", {
-    Title = "Mode",
-    Values = { "Mode A", "Mode B", "Mode C" },
-    Multi = false, Default = 1,
-})
-Dropdown:OnChanged(function(Value) print("SampleDropdown:", Value) end)
+	local Slider = Tabs.Automation:AddSlider("SampleSlider", {
+		Title = "Delay (detik)",
+		Description = "Atur interval eksekusi",
+		Default = 1,
+		Min = 0,
+		Max = 10,
+		Rounding = 1,
+		Callback = function(Value)
+			print("SampleSlider:", Value)
+		end,
+	})
+
+	local Dropdown = Tabs.Automation:AddDropdown("SampleDropdown", {
+		Title = "Mode",
+		Values = { "Mode A", "Mode B", "Mode C" },
+		Multi = false,
+		Default = 1,
+	})
+
+	Dropdown:OnChanged(function(Value)
+		print("SampleDropdown:", Value)
+	end)
+end
 
 SaveManager:SetLibrary(DimensiUI)
 InterfaceManager:SetLibrary(DimensiUI)
