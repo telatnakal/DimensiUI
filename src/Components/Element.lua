@@ -129,16 +129,16 @@ return function(Title, Desc, Parent, Hover)
 
 		Creator.AddSignal(Element.Frame.MouseEnter, function()
 			SetTransparency(Creator.GetThemeProperty("ElementTransparency") - Creator.GetThemeProperty("HoverChange"))
-		end)
+		end, Element.Frame)
 		Creator.AddSignal(Element.Frame.MouseLeave, function()
 			SetTransparency(Creator.GetThemeProperty("ElementTransparency"))
-		end)
+		end, Element.Frame)
 		Creator.AddSignal(Element.Frame.MouseButton1Down, function()
 			SetTransparency(Creator.GetThemeProperty("ElementTransparency") + Creator.GetThemeProperty("HoverChange"))
-		end)
+		end, Element.Frame)
 		Creator.AddSignal(Element.Frame.MouseButton1Up, function()
 			SetTransparency(Creator.GetThemeProperty("ElementTransparency") - Creator.GetThemeProperty("HoverChange"))
-		end)
+		end, Element.Frame)
 	end
 
 	return Element

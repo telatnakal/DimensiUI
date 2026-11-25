@@ -125,25 +125,25 @@ function TabModule:New(Title, Icon, Parent)
 
 	Creator.AddSignal(ContainerLayout:GetPropertyChangedSignal("AbsoluteContentSize"), function()
 		Tab.ContainerFrame.CanvasSize = UDim2.new(0, 0, 0, ContainerLayout.AbsoluteContentSize.Y + 2)
-	end)
+	end, Tab.ContainerFrame)
 
 	Tab.Motor, Tab.SetTransparency = Creator.SpringMotor(1, Tab.Frame, "BackgroundTransparency")
 
 	Creator.AddSignal(Tab.Frame.MouseEnter, function()
 		Tab.SetTransparency(Tab.Selected and 0.85 or 0.89)
-	end)
+	end, Tab.Frame)
 	Creator.AddSignal(Tab.Frame.MouseLeave, function()
 		Tab.SetTransparency(Tab.Selected and 0.89 or 1)
-	end)
+	end, Tab.Frame)
 	Creator.AddSignal(Tab.Frame.MouseButton1Down, function()
 		Tab.SetTransparency(0.92)
-	end)
+	end, Tab.Frame)
 	Creator.AddSignal(Tab.Frame.MouseButton1Up, function()
 		Tab.SetTransparency(Tab.Selected and 0.85 or 0.89)
-	end)
+	end, Tab.Frame)
 	Creator.AddSignal(Tab.Frame.MouseButton1Click, function()
 		TabModule:SelectTab(TabIndex)
-	end)
+	end, Tab.Frame)
 
 	TabModule.Containers[TabIndex] = Tab.ContainerFrame
 	TabModule.Tabs[TabIndex] = Tab

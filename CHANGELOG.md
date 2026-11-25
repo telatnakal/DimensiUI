@@ -1,3 +1,33 @@
+## 1.2.10
+
+- Corrected SaveManager factory isolation: parser load callbacks and config-section controls now use the owning manager's Options registry instead of the legacy singleton.
+- Corrected InterfaceManager factory isolation: settings persistence, folder setup, and UI callbacks now consistently use the owning manager instance.
+- Preserved the legacy singleton export and `New()` / `NewInstance()` factory APIs.
+- Rebuilt the standalone bundle from modular source; Roblox runtime verification remains pending.
+
+## 1.2.9
+
+- Added `New()` and `NewInstance()` factories to SaveManager and InterfaceManager while preserving the existing singleton exports.
+- Each addon instance now owns its own folder, settings, ignored option indexes, parser state, and Library/Options references.
+- Kept addon method behavior and existing setup calls backward-compatible.
+- Rebuilt the standalone bundle from modular source; Roblox runtime verification remains pending.
+
+## 1.2.8
+
+- Bound TitleBar, element hover, component button, section layout, tab interaction, and textbox focus/measurement signals to their owning GUI instances.
+- Bound Window drag, resize, minimize-key, tab-layout, camera viewport, and canvas-position listeners to the Window root.
+- Bound the temporary drag InputObject connection to the Window root so destroying a window during a drag releases it immediately.
+- Extended static audit checks for owner-scoped component and Window listeners.
+- Rebuilt the standalone bundle from modular source; Roblox runtime verification remains pending.
+
+## 1.2.7
+
+- Bound Dropdown popup positioning, open/close input, and per-option hover/selection listeners to their owning GUI instances.
+- Bound Button, Toggle, Input, and Colorpicker input listeners to their owning component/dialog frames.
+- Bound Keybind capture listeners to the Keybind component so external GUI destruction also releases active capture.
+- Bound Slider drag state to its owner and clear the dragging flag during explicit destruction.
+- Rebuilt the standalone bundle from modular source; runtime verification remains pending.
+
 ## 1.2.6
 
 - Scope Slider and Keybind global input listeners to their owning component.

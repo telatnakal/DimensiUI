@@ -35,7 +35,7 @@ function Element:New(Idx, Config)
 
 	Creator.AddSignal(ButtonFrame.Frame.MouseButton1Click, function()
 		self.Library:SafeCallback(Config.Callback)
-	end)
+	end, ButtonFrame.Frame)
 
 	return ButtonFrame
 end

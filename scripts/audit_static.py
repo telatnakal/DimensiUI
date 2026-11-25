@@ -69,13 +69,89 @@ assert 'Themes = { "Dimensi" }' in library_init, "Library.Themes must be locked 
 assert 'if Value ~= "Dimensi" then' in library_init, "SetTheme must reject non-Dimensi themes"
 assert 'Library:SetTheme("Dimensi")' in interface_manager, "InterfaceManager must lock Dimensi theme"
 assert 'AddDropdown("InterfaceTheme"' not in interface_manager, "InterfaceManager must not expose a theme selector"
+save_manager = (ROOT / "Addons/SaveManager.lua").read_text()
+assert "local function CreateSaveManager()" in save_manager and "SaveManager.New = CreateSaveManager" in save_manager and "SaveManager.NewInstance = CreateSaveManager" in save_manager, "SaveManager instance factories are missing"
+assert "local function CreateInterfaceManager()" in interface_manager and "InterfaceManager.New = CreateInterfaceManager" in interface_manager and "InterfaceManager.NewInstance = CreateInterfaceManager" in interface_manager, "InterfaceManager instance factories are missing"
+assert "local InterfaceManager = CreateInterfaceManager()" in interface_manager, "InterfaceManager legacy singleton export is missing"
+assert "local SaveManager = CreateSaveManager()" in save_manager, "SaveManager legacy singleton export is missing"
+assert "manager.Options[idx]" in save_manager and "pcall(parser.Load, option.idx, option, self)" in save_manager, "SaveManager parser must use the owning manager registry"
+assert "next, self.Options" in save_manager and "self.Options.SaveManager_ConfigList" in save_manager, "SaveManager UI must use the owning manager registry"
+assert "SaveManager.Options" not in save_manager, "SaveManager factory still captures singleton Options"
+assert "local Settings = self.Settings" in interface_manager and "Manager:SaveSettings()" in interface_manager, "InterfaceManager callbacks must use the owning manager"
+assert "InterfaceManager.Settings" not in interface_manager, "InterfaceManager factory still captures singleton Settings"
 assert "Themes.Dark" not in (SRC / "Creator.lua").read_text(), "Legacy theme fallback remains"
 
 assert (ROOT / "src/Packages/DimensiMotion/init.lua").exists(), "Native motion package missing"
 assert not (ROOT / "src/Packages/Flipper").exists(), "Legacy motion package still exists"
-assert 'Version = "1.2.6"' in (SRC / "init.lua").read_text(), "Version metadata mismatch"
+assert 'Version = "1.2.10"' in (SRC / "init.lua").read_text(), "Version metadata mismatch"
 assert 'function Library:RegisterOption(Idx, Option)' in library_init, "Option registration helper is missing"
 assert 'function Library:UnregisterOption(Idx, Option)' in library_init, "Identity-safe option removal helper is missing"
+assert 'end, ButtonFrame.Frame)' in (SRC / "Elements/Button.lua").read_text(), "Button listener must be owner-bound"
+assert 'end, ToggleFrame.Frame)' in (SRC / "Elements/Toggle.lua").read_text(), "Toggle listener must be owner-bound"
+input_source = (SRC / "Elements/Input.lua").read_text()
+assert input_source.count('InputFrame.Frame)') >= 2, "Input listeners must be owner-bound"
+slider_source = (SRC / "Elements/Slider.lua").read_text()
+assert slider_source.count('SliderFrame.Frame)') >= 3, "Slider listeners must be owner-bound"
+dropdown_source = (SRC / "Elements/Dropdown.lua").read_text()
+assert 'RecalculateListPosition, DropdownFrame.Frame)' in dropdown_source and 'end, DropdownFrame.Frame)' in dropdown_source and 'end, Button)' in dropdown_source, "Dropdown listeners must be owner-bound"
+keybind_source = (SRC / "Elements/Keybind.lua").read_text()
+assert 'CaptureConnection = Creator.AddSignal(UserInputService.InputBegan' in keybind_source and 'end, KeybindFrame.Frame)' in keybind_source, "Keybind capture listener must be owner-bound"
+colorpicker_source = (SRC / "Elements/Colorpicker.lua").read_text()
+assert colorpicker_source.count('Dialog.Root)') >= 7 and 'end, ColorpickerFrame.Frame)' in colorpicker_source, "Colorpicker listeners must be owner-bound"
+# Component and window listeners must be scoped to the GUI that owns their lifetime.
+for rel, tokens in {
+    "Components/TitleBar.lua": ["Button.Callback, Button.Frame)"],
+    "Components/Element.lua": ["end, Element.Frame)"],
+    "Components/Button.lua": ["end, Button.Frame)"],
+    "Components/Section.lua": ["end, Section.Root)"],
+    "Components/Tab.lua": ["end, Tab.Frame)", "end, Tab.ContainerFrame)"],
+    "Components/Textbox.lua": ["Update, Textbox.Frame)", "end, Textbox.Frame)"],
+    "Components/Window.lua": ["end, Window.Root)", "FitToViewport, Window.Root)", "Input.Changed, function()"],
+}.items():
+    source = (SRC / rel).read_text()
+    for token in tokens:
+        assert token in source, f"Missing owner-bound listener in {rel}: {token}"
+window_source = (SRC / "Components/Window.lua").read_text()
+assert window_source.count("end, Window.Root)") >= 8, "Window service and GUI listeners must be owned by Window.Root"
+
+# Every AddSignal call must declare the Instance that owns its connection.
+def signal_call_arguments(source: str):
+    pattern = re.compile(r"(?:Creator\.)?AddSignal\(")
+    for match in pattern.finditer(source):
+        index = match.end()
+        depth = 1
+        quote = None
+        escaped = False
+        argument_start = index
+        arguments = []
+        while index < len(source) and depth:
+            char = source[index]
+            if quote:
+                if escaped:
+                    escaped = False
+                elif char == "\\":
+                    escaped = True
+                elif char == quote:
+                    quote = None
+            else:
+                if char in ('"', "\'"):
+                    quote = char
+                elif char in "([{":
+                    depth += 1
+                elif char in ")]}":
+                    if char == ")" and depth == 1:
+                        arguments.append(source[argument_start:index].strip())
+                    depth -= 1
+                elif char == "," and depth == 1:
+                    arguments.append(source[argument_start:index].strip())
+                    argument_start = index + 1
+            index += 1
+        yield arguments
+
+for file in SRC.rglob("*.lua"):
+    for arguments in signal_call_arguments(file.read_text()):
+        assert len(arguments) >= 3 and arguments[2], f"AddSignal must declare an owner: {file.relative_to(SRC)}"
+
 assert 'function Library:CreateInstance()' in (SRC / "init.lua").read_text(), "CreateInstance alias is missing"
 assert 'function Library:AddCleanup(Callback)' in (SRC / "init.lua").read_text(), "Instance cleanup registration is missing"
 assert 'function Acrylic.Destroy()' in (SRC / "Acrylic/init.lua").read_text(), "Acrylic lifecycle cleanup is missing"

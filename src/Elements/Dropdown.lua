@@ -200,11 +200,11 @@ function Element:New(Idx, Config)
 	RecalculateListPosition()
 	RecalculateListSize()
 
-	Creator.AddSignal(DropdownInner:GetPropertyChangedSignal("AbsolutePosition"), RecalculateListPosition)
+	Creator.AddSignal(DropdownInner:GetPropertyChangedSignal("AbsolutePosition"), RecalculateListPosition, DropdownFrame.Frame)
 
 	Creator.AddSignal(DropdownInner.MouseButton1Click, function()
 		Dropdown:Open()
-	end)
+	end, DropdownFrame.Frame)
 
 	Creator.AddSignal(UserInputService.InputBegan, function(Input)
 		if
@@ -357,16 +357,16 @@ function Element:New(Idx, Config)
 
 			Creator.AddSignal(Button.MouseEnter, function()
 				SetBackTransparency(Selected and 0.85 or 0.89)
-			end)
+			end, Button)
 			Creator.AddSignal(Button.MouseLeave, function()
 				SetBackTransparency(Selected and 0.89 or 1)
-			end)
+			end, Button)
 			Creator.AddSignal(Button.MouseButton1Down, function()
 				SetBackTransparency(0.92)
-			end)
+			end, Button)
 			Creator.AddSignal(Button.MouseButton1Up, function()
 				SetBackTransparency(Selected and 0.85 or 0.89)
-			end)
+			end, Button)
 
 			function Table:UpdateButton()
 				if Config.Multi then
@@ -411,7 +411,7 @@ function Element:New(Idx, Config)
 						Library:SafeCallback(Dropdown.Changed, Dropdown.Value)
 					end
 				end
-			end)
+			end, Button)
 
 			Table:UpdateButton()
 			Dropdown:Display()

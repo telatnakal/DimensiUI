@@ -161,7 +161,7 @@ function Element:New(Idx, Config)
 		local Token = CaptureToken
 		task.delay(0.2, function()
 			if not Picking or Token ~= CaptureToken then return end
-			CaptureConnection = Creator.TrackConnection(UserInputService.InputBegan:Connect(function(CapturedInput)
+			CaptureConnection = Creator.AddSignal(UserInputService.InputBegan, function(CapturedInput)
 				if not Picking or Token ~= CaptureToken then return end
 				local CapturedKey
 				local CallbackValue
@@ -184,7 +184,7 @@ function Element:New(Idx, Config)
 				Library:SafeCallback(Keybind.ChangedCallback, CallbackValue)
 				Library:SafeCallback(Keybind.Changed, CallbackValue)
 				if CaptureConnection then Creator.DisconnectSignal(CaptureConnection); CaptureConnection = nil end
-			end))
+			end, KeybindFrame.Frame)
 		end)
 	end, KeybindFrame.Frame)
 

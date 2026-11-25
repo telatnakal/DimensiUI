@@ -1,8 +1,10 @@
 local httpService = game:GetService("HttpService")
 
-local InterfaceManager = {} do
+local function CreateInterfaceManager()
+	local InterfaceManager = {}
+	do
 	InterfaceManager.Folder = "DimensiUISettings"
-    InterfaceManager.Settings = {
+    self.Settings = {
         Theme = "Dimensi",
         Acrylic = true,
         Transparency = true,
@@ -41,7 +43,7 @@ local InterfaceManager = {} do
     end
 
 
-    function InterfaceManager:SaveSettings()
+    function Manager:SaveSettings()
 		local ok, encoded = pcall(httpService.JSONEncode, httpService, self.Settings)
 		if not ok or type(encoded) ~= "string" then return false, "encode error" end
 		if #encoded > 65536 then return false, "settings exceed 64 KiB" end
@@ -70,11 +72,12 @@ local InterfaceManager = {} do
     function InterfaceManager:BuildInterfaceSection(tab)
         assert(self.Library, "Must set InterfaceManager.Library")
 		local Library = self.Library
-        local Settings = InterfaceManager.Settings
+        local Settings = self.Settings
+        local Manager = self
 
-        local folderOk = pcall(InterfaceManager.BuildFolderTree, InterfaceManager)
+        local folderOk = pcall(self.BuildFolderTree, self)
         if not folderOk then warn("DimensiUI InterfaceManager folder setup failed") end
-        local loadOk, loadResult = pcall(InterfaceManager.LoadSettings, InterfaceManager)
+        local loadOk, loadResult = pcall(self.LoadSettings, self)
         if not loadOk or not loadResult then warn("DimensiUI InterfaceManager settings load failed") end
 
 		local section = tab:AddSection("Interface")
@@ -88,7 +91,7 @@ local InterfaceManager = {} do
 				Callback = function(Value)
 					if not Library:ToggleAcrylic(Value) then return end
                     Settings.Acrylic = Value
-                    InterfaceManager:SaveSettings()
+                    Manager:SaveSettings()
 				end
 			})
 		end
@@ -100,17 +103,23 @@ local InterfaceManager = {} do
 			Callback = function(Value)
 				Library:ToggleTransparency(Value)
 				Settings.Transparency = Value
-                InterfaceManager:SaveSettings()
+                Manager:SaveSettings()
 			end
 		})
 	
 		local MenuKeybind = section:AddKeybind("MenuKeybind", { Title = "Minimize Bind", Default = Settings.MenuKeybind })
 		MenuKeybind:OnChanged(function()
 			Settings.MenuKeybind = MenuKeybind.Value
-            InterfaceManager:SaveSettings()
+            Manager:SaveSettings()
 		end)
 		Library.MinimizeKeybind = MenuKeybind
     end
+	end
+	return InterfaceManager
 end
+
+local InterfaceManager = CreateInterfaceManager()
+InterfaceManager.New = CreateInterfaceManager
+InterfaceManager.NewInstance = CreateInterfaceManager
 
 return InterfaceManager

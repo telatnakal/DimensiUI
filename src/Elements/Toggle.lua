@@ -98,7 +98,7 @@ function Element:New(Idx, Config)
 
 	Creator.AddSignal(ToggleFrame.Frame.MouseButton1Click, function()
 		Toggle:SetValue(not Toggle.Value)
-	end)
+	end, ToggleFrame.Frame)
 
 	Toggle:SetValue(Toggle.Value)
 

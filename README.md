@@ -7,7 +7,7 @@ A modular Roblox UI library with a self-contained bundled build, a responsive in
 
 - **Author:** telatnakal
 - **Credit:** telatnakal
-- **Version:** 1.2.6
+- **Version:** 1.2.10
 - **Theme:** Dimensi only (obsidian-violet / Builder Sans typography)
 
 ## Features
@@ -87,3 +87,20 @@ UI2:Destroy() -- does not destroy UI
 ```
 
 Register instance-owned cleanup work with `Library:AddCleanup(function() ... end)`. Callbacks are run in reverse registration order when that instance is destroyed. Acrylic's owned DepthOfField effect is also released during destruction and previously captured effect states are restored.
+
+### Per-instance addons
+
+The addon modules retain their existing singleton exports for compatibility. For multiple independent library instances, create a matching addon instance and assign the corresponding library:
+
+```lua
+local SaveManagerModule = loadstring(game:HttpGet("YOUR_SAVEMANAGER_RAW_URL"))()
+local InterfaceManagerModule = loadstring(game:HttpGet("YOUR_INTERFACEMANAGER_RAW_URL"))()
+
+local SaveManager = SaveManagerModule:NewInstance()
+local InterfaceManager = InterfaceManagerModule:NewInstance()
+
+SaveManager:SetLibrary(UI2)
+InterfaceManager:SetLibrary(UI2)
+```
+
+Use a distinct `SetFolder()` path for each manager if their configuration files must also remain separate on disk. Independent manager objects do not automatically create separate filesystem namespaces.

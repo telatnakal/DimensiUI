@@ -174,7 +174,7 @@ local Library = {
 	Name = "DimensiUI",
 	Author = "telatnakal",
 	Credit = "telatnakal",
-	Version = "1.2.6",
+	Version = "1.2.10",
 
 	OpenFrames = {},
 	Options = {},
@@ -2074,16 +2074,16 @@ return function(Theme, Parent, DialogCheck)
 	local Motor, SetTransparency = Creator.SpringMotor(1, Button.HoverFrame, "BackgroundTransparency", DialogCheck)
 	Creator.AddSignal(Button.Frame.MouseEnter, function()
 		SetTransparency(0.97)
-	end)
+	end, Button.Frame)
 	Creator.AddSignal(Button.Frame.MouseLeave, function()
 		SetTransparency(1)
-	end)
+	end, Button.Frame)
 	Creator.AddSignal(Button.Frame.MouseButton1Down, function()
 		SetTransparency(1)
-	end)
+	end, Button.Frame)
 	Creator.AddSignal(Button.Frame.MouseButton1Up, function()
 		SetTransparency(0.97)
-	end)
+	end, Button.Frame)
 
 	return Button
 end
@@ -2417,16 +2417,16 @@ return function(Title, Desc, Parent, Hover)
 
 		Creator.AddSignal(Element.Frame.MouseEnter, function()
 			SetTransparency(Creator.GetThemeProperty("ElementTransparency") - Creator.GetThemeProperty("HoverChange"))
-		end)
+		end, Element.Frame)
 		Creator.AddSignal(Element.Frame.MouseLeave, function()
 			SetTransparency(Creator.GetThemeProperty("ElementTransparency"))
-		end)
+		end, Element.Frame)
 		Creator.AddSignal(Element.Frame.MouseButton1Down, function()
 			SetTransparency(Creator.GetThemeProperty("ElementTransparency") + Creator.GetThemeProperty("HoverChange"))
-		end)
+		end, Element.Frame)
 		Creator.AddSignal(Element.Frame.MouseButton1Up, function()
 			SetTransparency(Creator.GetThemeProperty("ElementTransparency") - Creator.GetThemeProperty("HoverChange"))
-		end)
+		end, Element.Frame)
 	end
 
 	return Element
@@ -2767,7 +2767,7 @@ return function(Title, Parent)
 	Creator.AddSignal(Section.Layout:GetPropertyChangedSignal("AbsoluteContentSize"), function()
 		Section.Container.Size = UDim2.new(1, 0, 0, Section.Layout.AbsoluteContentSize.Y)
 		Section.Root.Size = UDim2.new(1, 0, 0, Section.Layout.AbsoluteContentSize.Y + 25)
-	end)
+	end, Section.Root)
 	return Section
 end
 end
@@ -2900,25 +2900,25 @@ function TabModule:New(Title, Icon, Parent)
 
 	Creator.AddSignal(ContainerLayout:GetPropertyChangedSignal("AbsoluteContentSize"), function()
 		Tab.ContainerFrame.CanvasSize = UDim2.new(0, 0, 0, ContainerLayout.AbsoluteContentSize.Y + 2)
-	end)
+	end, Tab.ContainerFrame)
 
 	Tab.Motor, Tab.SetTransparency = Creator.SpringMotor(1, Tab.Frame, "BackgroundTransparency")
 
 	Creator.AddSignal(Tab.Frame.MouseEnter, function()
 		Tab.SetTransparency(Tab.Selected and 0.85 or 0.89)
-	end)
+	end, Tab.Frame)
 	Creator.AddSignal(Tab.Frame.MouseLeave, function()
 		Tab.SetTransparency(Tab.Selected and 0.89 or 1)
-	end)
+	end, Tab.Frame)
 	Creator.AddSignal(Tab.Frame.MouseButton1Down, function()
 		Tab.SetTransparency(0.92)
-	end)
+	end, Tab.Frame)
 	Creator.AddSignal(Tab.Frame.MouseButton1Up, function()
 		Tab.SetTransparency(Tab.Selected and 0.85 or 0.89)
-	end)
+	end, Tab.Frame)
 	Creator.AddSignal(Tab.Frame.MouseButton1Click, function()
 		TabModule:SelectTab(TabIndex)
-	end)
+	end, Tab.Frame)
 
 	TabModule.Containers[TabIndex] = Tab.ContainerFrame
 	TabModule.Tabs[TabIndex] = Tab
@@ -3077,8 +3077,8 @@ return function(Parent, Acrylic)
 
 	task.spawn(Update)
 
-	Creator.AddSignal(Textbox.Input:GetPropertyChangedSignal("Text"), Update)
-	Creator.AddSignal(Textbox.Input:GetPropertyChangedSignal("CursorPosition"), Update)
+	Creator.AddSignal(Textbox.Input:GetPropertyChangedSignal("Text"), Update, Textbox.Frame)
+	Creator.AddSignal(Textbox.Input:GetPropertyChangedSignal("CursorPosition"), Update, Textbox.Frame)
 
 	Creator.AddSignal(Textbox.Input.Focused, function()
 		Update()
@@ -3087,7 +3087,7 @@ return function(Parent, Acrylic)
 		Textbox.Indicator.BackgroundTransparency = 0
 		Creator.OverrideTag(Textbox.Frame, { BackgroundColor3 = Acrylic and "InputFocused" or "DialogHolder" })
 		Creator.OverrideTag(Textbox.Indicator, { BackgroundColor3 = "Accent" })
-	end)
+	end, Textbox.Frame)
 
 	Creator.AddSignal(Textbox.Input.FocusLost, function()
 		Update()
@@ -3096,7 +3096,7 @@ return function(Parent, Acrylic)
 		Textbox.Indicator.BackgroundTransparency = 0.5
 		Creator.OverrideTag(Textbox.Frame, { BackgroundColor3 = Acrylic and "Input" or "DialogInput" })
 		Creator.OverrideTag(Textbox.Indicator, { BackgroundColor3 = Acrylic and "InputIndicator" or "DialogInputLine" })
-	end)
+	end, Textbox.Frame)
 
 	return Textbox
 end
@@ -3153,17 +3153,17 @@ return function(Config)
 
 		AddSignal(Button.Frame.MouseEnter, function()
 			SetTransparency(0.94)
-		end)
+		end, Button.Frame)
 		AddSignal(Button.Frame.MouseLeave, function()
 			SetTransparency(1, true)
-		end)
+		end, Button.Frame)
 		AddSignal(Button.Frame.MouseButton1Down, function()
 			SetTransparency(0.96)
-		end)
+		end, Button.Frame)
 		AddSignal(Button.Frame.MouseButton1Up, function()
 			SetTransparency(0.94)
-		end)
-		AddSignal(Button.Frame.MouseButton1Click, Button.Callback)
+		end, Button.Frame)
+		AddSignal(Button.Frame.MouseButton1Click, Button.Callback, Button.Frame)
 
 		Button.SetCallback = function(Func)
 			Button.Callback = Func
@@ -3458,7 +3458,7 @@ return function(Config)
 			if DragEndConnection then
 				Creator.DisconnectSignal(DragEndConnection)
 			end
-			DragEndConnection = Creator.TrackConnection(Input.Changed:Connect(function()
+			DragEndConnection = Creator.AddSignal(Input.Changed, function()
 				if Input.UserInputState == Enum.UserInputState.End then
 					Dragging = false
 					if DragEndConnection then
@@ -3466,9 +3466,9 @@ return function(Config)
 						DragEndConnection = nil
 					end
 				end
-			end))
+			end, Window.Root)
 		end
-	end)
+	end, Window.Root)
 
 	Creator.AddSignal(Window.TitleBar.Frame.InputChanged, function(Input)
 		if
@@ -3477,7 +3477,7 @@ return function(Config)
 		then
 			DragInput = Input
 		end
-	end)
+	end, Window.Root)
 
 	Creator.AddSignal(ResizeStartFrame.InputBegan, function(Input)
 		if
@@ -3487,7 +3487,7 @@ return function(Config)
 			Resizing = true
 			ResizePos = Input.Position
 		end
-	end)
+	end, Window.Root)
 
 	Creator.AddSignal(UserInputService.InputChanged, function(Input)
 		if Input == DragInput and Dragging then
@@ -3525,14 +3525,14 @@ return function(Config)
 				Y = Motion.Instant.new(TargetSizeClamped.Y),
 			})
 		end
-	end)
+	end, Window.Root)
 
 	Creator.AddSignal(UserInputService.InputEnded, function(Input)
 		if Resizing == true or Input.UserInputType == Enum.UserInputType.Touch then
 			Resizing = false
 			Window.Size = UDim2.fromOffset(SizeMotor:getValue().X, SizeMotor:getValue().Y)
 		end
-	end)
+	end, Window.Root)
 
 	local function FitToViewport()
 		if not Window.Root or not Window.Root.Parent then return end
@@ -3560,7 +3560,7 @@ return function(Config)
 		end
 		Camera = Workspace.CurrentCamera
 		if Camera then
-			ViewportConnection = Creator.AddSignal(Camera:GetPropertyChangedSignal("ViewportSize"), FitToViewport)
+			ViewportConnection = Creator.AddSignal(Camera:GetPropertyChangedSignal("ViewportSize"), FitToViewport, Window.Root)
 			FitToViewport()
 		end
 	end
@@ -3569,7 +3569,7 @@ return function(Config)
 
 	Creator.AddSignal(Window.TabHolder.UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"), function()
 		Window.TabHolder.CanvasSize = UDim2.new(0, 0, 0, Window.TabHolder.UIListLayout.AbsoluteContentSize.Y)
-	end)
+	end, Window.Root)
 
 	Creator.AddSignal(UserInputService.InputBegan, function(Input)
 		if
@@ -3583,7 +3583,7 @@ return function(Config)
 		elseif Input.KeyCode == Library.MinimizeKey and not UserInputService:GetFocusedTextBox() then
 			Window:Minimize()
 		end
-	end)
+	end, Window.Root)
 
 	function Window:Minimize()
 		Window.Minimized = not Window.Minimized
@@ -3679,7 +3679,7 @@ return function(Config)
 		LastValue = TabModule:GetCurrentTabPos() + 16
 		LastTime = 0
 		Window.SelectorPosMotor:setGoal(Instant(TabModule:GetCurrentTabPos()))
-	end)
+	end, Window.Root)
 
 	return Window
 end
@@ -3723,7 +3723,7 @@ function Element:New(Idx, Config)
 
 	Creator.AddSignal(ButtonFrame.Frame.MouseButton1Click, function()
 		self.Library:SafeCallback(Config.Callback)
-	end)
+	end, ButtonFrame.Frame)
 
 	return ButtonFrame
 end
@@ -4073,7 +4073,7 @@ function Element:New(Idx, Config)
 				end
 			end
 			Display()
-		end)
+		end, Dialog.Root)
 
 		Creator.AddSignal(RedInput.Input.FocusLost, function(Enter)
 			if Enter then
@@ -4086,7 +4086,7 @@ function Element:New(Idx, Config)
 				end
 			end
 			Display()
-		end)
+		end, Dialog.Root)
 
 		Creator.AddSignal(GreenInput.Input.FocusLost, function(Enter)
 			if Enter then
@@ -4100,7 +4100,7 @@ function Element:New(Idx, Config)
 				end
 			end
 			Display()
-		end)
+		end, Dialog.Root)
 
 		Creator.AddSignal(BlueInput.Input.FocusLost, function(Enter)
 			if Enter then
@@ -4114,7 +4114,7 @@ function Element:New(Idx, Config)
 				end
 			end
 			Display()
-		end)
+		end, Dialog.Root)
 
 		if Config.Transparency then
 			Creator.AddSignal(AlphaInput.Input.FocusLost, function(Enter)
@@ -4127,7 +4127,7 @@ function Element:New(Idx, Config)
 					end)
 				end
 				Display()
-			end)
+			end, Dialog.Root)
 		end
 
 		local ActiveDrag = nil
@@ -4240,7 +4240,7 @@ function Element:New(Idx, Config)
 
 	Creator.AddSignal(ColorpickerFrame.Frame.MouseButton1Click, function()
 		CreateColorDialog()
-	end)
+	end, ColorpickerFrame.Frame)
 
 	Colorpicker:Display()
 
@@ -4454,11 +4454,11 @@ function Element:New(Idx, Config)
 	RecalculateListPosition()
 	RecalculateListSize()
 
-	Creator.AddSignal(DropdownInner:GetPropertyChangedSignal("AbsolutePosition"), RecalculateListPosition)
+	Creator.AddSignal(DropdownInner:GetPropertyChangedSignal("AbsolutePosition"), RecalculateListPosition, DropdownFrame.Frame)
 
 	Creator.AddSignal(DropdownInner.MouseButton1Click, function()
 		Dropdown:Open()
-	end)
+	end, DropdownFrame.Frame)
 
 	Creator.AddSignal(UserInputService.InputBegan, function(Input)
 		if
@@ -4611,16 +4611,16 @@ function Element:New(Idx, Config)
 
 			Creator.AddSignal(Button.MouseEnter, function()
 				SetBackTransparency(Selected and 0.85 or 0.89)
-			end)
+			end, Button)
 			Creator.AddSignal(Button.MouseLeave, function()
 				SetBackTransparency(Selected and 0.89 or 1)
-			end)
+			end, Button)
 			Creator.AddSignal(Button.MouseButton1Down, function()
 				SetBackTransparency(0.92)
-			end)
+			end, Button)
 			Creator.AddSignal(Button.MouseButton1Up, function()
 				SetBackTransparency(Selected and 0.85 or 0.89)
-			end)
+			end, Button)
 
 			function Table:UpdateButton()
 				if Config.Multi then
@@ -4665,7 +4665,7 @@ function Element:New(Idx, Config)
 						Library:SafeCallback(Dropdown.Changed, Dropdown.Value)
 					end
 				end
-			end)
+			end, Button)
 
 			Table:UpdateButton()
 			Dropdown:Display()
@@ -4876,11 +4876,11 @@ function Element:New(Idx, Config)
 				return
 			end
 			Input:SetValue(Box.Text)
-		end)
+		end, InputFrame.Frame)
 	else
 		AddSignal(Box:GetPropertyChangedSignal("Text"), function()
 			Input:SetValue(Box.Text)
-		end)
+		end, InputFrame.Frame)
 	end
 
 	function Input:OnChanged(Func)
@@ -5064,7 +5064,7 @@ function Element:New(Idx, Config)
 		local Token = CaptureToken
 		task.delay(0.2, function()
 			if not Picking or Token ~= CaptureToken then return end
-			CaptureConnection = Creator.TrackConnection(UserInputService.InputBegan:Connect(function(CapturedInput)
+			CaptureConnection = Creator.AddSignal(UserInputService.InputBegan, function(CapturedInput)
 				if not Picking or Token ~= CaptureToken then return end
 				local CapturedKey
 				local CallbackValue
@@ -5087,7 +5087,7 @@ function Element:New(Idx, Config)
 				Library:SafeCallback(Keybind.ChangedCallback, CallbackValue)
 				Library:SafeCallback(Keybind.Changed, CallbackValue)
 				if CaptureConnection then Creator.DisconnectSignal(CaptureConnection); CaptureConnection = nil end
-			end))
+			end, KeybindFrame.Frame)
 		end)
 	end, KeybindFrame.Frame)
 
@@ -5315,6 +5315,7 @@ function Element:New(Idx, Config)
 	end
 
 	function Slider:Destroy()
+		Dragging = false
 		SliderFrame:Destroy()
 		Library:UnregisterOption(Idx, Slider)
 	end
@@ -5429,7 +5430,7 @@ function Element:New(Idx, Config)
 
 	Creator.AddSignal(ToggleFrame.Frame.MouseButton1Click, function()
 		Toggle:SetValue(not Toggle.Value)
-	end)
+	end, ToggleFrame.Frame)
 
 	Toggle:SetValue(Toggle.Value)
 

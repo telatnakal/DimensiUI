@@ -160,6 +160,7 @@ function Element:New(Idx, Config)
 	end
 
 	function Slider:Destroy()
+		Dragging = false
 		SliderFrame:Destroy()
 		Library:UnregisterOption(Idx, Slider)
 	end

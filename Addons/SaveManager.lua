@@ -1,6 +1,8 @@
 local httpService = game:GetService("HttpService")
 
-local SaveManager = {} do
+local function CreateSaveManager()
+	local SaveManager = {}
+	do
 	SaveManager.Folder = "DimensiUISettings"
 	SaveManager.Ignore = {}
 	SaveManager.Parser = {
@@ -8,9 +10,9 @@ local SaveManager = {} do
 			Save = function(idx, object) 
 				return { type = "Toggle", idx = idx, value = object.Value } 
 			end,
-			Load = function(idx, data)
-				if SaveManager.Options[idx] then 
-					SaveManager.Options[idx]:SetValue(data.value)
+			Load = function(idx, data, manager)
+				if manager.Options[idx] then 
+					manager.Options[idx]:SetValue(data.value)
 				end
 			end,
 		},
@@ -18,18 +20,18 @@ local SaveManager = {} do
 			Save = function(idx, object)
 				return { type = "Slider", idx = idx, value = tostring(object.Value) }
 			end,
-			Load = function(idx, data)
+			Load = function(idx, data, manager)
 				local value = tonumber(data.value)
-				if value and SaveManager.Options[idx] then SaveManager.Options[idx]:SetValue(value) end
+				if value and manager.Options[idx] then manager.Options[idx]:SetValue(value) end
 			end,
 		},
 		Dropdown = {
 			Save = function(idx, object)
 				return { type = "Dropdown", idx = idx, value = object.Value, mutli = object.Multi }
 			end,
-			Load = function(idx, data)
-				if SaveManager.Options[idx] then 
-					SaveManager.Options[idx]:SetValue(data.value)
+			Load = function(idx, data, manager)
+				if manager.Options[idx] then 
+					manager.Options[idx]:SetValue(data.value)
 				end
 			end,
 		},
@@ -37,9 +39,9 @@ local SaveManager = {} do
 			Save = function(idx, object)
 				return { type = "Colorpicker", idx = idx, value = object.Value:ToHex(), transparency = object.Transparency }
 			end,
-			Load = function(idx, data)
-				if SaveManager.Options[idx] then 
-					SaveManager.Options[idx]:SetValueRGB(Color3.fromHex(data.value), data.transparency)
+			Load = function(idx, data, manager)
+				if manager.Options[idx] then 
+					manager.Options[idx]:SetValueRGB(Color3.fromHex(data.value), data.transparency)
 				end
 			end,
 		},
@@ -47,9 +49,9 @@ local SaveManager = {} do
 			Save = function(idx, object)
 				return { type = "Keybind", idx = idx, mode = object.Mode, key = object.Value }
 			end,
-			Load = function(idx, data)
-				if SaveManager.Options[idx] then 
-					SaveManager.Options[idx]:SetValue(data.key, data.mode)
+			Load = function(idx, data, manager)
+				if manager.Options[idx] then 
+					manager.Options[idx]:SetValue(data.key, data.mode)
 				end
 			end,
 		},
@@ -58,9 +60,9 @@ local SaveManager = {} do
 			Save = function(idx, object)
 				return { type = "Input", idx = idx, text = object.Value }
 			end,
-			Load = function(idx, data)
-				if SaveManager.Options[idx] and type(data.text) == "string" then
-					SaveManager.Options[idx]:SetValue(data.text)
+			Load = function(idx, data, manager)
+				if manager.Options[idx] and type(data.text) == "string" then
+					manager.Options[idx]:SetValue(data.text)
 				end
 			end,
 		},
@@ -91,7 +93,7 @@ local SaveManager = {} do
 		if type(name) ~= "string" or name == "" or #name > 64 then return false, "invalid config name" end
 		if name:find("[\\/:*?\"<>|%c]") or name == "." or name == ".." then return false, "invalid config name" end
 		local data = { objects = {} }
-		for idx, option in next, SaveManager.Options do
+		for idx, option in next, self.Options do
 			if type(idx) ~= "string" or type(option) ~= "table" or not self.Parser[option.Type] or self.Ignore[idx] then continue end
 			local ok, entry = pcall(self.Parser[option.Type].Save, idx, option)
 			if not ok or type(entry) ~= "table" then return false, "failed to serialize option " .. tostring(idx) end
@@ -155,7 +157,7 @@ local SaveManager = {} do
 				valid = type(option.text) == "string" and #option.text <= 4096 and (not object.Numeric or option.text == "" or tonumber(option.text) ~= nil)
 			end
 			if not valid then skipped += 1; continue end
-			local ok = pcall(parser.Load, option.idx, option)
+			local ok = pcall(parser.Load, option.idx, option, self)
 			if ok then applied += 1 else skipped += 1 end
 		end
 		if skipped > 0 then return false, string.format("loaded %d options; skipped %d invalid entries", applied, skipped) end
@@ -168,7 +170,7 @@ local SaveManager = {} do
 		})
 	end
 
-	function SaveManager:BuildFolderTree()
+	function self:BuildFolderTree()
 		local paths = {
 			self.Folder,
 			self.Folder .. "/settings"
@@ -245,7 +247,7 @@ local SaveManager = {} do
 		section:AddButton({
             Title = "Create config",
             Callback = function()
-                local name = SaveManager.Options.SaveManager_ConfigName.Value
+                local name = self.Options.SaveManager_ConfigName.Value
 
                 if name:gsub(" ", "") == "" then 
                     return self.Library:Notify({
@@ -273,13 +275,13 @@ local SaveManager = {} do
 					Duration = 7
 				})
 
-                SaveManager.Options.SaveManager_ConfigList:SetValues(self:RefreshConfigList())
-                SaveManager.Options.SaveManager_ConfigList:SetValue(nil)
+                self.Options.SaveManager_ConfigList:SetValues(self:RefreshConfigList())
+                self.Options.SaveManager_ConfigList:SetValue(nil)
             end
         })
 
         section:AddButton({Title = "Load config", Callback = function()
-			local name = SaveManager.Options.SaveManager_ConfigList.Value
+			local name = self.Options.SaveManager_ConfigList.Value
 
 			local success, err = self:Load(name)
 			if not success then
@@ -300,7 +302,7 @@ local SaveManager = {} do
 		end})
 
 		section:AddButton({Title = "Overwrite config", Callback = function()
-			local name = SaveManager.Options.SaveManager_ConfigList.Value
+			local name = self.Options.SaveManager_ConfigList.Value
 
 			local success, err = self:Save(name)
 			if not success then
@@ -321,13 +323,13 @@ local SaveManager = {} do
 		end})
 
 		section:AddButton({Title = "Refresh list", Callback = function()
-			SaveManager.Options.SaveManager_ConfigList:SetValues(self:RefreshConfigList())
-			SaveManager.Options.SaveManager_ConfigList:SetValue(nil)
+			self.Options.SaveManager_ConfigList:SetValues(self:RefreshConfigList())
+			self.Options.SaveManager_ConfigList:SetValue(nil)
 		end})
 
 		local AutoloadButton
 		AutoloadButton = section:AddButton({Title = "Set as autoload", Description = "Current autoload config: none", Callback = function()
-			local name = SaveManager.Options.SaveManager_ConfigList.Value
+			local name = self.Options.SaveManager_ConfigList.Value
 			if not name or name == "" then
 				return self.Library:Notify({
 					Title = "Interface",
@@ -351,10 +353,16 @@ local SaveManager = {} do
 			AutoloadButton:SetDesc("Current autoload config: " .. name)
 		end
 
-		SaveManager:SetIgnoreIndexes({ "SaveManager_ConfigList", "SaveManager_ConfigName" })
+		self:SetIgnoreIndexes({ "SaveManager_ConfigList", "SaveManager_ConfigName" })
 	end
 
-	SaveManager:BuildFolderTree()
+	self:BuildFolderTree()
+	end
+	return SaveManager
 end
+
+local SaveManager = CreateSaveManager()
+SaveManager.New = CreateSaveManager
+SaveManager.NewInstance = CreateSaveManager
 
 return SaveManager

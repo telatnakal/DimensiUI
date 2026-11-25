@@ -203,7 +203,7 @@ return function(Config)
 			if DragEndConnection then
 				Creator.DisconnectSignal(DragEndConnection)
 			end
-			DragEndConnection = Creator.TrackConnection(Input.Changed:Connect(function()
+			DragEndConnection = Creator.AddSignal(Input.Changed, function()
 				if Input.UserInputState == Enum.UserInputState.End then
 					Dragging = false
 					if DragEndConnection then
@@ -211,9 +211,9 @@ return function(Config)
 						DragEndConnection = nil
 					end
 				end
-			end))
+			end, Window.Root)
 		end
-	end)
+	end, Window.Root)
 
 	Creator.AddSignal(Window.TitleBar.Frame.InputChanged, function(Input)
 		if
@@ -222,7 +222,7 @@ return function(Config)
 		then
 			DragInput = Input
 		end
-	end)
+	end, Window.Root)
 
 	Creator.AddSignal(ResizeStartFrame.InputBegan, function(Input)
 		if
@@ -232,7 +232,7 @@ return function(Config)
 			Resizing = true
 			ResizePos = Input.Position
 		end
-	end)
+	end, Window.Root)
 
 	Creator.AddSignal(UserInputService.InputChanged, function(Input)
 		if Input == DragInput and Dragging then
@@ -270,14 +270,14 @@ return function(Config)
 				Y = Motion.Instant.new(TargetSizeClamped.Y),
 			})
 		end
-	end)
+	end, Window.Root)
 
 	Creator.AddSignal(UserInputService.InputEnded, function(Input)
 		if Resizing == true or Input.UserInputType == Enum.UserInputType.Touch then
 			Resizing = false
 			Window.Size = UDim2.fromOffset(SizeMotor:getValue().X, SizeMotor:getValue().Y)
 		end
-	end)
+	end, Window.Root)
 
 	local function FitToViewport()
 		if not Window.Root or not Window.Root.Parent then return end
@@ -305,7 +305,7 @@ return function(Config)
 		end
 		Camera = Workspace.CurrentCamera
 		if Camera then
-			ViewportConnection = Creator.AddSignal(Camera:GetPropertyChangedSignal("ViewportSize"), FitToViewport)
+			ViewportConnection = Creator.AddSignal(Camera:GetPropertyChangedSignal("ViewportSize"), FitToViewport, Window.Root)
 			FitToViewport()
 		end
 	end
@@ -314,7 +314,7 @@ return function(Config)
 
 	Creator.AddSignal(Window.TabHolder.UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"), function()
 		Window.TabHolder.CanvasSize = UDim2.new(0, 0, 0, Window.TabHolder.UIListLayout.AbsoluteContentSize.Y)
-	end)
+	end, Window.Root)
 
 	Creator.AddSignal(UserInputService.InputBegan, function(Input)
 		if
@@ -328,7 +328,7 @@ return function(Config)
 		elseif Input.KeyCode == Library.MinimizeKey and not UserInputService:GetFocusedTextBox() then
 			Window:Minimize()
 		end
-	end)
+	end, Window.Root)
 
 	function Window:Minimize()
 		Window.Minimized = not Window.Minimized
@@ -424,7 +424,7 @@ return function(Config)
 		LastValue = TabModule:GetCurrentTabPos() + 16
 		LastTime = 0
 		Window.SelectorPosMotor:setGoal(Instant(TabModule:GetCurrentTabPos()))
-	end)
+	end, Window.Root)
 
 	return Window
 end

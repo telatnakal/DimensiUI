@@ -72,11 +72,11 @@ function Element:New(Idx, Config)
 				return
 			end
 			Input:SetValue(Box.Text)
-		end)
+		end, InputFrame.Frame)
 	else
 		AddSignal(Box:GetPropertyChangedSignal("Text"), function()
 			Input:SetValue(Box.Text)
-		end)
+		end, InputFrame.Frame)
 	end
 
 	function Input:OnChanged(Func)

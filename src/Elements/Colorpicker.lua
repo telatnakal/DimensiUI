@@ -339,7 +339,7 @@ function Element:New(Idx, Config)
 				end
 			end
 			Display()
-		end)
+		end, Dialog.Root)
 
 		Creator.AddSignal(RedInput.Input.FocusLost, function(Enter)
 			if Enter then
@@ -352,7 +352,7 @@ function Element:New(Idx, Config)
 				end
 			end
 			Display()
-		end)
+		end, Dialog.Root)
 
 		Creator.AddSignal(GreenInput.Input.FocusLost, function(Enter)
 			if Enter then
@@ -366,7 +366,7 @@ function Element:New(Idx, Config)
 				end
 			end
 			Display()
-		end)
+		end, Dialog.Root)
 
 		Creator.AddSignal(BlueInput.Input.FocusLost, function(Enter)
 			if Enter then
@@ -380,7 +380,7 @@ function Element:New(Idx, Config)
 				end
 			end
 			Display()
-		end)
+		end, Dialog.Root)
 
 		if Config.Transparency then
 			Creator.AddSignal(AlphaInput.Input.FocusLost, function(Enter)
@@ -393,7 +393,7 @@ function Element:New(Idx, Config)
 					end)
 				end
 				Display()
-			end)
+			end, Dialog.Root)
 		end
 
 		local ActiveDrag = nil
@@ -506,7 +506,7 @@ function Element:New(Idx, Config)
 
 	Creator.AddSignal(ColorpickerFrame.Frame.MouseButton1Click, function()
 		CreateColorDialog()
-	end)
+	end, ColorpickerFrame.Frame)
 
 	Colorpicker:Display()
 

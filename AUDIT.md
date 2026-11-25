@@ -164,3 +164,41 @@ The current code still exposes a singleton Library from `src/init.lua`; `Creator
 The library now exposes `Library:NewInstance()`. It clones the root ModuleScript and requires that clone, which gives each library instance its own ModuleScript require cache. This scopes the stateful Creator, Tab, Notification, Acrylic, Elements, and Motion modules to the cloned root tree while preserving the existing API on the original library instance. The standalone bundle implements equivalent root-tree cloning and per-root module caches.
 
 This implementation is statically integrated but is not yet certified by Roblox Studio runtime tests. Verify that root ModuleScript cloning is permitted in the target deployment environment, that cloned roots can be required from their parent, and that destroying one instance leaves other instances fully functional.
+
+
+## Component event ownership update — 1.2.7
+
+- Element-level event listeners in Button, Toggle, Input, Slider, Dropdown, Keybind, and Colorpicker now pass an owning GUI instance to `Creator.AddSignal` where the listener lifetime is bounded by a component or dialog.
+- Dropdown option hover, press, and selection listeners are tied to each generated option button; popup/global input listeners are tied to the Dropdown frame.
+- Keybind's temporary capture listener is tied to the Keybind frame, so destroying the component also disconnects capture input.
+- Slider drag state is reset on explicit destruction.
+- Static checks can verify source/bundle parity and owner arguments; Roblox runtime behavior still requires Studio/client testing.
+
+## Component and Window event ownership update — 1.2.8
+
+- Bound TitleBar hover/press/click signals to each title-bar button frame.
+- Bound reusable element hover, component button hover, section layout, tab interaction/layout, and textbox focus/measurement signals to their owning GUI instances.
+- Bound Window drag, resize, minimize-key, tab-layout, camera viewport, and canvas-position signals to the Window root.
+- The temporary drag InputObject connection is now registered through `Creator.AddSignal` with the Window root as owner, so destroying the Window during an active drag disconnects it immediately.
+- Every `Creator.AddSignal` call in the modular source now supplies an explicit owner instance. Long-lived Acrylic camera bindings remain explicitly disconnected when their tracked model is destroyed.
+
+**Validation:** static audit, 37-module source/bundle parity, require-path checks, and deterministic build pass. No Luau compiler or Roblox Studio/client runtime is available here; runtime behavior remains unverified.
+
+
+
+## Addon instance isolation update — 1.2.9
+
+- `SaveManager.New()` / `SaveManager.NewInstance()` create independent manager objects with independent folder, ignore-index, parser, and Library/Options state.
+- `InterfaceManager.New()` / `InterfaceManager.NewInstance()` create independent manager objects with independent folder and settings state.
+- Existing module-level singleton exports remain available for backward compatibility.
+- This isolates addon in-memory state; filesystem folder names are still shared if callers configure identical paths.
+- Static source checks do not replace runtime tests with two libraries and two addon instances.
+
+## Addon instance isolation correction — 1.2.10
+
+- SaveManager parser load callbacks now receive the owning manager and apply values through that manager's `Options` table.
+- SaveManager save/load iteration and configuration controls use the active manager instance rather than singleton-captured option references.
+- InterfaceManager settings load/save and generated control callbacks use the active manager instance.
+- The legacy singleton exports remain available, while `New()` and `NewInstance()` now have isolated settings and option bindings throughout the addon methods.
+- Static audit verifies that addon factory internals do not retain singleton `Options` or `Settings` references.
+- Static source/bundle parity and deterministic build passed. Luau compiler and Roblox Studio runtime checks remain outstanding.
