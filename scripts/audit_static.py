@@ -222,6 +222,10 @@ for element_file in (SRC / "Elements/Paragraph.lua", SRC / "Elements/Button.lua"
     assert 'if Config == nil and type(Idx) == "table" then' in source, f"Missing legacy config normalization: {element_file.name}"
 
 assert 'Library:UnregisterOption(Idx, Toggle)' in (SRC / "Elements/Toggle.lua").read_text(), "Toggle destroy must unregister only its own option instance"
+toggle_source = (SRC / "Elements/Toggle.lua").read_text()
+assert "UDim2.fromOffset(28, 16)" in toggle_source, "Toggle track must use compact 28x16 sizing"
+assert "UDim2.fromOffset(10, 10)" in toggle_source, "Toggle indicator must use compact 10x10 sizing"
+assert "Toggle.Value and 16 or 2" in toggle_source, "Toggle indicator position must match compact track geometry"
 
 assert 'Library:UnregisterOption(Idx, Slider)' in (SRC / "Elements/Slider.lua").read_text(), "Slider destroy must unregister only its own option instance"
 
