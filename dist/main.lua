@@ -2107,15 +2107,15 @@ return function(Title, Desc, Parent, Hover)
 	}, {
 		New("UIListLayout", {
 			SortOrder = Enum.SortOrder.LayoutOrder,
-			Padding = UDim.new(0, 4),
+			Padding = UDim.new(0, 3),
 			VerticalAlignment = Enum.VerticalAlignment.Center,
 		}),
 		New("UIPadding", {
-			PaddingBottom = UDim.new(0, 7),
-			PaddingTop = UDim.new(0, 7),
+			PaddingBottom = UDim.new(0, 4),
+			PaddingTop = UDim.new(0, 4),
 		}),
 		New("UISizeConstraint", {
-			MinSize = Vector2.new(0, 42),
+			MinSize = Vector2.new(0, 36),
 		}),
 		Element.TitleLabel,
 		Element.DescLabel,
@@ -2667,7 +2667,7 @@ function TabModule:New(Title, Icon, Parent)
 	})
 
 	local ContainerLayout = New("UIListLayout", {
-		Padding = UDim.new(0, 14),
+		Padding = UDim.new(0, 9),
 		SortOrder = Enum.SortOrder.LayoutOrder,
 	})
 
@@ -2756,6 +2756,7 @@ function TabModule:SelectTab(Tab)
 	TabObject.SetTransparency(TINT_SELECTED)
 	TabObject.Selected = true
 	SetActive(TabObject, true)
+	Window.TabDisplay.Text = TabObject.Name
 	task.spawn(function()
 		if Generation ~= TabModule.SelectionGeneration or require(Root).Unloaded then return end
 		Window.ContainerPosMotor:setGoal(Spring(Window.ContentTop + 16, { frequency = 10 }))
@@ -2888,77 +2889,145 @@ local Root = script.Parent.Parent
 local Typography = require(Root.Typography)
 local Assets = require(script.Parent.Assets)
 local Creator = require(Root.Creator)
+local Motion = require(Root.Packages.DimensiMotion)
 
 local New = Creator.New
 local AddSignal = Creator.AddSignal
 
 return function(Config)
 	local TitleBar = {}
+
 	local Library = require(Root)
 
 	local function BarButton(Icon, Pos, Parent, Callback)
-		local Button = { Callback = Callback or function() end }
+		local Button = {
+			Callback = Callback or function() end,
+		}
+
 		Button.Frame = New("TextButton", {
-			Size = UDim2.fromOffset(30, 30),
+			Size = UDim2.fromOffset(32, 32),
 			AnchorPoint = Vector2.new(1, 0),
 			BackgroundTransparency = 1,
 			Parent = Parent,
 			Position = Pos,
 			Text = "",
+			ThemeTag = {
+				BackgroundColor3 = "Text",
+			},
 		}, {
-			New("UICorner", { CornerRadius = UDim.new(0, 7) }),
+			New("UICorner", {
+				CornerRadius = UDim.new(0, 8),
+			}),
 			New("ImageLabel", {
-				Image = Icon, Size = UDim2.fromOffset(15, 15),
-				Position = UDim2.fromScale(0.5, 0.5), AnchorPoint = Vector2.new(0.5, 0.5),
-				BackgroundTransparency = 1, ThemeTag = { ImageColor3 = "Text" },
+				Image = Icon,
+				Size = UDim2.fromOffset(16, 16),
+				Position = UDim2.fromScale(0.5, 0.5),
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				BackgroundTransparency = 1,
+				Name = "Icon",
+				ThemeTag = {
+					ImageColor3 = "Text",
+				},
 			}),
 		})
-		local _, SetTransparency = Creator.SpringMotor(1, Button.Frame, "BackgroundTransparency")
-		AddSignal(Button.Frame.MouseEnter, function() SetTransparency(0.92) end, Button.Frame)
-		AddSignal(Button.Frame.MouseLeave, function() SetTransparency(1, true) end, Button.Frame)
+
+		local Motor, SetTransparency = Creator.SpringMotor(1, Button.Frame, "BackgroundTransparency")
+
+		AddSignal(Button.Frame.MouseEnter, function()
+			SetTransparency(0.94)
+		end, Button.Frame)
+		AddSignal(Button.Frame.MouseLeave, function()
+			SetTransparency(1, true)
+		end, Button.Frame)
+		AddSignal(Button.Frame.MouseButton1Down, function()
+			SetTransparency(0.96)
+		end, Button.Frame)
+		AddSignal(Button.Frame.MouseButton1Up, function()
+			SetTransparency(0.94)
+		end, Button.Frame)
 		AddSignal(Button.Frame.MouseButton1Click, Button.Callback, Button.Frame)
-		return Button.Frame
+
+		Button.SetCallback = function(Func)
+			Button.Callback = Func
+		end
+
+		return Button
 	end
 
 	TitleBar.Brand = New("Frame", {
-		Position = UDim2.fromOffset(20, 0),
-		Size = UDim2.new(1, -112, 1, 0),
+		Position = UDim2.fromOffset(24, 12),
+		Size = UDim2.fromOffset(math.max(96, (Config.Window and Config.Window.TabWidth or 160) - 12), 0),
+		AutomaticSize = Enum.AutomaticSize.Y,
 		BackgroundTransparency = 1,
 	}, {
+		New("UIListLayout", {
+			Padding = UDim.new(0, 2),
+			SortOrder = Enum.SortOrder.LayoutOrder,
+		}),
 		New("TextLabel", {
-			Name = "HeaderTitle", RichText = true, Text = Config.Title,
-			FontFace = Typography.SemiBold, TextSize = 14,
-			TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Center,
-			TextTruncate = Enum.TextTruncate.AtEnd, Size = UDim2.fromScale(1, 1),
-			BackgroundTransparency = 1, ThemeTag = { TextColor3 = "Text" },
+			RichText = true,
+			Text = Config.Title,
+			FontFace = Typography.SemiBold,
+			TextSize = 14,
+			TextXAlignment = "Left",
+			TextYAlignment = "Center",
+			TextWrapped = true,
+			AutomaticSize = Enum.AutomaticSize.Y,
+			Size = UDim2.new(1, 0, 0, 17),
+			BackgroundTransparency = 1,
+			LayoutOrder = 1,
+			ThemeTag = {
+				TextColor3 = "Text",
+			},
+		}),
+		New("TextLabel", {
+			RichText = true,
+			Text = Config.SubTitle,
+			TextTransparency = 0,
+			FontFace = Typography.Regular,
+			TextSize = 11,
+			TextXAlignment = "Left",
+			TextYAlignment = "Center",
+			TextWrapped = true,
+			AutomaticSize = Enum.AutomaticSize.Y,
+			Size = UDim2.new(1, 0, 0, 14),
+			BackgroundTransparency = 1,
+			LayoutOrder = 2,
+			ThemeTag = {
+				TextColor3 = "SubText",
+			},
 		}),
 	})
 
 	TitleBar.Frame = New("Frame", {
-		Size = UDim2.new(1, 0, 0, 48),
+		Size = UDim2.new(1, 0, 0, 56),
 		BackgroundTransparency = 1,
 		Parent = Config.Parent,
 	}, {
 		TitleBar.Brand,
-		New("Frame", {
-			Name = "HeaderDivider", Position = UDim2.new(0, 0, 1, -1),
-			Size = UDim2.new(1, 0, 0, 1), BorderSizePixel = 0,
-			ThemeTag = { BackgroundColor3 = "Divider" },
-		}),
 	})
 
-	TitleBar.CloseButton = BarButton(Assets.Close, UDim2.new(1, -10, 0, 9), TitleBar.Frame, function()
+	TitleBar.CloseButton = BarButton(Assets.Close, UDim2.new(1, -12, 0, 12), TitleBar.Frame, function()
 		Library.Window:Dialog({
-			Title = "Close", Content = "Are you sure you want to unload the interface?",
+			Title = "Close",
+			Content = "Are you sure you want to unload the interface?",
 			Buttons = {
-				{ Title = "Yes", Callback = function() Library:Destroy() end },
-				{ Title = "No" },
+				{
+					Title = "Yes",
+					Callback = function()
+						Library:Destroy()
+					end,
+				},
+				{
+					Title = "No",
+				},
 			},
 		})
 	end)
-	TitleBar.MinButton = BarButton(Assets.Min, UDim2.new(1, -44, 0, 9), TitleBar.Frame, function()
+	TitleBar.MinButton = BarButton(Assets.Min, UDim2.new(1, -48, 0, 12), TitleBar.Frame, function()
 		Library.Window:Minimize()
 	end)
+
 	return TitleBar
 end
 end
@@ -3003,7 +3072,7 @@ return function(Config)
 		Minimized = false,
 		Size = UDim2.fromOffset(initialWidth, initialHeight),
 		TabWidth = initialTabWidth,
-		ContentTop = 60,
+		ContentTop = 68,
 		CurrentPos = 0,
 		Position = UDim2.fromOffset(
 			math.max(12, viewport.X / 2 - initialWidth / 2),
@@ -3072,6 +3141,22 @@ return function(Config)
 		Window.TabHolder,
 	})
 
+	Window.TabDisplay = New("TextLabel", {
+		RichText = true,
+		Text = "Tab",
+		TextTransparency = 0,
+		FontFace = Typography.SemiBold,
+		TextSize = 18,
+		TextXAlignment = "Left",
+		TextYAlignment = "Center",
+		TextTruncate = Enum.TextTruncate.AtEnd,
+		Size = UDim2.new(1, -(Window.TabWidth + 144), 0, 28),
+		Position = UDim2.fromOffset(Window.TabWidth + 48, 14),
+		BackgroundTransparency = 1,
+		ThemeTag = {
+			TextColor3 = "Text",
+		},
+	})
 
 	Window.ContainerHolder = New("CanvasGroup", {
 		Size = UDim2.new(1, -(Window.TabWidth + 72), 1, -(Window.ContentTop + 20)),
@@ -3088,6 +3173,7 @@ return function(Config)
 	}, {
 		Window.Surface.Frame,
 		Window.Sidebar,
+		Window.TabDisplay,
 		Window.ContainerHolder,
 		TabFrame,
 		ResizeStartFrame,
@@ -3100,12 +3186,14 @@ return function(Config)
 		Window = Window,
 	})
 
-	-- Sidebar navigation begins immediately below the single global header.
+	-- The tab list starts below the brand block, which grows when a long title wraps.
 	local function LayoutSidebar()
-		TabFrame.Position = UDim2.fromOffset(12, 60)
-		TabFrame.Size = UDim2.new(0, Window.TabWidth, 1, -72)
+		local Brand = Window.TitleBar.Brand
+		local Top = math.max(64, Brand.Position.Y.Offset + Brand.AbsoluteSize.Y + 18)
+		TabFrame.Position = UDim2.fromOffset(12, Top)
+		TabFrame.Size = UDim2.new(0, Window.TabWidth, 1, -(Top + 12))
 	end
-	LayoutSidebar()
+	Creator.AddSignal(Window.TitleBar.Brand:GetPropertyChangedSignal("AbsoluteSize"), LayoutSidebar, Window.Root)
 
 	local SizeMotor = Creator.TrackMotor(Motion.GroupMotor.new({
 		X = Window.Size.X.Offset,
@@ -3237,7 +3325,10 @@ return function(Config)
 		SizeMotor:setGoal({ X = Instant(width), Y = Instant(height) })
 		PosMotor:setGoal({ X = Instant(x), Y = Instant(y) })
 		Window.Sidebar.Size = UDim2.new(0, Window.TabWidth + 24, 1, 0)
+		Window.TitleBar.Brand.Size = UDim2.fromOffset(math.max(96, Window.TabWidth - 12), 0)
 		LayoutSidebar()
+		Window.TabDisplay.Size = UDim2.new(1, -(Window.TabWidth + 144), 0, 28)
+		Window.TabDisplay.Position = UDim2.fromOffset(Window.TabWidth + 48, 14)
 		Window.ContainerHolder.Size = UDim2.new(1, -(Window.TabWidth + 72), 1, -(Window.ContentTop + 20))
 		Window.ContainerHolder.Position = UDim2.fromOffset(Window.TabWidth + 48, Window.ContentTop)
 	end

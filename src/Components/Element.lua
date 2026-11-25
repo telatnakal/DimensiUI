@@ -59,15 +59,15 @@ return function(Title, Desc, Parent, Hover)
 	}, {
 		New("UIListLayout", {
 			SortOrder = Enum.SortOrder.LayoutOrder,
-			Padding = UDim.new(0, 4),
+			Padding = UDim.new(0, 3),
 			VerticalAlignment = Enum.VerticalAlignment.Center,
 		}),
 		New("UIPadding", {
-			PaddingBottom = UDim.new(0, 7),
-			PaddingTop = UDim.new(0, 7),
+			PaddingBottom = UDim.new(0, 4),
+			PaddingTop = UDim.new(0, 4),
 		}),
 		New("UISizeConstraint", {
-			MinSize = Vector2.new(0, 42),
+			MinSize = Vector2.new(0, 36),
 		}),
 		Element.TitleLabel,
 		Element.DescLabel,

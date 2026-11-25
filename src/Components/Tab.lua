@@ -110,7 +110,7 @@ function TabModule:New(Title, Icon, Parent)
 	})
 
 	local ContainerLayout = New("UIListLayout", {
-		Padding = UDim.new(0, 14),
+		Padding = UDim.new(0, 9),
 		SortOrder = Enum.SortOrder.LayoutOrder,
 	})
 
@@ -199,6 +199,7 @@ function TabModule:SelectTab(Tab)
 	TabObject.SetTransparency(TINT_SELECTED)
 	TabObject.Selected = true
 	SetActive(TabObject, true)
+	Window.TabDisplay.Text = TabObject.Name
 	task.spawn(function()
 		if Generation ~= TabModule.SelectionGeneration or require(Root).Unloaded then return end
 		Window.ContainerPosMotor:setGoal(Spring(Window.ContentTop + 16, { frequency = 10 }))
