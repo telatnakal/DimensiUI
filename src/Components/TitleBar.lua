@@ -69,7 +69,8 @@ return function(Config)
 
 	TitleBar.Brand = New("Frame", {
 		Position = UDim2.fromOffset(24, 12),
-		Size = UDim2.fromOffset(math.max(96, (Config.Window and Config.Window.TabWidth or 160) - 12), 34),
+		Size = UDim2.fromOffset(math.max(96, (Config.Window and Config.Window.TabWidth or 160) - 12), 0),
+		AutomaticSize = Enum.AutomaticSize.Y,
 		BackgroundTransparency = 1,
 	}, {
 		New("UIListLayout", {
@@ -83,7 +84,8 @@ return function(Config)
 			TextSize = 14,
 			TextXAlignment = "Left",
 			TextYAlignment = "Center",
-			TextTruncate = Enum.TextTruncate.AtEnd,
+			TextWrapped = true,
+			AutomaticSize = Enum.AutomaticSize.Y,
 			Size = UDim2.new(1, 0, 0, 17),
 			BackgroundTransparency = 1,
 			LayoutOrder = 1,
@@ -99,7 +101,8 @@ return function(Config)
 			TextSize = 11,
 			TextXAlignment = "Left",
 			TextYAlignment = "Center",
-			TextTruncate = Enum.TextTruncate.AtEnd,
+			TextWrapped = true,
+			AutomaticSize = Enum.AutomaticSize.Y,
 			Size = UDim2.new(1, 0, 0, 14),
 			BackgroundTransparency = 1,
 			LayoutOrder = 2,

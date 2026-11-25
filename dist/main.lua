@@ -2956,7 +2956,8 @@ return function(Config)
 
 	TitleBar.Brand = New("Frame", {
 		Position = UDim2.fromOffset(24, 12),
-		Size = UDim2.fromOffset(math.max(96, (Config.Window and Config.Window.TabWidth or 160) - 12), 34),
+		Size = UDim2.fromOffset(math.max(96, (Config.Window and Config.Window.TabWidth or 160) - 12), 0),
+		AutomaticSize = Enum.AutomaticSize.Y,
 		BackgroundTransparency = 1,
 	}, {
 		New("UIListLayout", {
@@ -2970,7 +2971,8 @@ return function(Config)
 			TextSize = 14,
 			TextXAlignment = "Left",
 			TextYAlignment = "Center",
-			TextTruncate = Enum.TextTruncate.AtEnd,
+			TextWrapped = true,
+			AutomaticSize = Enum.AutomaticSize.Y,
 			Size = UDim2.new(1, 0, 0, 17),
 			BackgroundTransparency = 1,
 			LayoutOrder = 1,
@@ -2986,7 +2988,8 @@ return function(Config)
 			TextSize = 11,
 			TextXAlignment = "Left",
 			TextYAlignment = "Center",
-			TextTruncate = Enum.TextTruncate.AtEnd,
+			TextWrapped = true,
+			AutomaticSize = Enum.AutomaticSize.Y,
 			Size = UDim2.new(1, 0, 0, 14),
 			BackgroundTransparency = 1,
 			LayoutOrder = 2,
@@ -3183,6 +3186,15 @@ return function(Config)
 		Window = Window,
 	})
 
+	-- The tab list starts below the brand block, which grows when a long title wraps.
+	local function LayoutSidebar()
+		local Brand = Window.TitleBar.Brand
+		local Top = math.max(64, Brand.Position.Y.Offset + Brand.AbsoluteSize.Y + 18)
+		TabFrame.Position = UDim2.fromOffset(12, Top)
+		TabFrame.Size = UDim2.new(0, Window.TabWidth, 1, -(Top + 12))
+	end
+	Creator.AddSignal(Window.TitleBar.Brand:GetPropertyChangedSignal("AbsoluteSize"), LayoutSidebar, Window.Root)
+
 	local SizeMotor = Creator.TrackMotor(Motion.GroupMotor.new({
 		X = Window.Size.X.Offset,
 		Y = Window.Size.Y.Offset,
@@ -3313,8 +3325,8 @@ return function(Config)
 		SizeMotor:setGoal({ X = Instant(width), Y = Instant(height) })
 		PosMotor:setGoal({ X = Instant(x), Y = Instant(y) })
 		Window.Sidebar.Size = UDim2.new(0, Window.TabWidth + 24, 1, 0)
-		TabFrame.Size = UDim2.new(0, Window.TabWidth, 1, -76)
-		Window.TitleBar.Brand.Size = UDim2.fromOffset(math.max(96, Window.TabWidth - 12), 34)
+		Window.TitleBar.Brand.Size = UDim2.fromOffset(math.max(96, Window.TabWidth - 12), 0)
+		LayoutSidebar()
 		Window.TabDisplay.Size = UDim2.new(1, -(Window.TabWidth + 144), 0, 28)
 		Window.TabDisplay.Position = UDim2.fromOffset(Window.TabWidth + 48, 14)
 		Window.ContainerHolder.Size = UDim2.new(1, -(Window.TabWidth + 72), 1, -(Window.ContentTop + 20))
@@ -4914,7 +4926,7 @@ function Element:New(Idx, Config)
 	local Dragging = false
 
 	local SliderFrame = require(Components.Element)(Config.Title, Config.Description, self.Container, false)
-	SliderFrame.LabelHolder.Size = UDim2.new(1, -172, 0, 0)
+	SliderFrame.LabelHolder.Size = UDim2.new(1, -180, 0, 0)
 	SliderFrame.DescLabel.Size = UDim2.new(1, 0, 0, 0)
 
 	Slider.SetTitle = SliderFrame.SetTitle
@@ -4970,7 +4982,7 @@ function Element:New(Idx, Config)
 	})
 
 	local SliderInner = New("Frame", {
-		Size = UDim2.new(0, 96, 0, 4),
+		Size = UDim2.new(0, 104, 0, 4),
 		AnchorPoint = Vector2.new(1, 0.5),
 		Position = UDim2.new(1, -48, 0.5, 0),
 		BackgroundTransparency = 0,

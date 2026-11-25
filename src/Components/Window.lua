@@ -151,6 +151,15 @@ return function(Config)
 		Window = Window,
 	})
 
+	-- The tab list starts below the brand block, which grows when a long title wraps.
+	local function LayoutSidebar()
+		local Brand = Window.TitleBar.Brand
+		local Top = math.max(64, Brand.Position.Y.Offset + Brand.AbsoluteSize.Y + 18)
+		TabFrame.Position = UDim2.fromOffset(12, Top)
+		TabFrame.Size = UDim2.new(0, Window.TabWidth, 1, -(Top + 12))
+	end
+	Creator.AddSignal(Window.TitleBar.Brand:GetPropertyChangedSignal("AbsoluteSize"), LayoutSidebar, Window.Root)
+
 	local SizeMotor = Creator.TrackMotor(Motion.GroupMotor.new({
 		X = Window.Size.X.Offset,
 		Y = Window.Size.Y.Offset,
@@ -281,8 +290,8 @@ return function(Config)
 		SizeMotor:setGoal({ X = Instant(width), Y = Instant(height) })
 		PosMotor:setGoal({ X = Instant(x), Y = Instant(y) })
 		Window.Sidebar.Size = UDim2.new(0, Window.TabWidth + 24, 1, 0)
-		TabFrame.Size = UDim2.new(0, Window.TabWidth, 1, -76)
-		Window.TitleBar.Brand.Size = UDim2.fromOffset(math.max(96, Window.TabWidth - 12), 34)
+		Window.TitleBar.Brand.Size = UDim2.fromOffset(math.max(96, Window.TabWidth - 12), 0)
+		LayoutSidebar()
 		Window.TabDisplay.Size = UDim2.new(1, -(Window.TabWidth + 144), 0, 28)
 		Window.TabDisplay.Position = UDim2.fromOffset(Window.TabWidth + 48, 14)
 		Window.ContainerHolder.Size = UDim2.new(1, -(Window.TabWidth + 72), 1, -(Window.ContentTop + 20))
