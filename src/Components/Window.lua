@@ -107,11 +107,31 @@ return function(Config)
 	})
 
 
-	Window.ContainerHolder = New("CanvasGroup", {
-		Size = UDim2.new(1, -(Window.TabWidth + 72), 1, -(Window.ContentTop + 20)),
-		Position = UDim2.fromOffset(Window.TabWidth + 48, Window.ContentTop),
-		BackgroundTransparency = 1,
-	})
+Window.ContainerHolder = New("CanvasGroup", {
+    Name = "ContainerHolder",
+
+    Size = UDim2.new(
+        1,
+        -(Window.TabWidth + 72),
+        1,
+        -(Window.ContentTop + 20)
+    ),
+
+    Position = UDim2.fromOffset(
+        Window.TabWidth + 48,
+        Window.ContentTop
+    ),
+
+    BackgroundTransparency = 0,
+    BorderSizePixel = 0,
+
+    ThemeTag = {
+        BackgroundColor3 = "WindowBackground",
+    },
+
+    ClipsDescendants = true,
+    GroupTransparency = 0,
+})
 
 	Window.Root = New("Frame", {
 		BackgroundTransparency = 1,
