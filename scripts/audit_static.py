@@ -74,16 +74,23 @@ assert "local function CreateSaveManager()" in save_manager and "SaveManager.New
 assert "local function CreateInterfaceManager()" in interface_manager and "InterfaceManager.New = CreateInterfaceManager" in interface_manager and "InterfaceManager.NewInstance = CreateInterfaceManager" in interface_manager, "InterfaceManager instance factories are missing"
 assert "local InterfaceManager = CreateInterfaceManager()" in interface_manager, "InterfaceManager legacy singleton export is missing"
 assert "local SaveManager = CreateSaveManager()" in save_manager, "SaveManager legacy singleton export is missing"
-assert "manager.Options[idx]" in save_manager and "pcall(parser.Load, option.idx, option, self)" in save_manager, "SaveManager parser must use the owning manager registry"
+assert "manager.Options[idx]" in save_manager and "pcall(entry.Parser.Load, entry.Index, entry.Data, self)" in save_manager, "SaveManager parser must use the owning manager registry"
 assert "next, self.Options" in save_manager and "self.Options.SaveManager_ConfigList" in save_manager, "SaveManager UI must use the owning manager registry"
 assert "SaveManager.Options" not in save_manager, "SaveManager factory still captures singleton Options"
 assert "local Settings = self.Settings" in interface_manager and "Manager:SaveSettings()" in interface_manager, "InterfaceManager callbacks must use the owning manager"
-assert "InterfaceManager.Settings" not in interface_manager, "InterfaceManager factory still captures singleton Settings"
+assert "InterfaceManager.Settings = {" in interface_manager, "InterfaceManager factory must initialize settings on its local table"
 assert "Themes.Dark" not in (SRC / "Creator.lua").read_text(), "Legacy theme fallback remains"
 
 assert (ROOT / "src/Packages/DimensiMotion/init.lua").exists(), "Native motion package missing"
 assert not (ROOT / "src/Packages/Flipper").exists(), "Legacy motion package still exists"
-assert 'Version = "1.2.10"' in (SRC / "init.lua").read_text(), "Version metadata mismatch"
+version_source = (SRC / "init.lua").read_text()
+version_match = re.search(r'(?m)^\s*Version = "([0-9]+\.[0-9]+\.[0-9]+)",\s*$', version_source)
+assert version_match, "Library version metadata is missing"
+version = version_match.group(1)
+assert f"**Version:** {version}" in (ROOT / "README.md").read_text(), "README version metadata mismatch"
+assert f"**Version:** {version}" in (ROOT / "AUDIT.md").read_text(), "Audit version metadata mismatch"
+assert f"DimensiUI v{version} (Bundled Single-File Build)" in bundle, "Bundle banner version mismatch"
+assert "Theme: Dimensi | Author: telatnakal" in bundle, "Bundle banner theme/author metadata mismatch"
 assert 'function Library:RegisterOption(Idx, Option)' in library_init, "Option registration helper is missing"
 assert 'function Library:UnregisterOption(Idx, Option)' in library_init, "Identity-safe option removal helper is missing"
 assert 'end, ButtonFrame.Frame)' in (SRC / "Elements/Button.lua").read_text(), "Button listener must be owner-bound"
@@ -168,6 +175,16 @@ window_dialog_source = (SRC / "Components/Window.lua").read_text()
 assert 'Config.Buttons = Config.Buttons or {}' in window_dialog_source, "Dialog Buttons must be optional"
 assert 'pcall(Acrylic.Destroy)' in (SRC / "init.lua").read_text(), "Library destroy must release Acrylic"
 assert 'function Library:NewInstance()' in (SRC / "init.lua").read_text(), "Multi Instance factory is missing"
+
+# Multi-instance factory must work in both modular ModuleScript and synthetic bundled roots.
+instance_factory = (SRC / "init.lua").read_text()
+assert 'local IsModuleRoot = typeof(Root) == "Instance" and Root:IsA("ModuleScript")' in instance_factory, "ModuleScript root detection is missing"
+assert 'local IsBundleRoot = type(Root) == "table" and Root._path == "" and type(Root.Clone) == "function"' in instance_factory, "Bundled root detection is missing"
+assert 'local function ValidateCloneTree(InstanceRoot)' in instance_factory, "ModuleScript clone-tree validation is missing"
+assert 'InstanceRoot:GetDescendants()' in instance_factory and 'Descendant.Archivable' in instance_factory, "Multi Instance must reject non-Archivable descendants before cloning"
+assert 'type(RootClone.Destroy) == "function"' in instance_factory, "Bundled root clone cleanup is missing"
+assert 'function node:Destroy()' in bundle, "Synthetic bundle nodes must support clone teardown"
+assert 'function node:Clone()' in bundle, "Synthetic bundle root cloning is missing"
 assert 'local __DimensiCaches = setmetatable({}, { __mode = "k" })' in bundle, "Bundle per-root module cache is missing"
 assert 'function node:Clone()' in bundle, "Bundle root clone support is missing"
 
@@ -229,3 +246,31 @@ assert "function NewDialog:SetOpenState(IsOpen)" in dialog_source, "Dialog open-
 assert "Library._OpenDialogCount > 0" in dialog_source, "Concurrent dialog state is not reference-counted"
 assert "NewDialog.TintFrame.Destroying" in dialog_source, "External dialog destruction must release open-state ownership"
 assert "Library._OpenDialogCount = 0" in library_init, "Library teardown must reset dialog accounting"
+
+
+# Addon factories must initialize methods/state on their local manager tables.
+save_manager = (ROOT / "Addons/SaveManager.lua").read_text()
+interface_manager = (ROOT / "Addons/InterfaceManager.lua").read_text()
+assert "function SaveManager:BuildFolderTree()" in save_manager, "SaveManager factory method must belong to its local instance"
+assert "\n\tSaveManager:BuildFolderTree()" in save_manager, "SaveManager factory must initialize its own folder tree"
+assert "function self:BuildFolderTree()" not in save_manager and "\n\tself:BuildFolderTree()" not in save_manager, "SaveManager factory contains an unresolved self reference"
+assert "InterfaceManager.Settings = {" in interface_manager, "InterfaceManager settings must belong to its local instance"
+assert "function InterfaceManager:SaveSettings()" in interface_manager, "InterfaceManager SaveSettings must belong to its local instance"
+assert "self.Settings = {" not in interface_manager and "function Manager:SaveSettings()" not in interface_manager, "InterfaceManager factory contains unresolved manager references"
+
+# Addon filesystem boundaries and per-instance library binding.
+assert 'pcall(isfile, path)' in save_manager, "SaveManager file existence checks must be protected"
+assert 'pcall(isfile, path)' in save_manager[save_manager.find('function SaveManager:LoadAutoloadConfig()'):], "Autoload existence checks must be protected"
+assert 'pcall(writefile, self.Folder .. "/settings/autoload.txt", name)' in save_manager, "Autoload writes must be protected"
+assert 'ignore indexes must contain non-empty strings' in save_manager, "SaveManager ignore indexes must be validated"
+assert 'invalid DimensiUI library instance' in save_manager, "SaveManager must validate its Library binding"
+assert 'invalid DimensiUI library instance' in interface_manager, "InterfaceManager must validate its Library binding"
+assert 'local ok, err = pcall(self.BuildFolderTree, self)' in interface_manager, "InterfaceManager must report folder initialization errors"
+assert 'Notification button callback must be a function' in notification_source, "Notification button callbacks must be validated"
+assert 'ButtonConfig.Callback' in notification_source and 'end, NewNotification.Holder)' in notification_source, "Notification buttons must use owner-bound callbacks"
+
+assert 'config validation failed; %d invalid or duplicate entries; no options were changed' in save_manager, "SaveManager must validate the complete config before applying values"
+assert 'config apply failed; previous option values were restored where possible' in save_manager, "SaveManager must attempt rollback after apply failure"
+assert 'local pending, seen, skipped = {}, {}, 0' in save_manager, "SaveManager config load staging is missing"
+assert 'pcall(entry.Parser.Load, entry.Index, entry.Previous, self)' in save_manager, "SaveManager must restore the currently failing option when possible"
+assert 'table.insert(applied, entry)\n\t\tend\n\t\treturn true' in save_manager, "SaveManager successful loads must return true"

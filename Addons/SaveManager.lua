@@ -69,9 +69,16 @@ local function CreateSaveManager()
 	}
 
 	function SaveManager:SetIgnoreIndexes(list)
+		if type(list) ~= "table" then return false, "ignore indexes must be a table" end
+		for _, key in next, list do
+			if type(key) ~= "string" or key == "" then
+				return false, "ignore indexes must contain non-empty strings"
+			end
+		end
 		for _, key in next, list do
 			self.Ignore[key] = true
 		end
+		return true
 	end
 
 	function SaveManager:SetFolder(folder)
@@ -112,7 +119,8 @@ local function CreateSaveManager()
 		if type(name) ~= "string" or name == "" or #name > 64 then return false, "invalid config name" end
 		if name:find("[\\/:*?\"<>|%c]") or name == "." or name == ".." then return false, "invalid config name" end
 		local path = self.Folder .. "/settings/" .. name .. ".json"
-		if not isfile(path) then return false, "invalid file" end
+		local fileOk, exists = pcall(isfile, path)
+		if not fileOk or not exists then return false, "invalid file" end
 		local readOk, contents = pcall(readfile, path)
 		if not readOk or type(contents) ~= "string" then return false, "read error" end
 		if #contents > 1024 * 1024 then return false, "config exceeds 1 MiB limit" end
@@ -125,11 +133,19 @@ local function CreateSaveManager()
 			maxIndex = math.max(maxIndex, key)
 		end
 		if count > 500 or maxIndex ~= count then return false, "invalid objects array size" end
-		local applied, skipped = 0, 0
+		local pending, seen, skipped = {}, {}, 0
 		for _, option in ipairs(decoded.objects) do
-			if type(option) ~= "table" or type(option.type) ~= "string" or type(option.idx) ~= "string" then skipped += 1; continue end
+			if type(option) ~= "table" or type(option.type) ~= "string" or type(option.idx) ~= "string" or seen[option.idx] then
+				skipped += 1
+				continue
+			end
+			seen[option.idx] = true
 			local parser = self.Parser[option.type]
-			if not parser or not self.Options[option.idx] then skipped += 1; continue end
+			local object = self.Options[option.idx]
+			if not parser or type(object) ~= "table" then
+				skipped += 1
+				continue
+			end
 			local valid = false
 			if option.type == "Toggle" then
 				valid = type(option.value) == "boolean"
@@ -137,30 +153,57 @@ local function CreateSaveManager()
 				local value = tonumber(option.value)
 				valid = value ~= nil and value == value and math.abs(value) < math.huge
 			elseif option.type == "Dropdown" then
-				local object = self.Options[option.idx]
 				if object.Multi and type(option.value) == "table" then
 					valid = true
 					for value, enabled in pairs(option.value) do
-						if type(value) ~= "string" or type(enabled) ~= "boolean" or (enabled and not table.find(object.Values, value)) then valid = false; break end
+						if type(value) ~= "string" or type(enabled) ~= "boolean" or not table.find(object.Values, value) then valid = false; break end
 					end
 				elseif not object.Multi and type(option.value) == "string" then
 					valid = table.find(object.Values, option.value) ~= nil
 				end
 			elseif option.type == "Colorpicker" then
 				valid = type(option.value) == "string" and option.value:match("^%x%x%x%x%x%x$") ~= nil
-				and (option.transparency == nil or (type(option.transparency) == "number" and option.transparency == option.transparency and option.transparency >= 0 and option.transparency <= 1))
+					and (option.transparency == nil or (type(option.transparency) == "number" and option.transparency == option.transparency and option.transparency >= 0 and option.transparency <= 1))
 			elseif option.type == "Keybind" then
 				valid = type(option.key) == "string" and (option.key == "MouseLeft" or option.key == "MouseRight" or Enum.KeyCode[option.key] ~= nil)
-				and (option.mode == "Toggle" or option.mode == "Hold" or option.mode == "Always")
+					and (option.mode == "Toggle" or option.mode == "Hold" or option.mode == "Always")
 			elseif option.type == "Input" then
-				local object = self.Options[option.idx]
 				valid = type(option.text) == "string" and #option.text <= 4096 and (not object.Numeric or option.text == "" or tonumber(option.text) ~= nil)
 			end
-			if not valid then skipped += 1; continue end
-			local ok = pcall(parser.Load, option.idx, option, self)
-			if ok then applied += 1 else skipped += 1 end
+			if not valid then
+				skipped += 1
+				continue
+			end
+			local saveOk, previous = pcall(parser.Save, option.idx, object)
+			if not saveOk or type(previous) ~= "table" then
+				skipped += 1
+				continue
+			end
+			local cloneOk, previousCopy = pcall(function()
+				return httpService:JSONDecode(httpService:JSONEncode(previous))
+			end)
+			if not cloneOk or type(previousCopy) ~= "table" then
+				skipped += 1
+				continue
+			end
+			table.insert(pending, { Index = option.idx, Data = option, Parser = parser, Previous = previousCopy })
 		end
-		if skipped > 0 then return false, string.format("loaded %d options; skipped %d invalid entries", applied, skipped) end
+		if skipped > 0 then
+			return false, string.format("config validation failed; %d invalid or duplicate entries; no options were changed", skipped)
+		end
+		local applied = {}
+		for _, entry in ipairs(pending) do
+			local ok = pcall(entry.Parser.Load, entry.Index, entry.Data, self)
+			if not ok then
+				pcall(entry.Parser.Load, entry.Index, entry.Previous, self)
+				for index = #applied, 1, -1 do
+					local previous = applied[index]
+					pcall(previous.Parser.Load, previous.Index, previous.Previous, self)
+				end
+				return false, "config apply failed; previous option values were restored where possible"
+			end
+			table.insert(applied, entry)
+		end
 		return true
 	end
 
@@ -170,7 +213,7 @@ local function CreateSaveManager()
 		})
 	end
 
-	function self:BuildFolderTree()
+	function SaveManager:BuildFolderTree()
 		local paths = {
 			self.Folder,
 			self.Folder .. "/settings"
@@ -207,13 +250,19 @@ local function CreateSaveManager()
 	end
 
 	function SaveManager:SetLibrary(library)
+		if type(library) ~= "table" or type(library.Options) ~= "table" or type(library.Notify) ~= "function" then
+			return false, "invalid DimensiUI library instance"
+		end
 		self.Library = library
         self.Options = library.Options
+		return true
 	end
 
 	function SaveManager:LoadAutoloadConfig()
 		local path = self.Folder .. "/settings/autoload.txt"
-		if isfile(path) then
+		local fileOk, exists = pcall(isfile, path)
+		if not fileOk then return false, "autoload file check failed" end
+		if exists then
 			local readOk, name = pcall(readfile, path)
 			if not readOk or type(name) ~= "string" then return false, "autoload read error" end
 
@@ -338,7 +387,15 @@ local function CreateSaveManager()
 					Duration = 5
 				})
 			end
-			writefile(self.Folder .. "/settings/autoload.txt", name)
+			local writeOk, writeError = pcall(writefile, self.Folder .. "/settings/autoload.txt", name)
+			if not writeOk then
+				return self.Library:Notify({
+					Title = "Interface",
+					Content = "Config loader",
+					SubContent = "Failed to save autoload setting: " .. tostring(writeError),
+					Duration = 7
+				})
+			end
 			AutoloadButton:SetDesc("Current autoload config: " .. name)
 			self.Library:Notify({
 				Title = "Interface",
@@ -348,15 +405,19 @@ local function CreateSaveManager()
 			})
 		end})
 
-		if isfile(self.Folder .. "/settings/autoload.txt") then
-			local name = readfile(self.Folder .. "/settings/autoload.txt")
-			AutoloadButton:SetDesc("Current autoload config: " .. name)
+		local autoloadPath = self.Folder .. "/settings/autoload.txt"
+		local fileOk, exists = pcall(isfile, autoloadPath)
+		if fileOk and exists then
+			local readOk, name = pcall(readfile, autoloadPath)
+			if readOk and type(name) == "string" and name ~= "" then
+				AutoloadButton:SetDesc("Current autoload config: " .. name)
+			end
 		end
 
 		self:SetIgnoreIndexes({ "SaveManager_ConfigList", "SaveManager_ConfigName" })
 	end
 
-	self:BuildFolderTree()
+	SaveManager:BuildFolderTree()
 	end
 	return SaveManager
 end

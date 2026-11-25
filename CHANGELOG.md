@@ -1,3 +1,40 @@
+## 1.2.15
+
+- Hardened SaveManager config/autoload file checks and autoload writes with protected filesystem calls.
+- Validated SaveManager ignore-index input and per-instance Library binding; InterfaceManager now validates its Library binding and reports folder setup errors.
+- Made SaveManager config loading validate all entries before applying any values, reject duplicate option IDs, and roll back already-applied values if a setter fails.
+- Confirmed Notification button configuration is implemented, validated, and owner-bound; corrected the stale audit note that described it as unimplemented.
+- Rebuilt `dist/main.lua` from the 37 modular source files and extended deterministic static checks. Roblox/Luau runtime verification remains pending.
+
+## 1.2.14
+
+- Synchronized the library, README, audit metadata, and standalone bundle version.
+- Updated the standalone bundle banner to identify the Dimensi theme instead of the obsolete Dark Purple theme label.
+- Updated the bundle builder to derive its banner version from `src/init.lua`, preventing future source/bundle header drift.
+- Added static release checks for version and bundle-banner parity. Roblox runtime verification remains pending.
+
+## 1.2.13
+
+- Validate the complete modular ModuleScript clone tree before creating a new library instance.
+- Reject non-Archivable descendants with the exact offending instance path instead of silently producing an incomplete cloned module tree.
+- Preserve the existing standalone bundle cloning path.
+- Added static regression checks for clone-tree validation and rebuilt the standalone bundle. Roblox runtime verification remains pending.
+
+## 1.2.12
+
+- Fixed `NewInstance()` for the standalone bundle: the synthetic module-tree root is now accepted alongside Roblox ModuleScript roots.
+- Added synthetic node-tree destruction so destroying a bundled child instance releases its cloned module tree and cache key.
+- Kept the modular ModuleScript cloning path and its Archivable validation unchanged.
+- Added static regression checks for modular and bundled instance-root handling.
+- Rebuilt `dist/main.lua` from modular source. Roblox runtime verification remains pending.
+
+## 1.2.11
+
+- Fixed SaveManager factory initialization to define and invoke `BuildFolderTree` on its own manager instance instead of an undefined global `self`.
+- Fixed InterfaceManager factory initialization to create `Settings` on its own instance and define `SaveSettings` on the correct manager table.
+- Added static regression checks for factory-local method ownership and initialization.
+- Rebuilt `dist/main.lua` from modular source. Roblox runtime verification remains pending.
+
 ## 1.2.10
 
 - Corrected SaveManager factory isolation: parser load callbacks and config-section controls now use the owning manager's Options registry instead of the legacy singleton.

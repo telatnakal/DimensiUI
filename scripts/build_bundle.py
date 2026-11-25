@@ -49,7 +49,19 @@ def main() -> None:
         is_module = "true" if path in modules else "false"
         node_lines.append(f"local {variable(path)} = __MakeNode('{path}', '{name}', {parent_var}, {is_module})")
 
+    init_source = modules[""].read_text(encoding="utf-8")
+    version_match = re.search(r'(?m)^\s*Version = "([0-9]+\.[0-9]+\.[0-9]+)",\s*$', init_source)
+    if not version_match:
+        raise RuntimeError("Library version metadata was not found in src/init.lua")
+    version = version_match.group(1)
+
     prefix = original[:first.start()]
+    prefix = re.sub(
+        r"(?s)^--\[\[.*?\]\]\s*",
+        f"--[[\n    DimensiUI v{version} (Bundled Single-File Build)\n    Standalone DimensiUI | Theme: Dimensi | Author: telatnakal\n]]\n\n",
+        prefix,
+        count=1,
+    )
     root_start = prefix.find("local __RootNode = __MakeNode(")
     real_require = prefix.find("local __RealRequire", root_start)
     if root_start < 0 or real_require < 0:

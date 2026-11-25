@@ -7,7 +7,7 @@ A modular Roblox UI library with a self-contained bundled build, a responsive in
 
 - **Author:** telatnakal
 - **Credit:** telatnakal
-- **Version:** 1.2.10
+- **Version:** 1.2.15
 - **Theme:** Dimensi only (obsidian-violet / Builder Sans typography)
 
 ## Features
@@ -16,9 +16,10 @@ A modular Roblox UI library with a self-contained bundled build, a responsive in
 - Notifications and dialogs
 - Single Dimensi theme with runtime accent override
 - Optional acrylic and transparency effects
-- SaveManager and InterfaceManager addons
+- SaveManager and InterfaceManager addons with per-instance factories and guarded persistence
 - Modular source and a bundled single-file build
-- Isolated library instances through `Library:NewInstance()`
+- Isolated library instances through `Library:NewInstance()` and `Library:CreateInstance()`
+- Per-instance SaveManager and InterfaceManager factories with validated library binding
 
 ## Installation
 
@@ -74,7 +75,7 @@ Each library instance owns an independent root module tree and its own GUI, them
 
 ### Instance isolation and cleanup
 
-Each library instance owns its own cloned ModuleScript tree and module cache. Create an independent instance with either `Library:NewInstance()` or `Library:CreateInstance()`. Each instance can create one window and can be destroyed independently.
+Each library instance owns its own cloned module tree and module cache in both modular and bundled builds. Create an independent instance with either `Library:NewInstance()` or `Library:CreateInstance()`. Each instance can create one window and can be destroyed independently.
 
 ```lua
 local UI = require(path.to.DimensiUI)

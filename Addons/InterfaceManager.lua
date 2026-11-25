@@ -4,7 +4,7 @@ local function CreateInterfaceManager()
 	local InterfaceManager = {}
 	do
 	InterfaceManager.Folder = "DimensiUISettings"
-    self.Settings = {
+    InterfaceManager.Settings = {
         Theme = "Dimensi",
         Acrylic = true,
         Transparency = true,
@@ -27,8 +27,13 @@ local function CreateInterfaceManager()
 	end
 
     function InterfaceManager:SetLibrary(library)
+		if type(library) ~= "table" or type(library.SetTheme) ~= "function" or type(library.ToggleTransparency) ~= "function" then
+			return false, "invalid DimensiUI library instance"
+		end
 		self.Library = library
-		pcall(self.BuildFolderTree, self)
+		local ok, err = pcall(self.BuildFolderTree, self)
+		if not ok then return false, tostring(err) end
+		return true
 	end
 
     function InterfaceManager:BuildFolderTree()
@@ -43,7 +48,7 @@ local function CreateInterfaceManager()
     end
 
 
-    function Manager:SaveSettings()
+    function InterfaceManager:SaveSettings()
 		local ok, encoded = pcall(httpService.JSONEncode, httpService, self.Settings)
 		if not ok or type(encoded) ~= "string" then return false, "encode error" end
 		if #encoded > 65536 then return false, "settings exceed 64 KiB" end

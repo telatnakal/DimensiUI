@@ -1,16 +1,27 @@
 # DimensiUI — Audit Ronde 2 / Hardening
 
 **Project:** DimensiUI  
-**Version:** 1.1.1  
+**Version:** 1.2.15  
 **Author / displayed credit:** telatnakal  
 **Theme:** Dimensi only (obsidian-violet)  
 **Audit type:** Static source review and hardening; runtime validation is outstanding.
+
+## Current package note — v1.2.15
+
+The release metadata is synchronized across `src/init.lua`, `README.md`, this audit, and the `dist/main.lua` banner. The build script derives the bundle banner version from the modular source, and the static audit checks that parity. v1.2.15 hardens addon library binding and filesystem error handling. This is static validation, not Roblox runtime certification.
 
 ## Scope
 
 Reviewed the modular source, bundled build, addon managers, component lifecycle, callback paths, configuration handling, theme registry, animation ownership, input capture, and repository metadata. The project has no Fluent UI or Flipper imports/packages in this revision. Roblox built-in services and Roblox asset IDs remain in use.
 
-## Changes in this release candidate
+## Changes in v1.2.15
+
+- SaveManager now protects file-existence checks for config and autoload files, validates ignore-index input and the assigned Library instance, reports autoload write failures, validates all config entries before applying any values, rejects duplicate option IDs, and rolls back already-applied values if a setter fails.
+- InterfaceManager now validates the assigned Library instance and reports folder initialization failures to its caller.
+- Notification button support is implemented and statically validated; the previous audit note that described it as unimplemented was stale.
+- Rebuilt `dist/main.lua` from modular source and expanded static checks for the addon contracts. Runtime/device verification remains pending.
+
+## Changes in prior releases
 
 ### API constructor regression fix (1.1.1)
 - Fixed `Paragraph:New` and `Button:New` to accept the same `(Idx, Config)` arguments used by the central element dispatcher.
@@ -67,8 +78,8 @@ Reviewed the modular source, bundled build, addon managers, component lifecycle,
 
 ## Static validation performed
 
-- 36 source module paths detected.
-- 36 bundled module paths detected.
+- 37 source module paths detected.
+- 37 bundled module paths detected.
 - No duplicate bundle module markers.
 - Source/bundle module sets match.
 - Source/bundle text parity check passes.
@@ -85,8 +96,8 @@ Reviewed the modular source, bundled build, addon managers, component lifecycle,
 - Visual QA (desktop, touch, scaling, text clipping) was not run.
 - Motion timing, spring convergence, and all input edge cases still require runtime testing.
 - Acrylic rendering remains graphics/camera dependent; validate on target executor/client.
-- Config loading can apply valid entries before returning a partial-load error if other entries are invalid.
-- Notification `Buttons` config is accepted but not implemented as interactive notification buttons; use Dialog for buttons.
+- SaveManager validates the complete config before applying values and attempts rollback if a setter fails; rollback itself is best-effort because Roblox callbacks and external side effects cannot be transactionally reversed.
+- Notification buttons are implemented with validated titles/callbacks and owner-bound click connections; verify layout and callback behavior in Roblox runtime.
 - InterfaceManager cannot activate Acrylic if the window was created with Acrylic disabled; Acrylic is opt-in at window creation in the current API.
 - Source provenance/licensing of all pre-existing UI modules and asset IDs is not fully established from the supplied archive. This release does not invent a license file. Verify the source/license inventory before public distribution and retain required notices.
 
@@ -108,7 +119,7 @@ Reviewed the modular source, bundled build, addon managers, component lifecycle,
 
 ## Release status
 
-**Static hardened release candidate (1.1.1) — not runtime verified.** Do not label it production/runtime-tested until the compiler and Roblox regression matrix above pass.
+**Static hardened release candidate (1.2.15) — not runtime verified.** Do not label it production/runtime-tested until the compiler and Roblox regression matrix above pass.
 
 ## Findings fixed during the final hardening pass
 
@@ -202,3 +213,19 @@ This implementation is statically integrated but is not yet certified by Roblox 
 - The legacy singleton exports remain available, while `New()` and `NewInstance()` now have isolated settings and option bindings throughout the addon methods.
 - Static audit verifies that addon factory internals do not retain singleton `Options` or `Settings` references.
 - Static source/bundle parity and deterministic build passed. Luau compiler and Roblox Studio runtime checks remain outstanding.
+
+
+## Addon factory regression correction — 1.2.11
+
+- SaveManager previously declared `BuildFolderTree` using an unresolved global `self` and invoked the same unresolved value during factory initialization. The factory now binds both operations to its local `SaveManager` instance.
+- InterfaceManager previously assigned `Settings` through an unresolved global `self` and declared `SaveSettings` on an unresolved global `Manager`. Both now bind to the local `InterfaceManager` instance.
+- Added static regression assertions for these factory-local references.
+- This fixes concrete source-level initialization defects; Roblox executor filesystem APIs and addon UI flows still require runtime validation.
+
+
+## Audit update — 1.2.13
+
+- Fixed a release-blocking Multi Instance mismatch: `NewInstance()` previously required an actual Roblox `ModuleScript`, while the standalone bundle supplies a synthetic Lua table node. The factory now recognizes both root forms.
+- Added teardown for synthetic cloned module trees, including child maps and parent links.
+- Added static assertions covering both modular and bundled root handling.
+- Roblox runtime validation remains outstanding; static checks do not prove executor or Studio behavior.

@@ -1,6 +1,6 @@
 --[[
-    DimensiUI v1.2.4 (Bundled Single-File Build)
-    Standalone DimensiUI | Default Theme: Dark Purple | Author: telatnakal
+    DimensiUI v1.2.15 (Bundled Single-File Build)
+    Standalone DimensiUI | Theme: Dimensi | Author: telatnakal
 ]]
 
 local __DimensiModules = {}
@@ -40,6 +40,25 @@ local function __MakeNode(path, name, parent, isModule)
 			return copy
 		end
 		return cloneTree(self, nil)
+	end
+	function node:Destroy()
+		for index = #self._children, 1, -1 do
+			self._children[index]:Destroy()
+		end
+		table.clear(self._children)
+		table.clear(self._childMap)
+		if self.Parent and self.Parent._childMap then
+			if self.Parent._childMap[self.Name] == self then
+				self.Parent._childMap[self.Name] = nil
+			end
+			for index = #self.Parent._children, 1, -1 do
+				if self.Parent._children[index] == self then
+					table.remove(self.Parent._children, index)
+					break
+				end
+			end
+		end
+		self.Parent = nil
 	end
 	setmetatable(node, {
 		__index = function(self, key)
@@ -174,7 +193,7 @@ local Library = {
 	Name = "DimensiUI",
 	Author = "telatnakal",
 	Credit = "telatnakal",
-	Version = "1.2.10",
+	Version = "1.2.15",
 
 	OpenFrames = {},
 	Options = {},
@@ -256,27 +275,47 @@ end
 
 Library.Elements = Elements
 
+local function ValidateCloneTree(InstanceRoot)
+	assert(InstanceRoot.Archivable, "DimensiUI:NewInstance cannot clone a non-Archivable instance: " .. InstanceRoot:GetFullName())
+	for _, Descendant in ipairs(InstanceRoot:GetDescendants()) do
+		assert(Descendant.Archivable, "DimensiUI:NewInstance cannot clone a non-Archivable descendant: " .. Descendant:GetFullName())
+	end
+end
+
 function Library:NewInstance()
 	assert(not Library.Unloaded, "DimensiUI has been destroyed")
-	assert(typeof(Root) == "Instance" and Root:IsA("ModuleScript"), "DimensiUI:NewInstance requires a ModuleScript root")
-	assert(Root.Archivable, "DimensiUI:NewInstance requires the root ModuleScript to be Archivable")
+
+	local IsModuleRoot = typeof(Root) == "Instance" and Root:IsA("ModuleScript")
+	local IsBundleRoot = type(Root) == "table" and Root._path == "" and type(Root.Clone) == "function"
+	assert(IsModuleRoot or IsBundleRoot, "DimensiUI:NewInstance requires a modular or bundled library root")	
+	if IsModuleRoot then
+		ValidateCloneTree(Root)
+	end
 
 	local Clone
 	local Success, Result = pcall(function()
 		Clone = Root:Clone()
-		assert(Clone, "Root ModuleScript could not be cloned")
+		assert(Clone, "Library root could not be cloned")
 		Clone.Name = Root.Name .. "_Instance"
-		Clone.Parent = Root.Parent
+		if IsModuleRoot then
+			Clone.Parent = Root.Parent
+		end
 		local NewLibrary = require(Clone)
-		assert(type(NewLibrary) == "table" and NewLibrary ~= Library, "Cloned ModuleScript did not create an isolated library")
+		assert(type(NewLibrary) == "table" and NewLibrary ~= Library, "Cloned root did not create an isolated library")
 		NewLibrary._RootClone = Clone
-		NewLibrary._InstanceParent = Root.Parent
+		NewLibrary._InstanceParent = IsModuleRoot and Root.Parent or nil
 		return NewLibrary
 	end)
 
 	if not Success then
-		if Clone and typeof(Clone) == "Instance" then
-			pcall(function() Clone:Destroy() end)
+		if Clone then
+			pcall(function()
+				if typeof(Clone) == "Instance" then
+					Clone:Destroy()
+				elseif type(Clone) == "table" and type(Clone.Destroy) == "function" then
+					Clone:Destroy()
+				end
+			end)
 		end
 		error("DimensiUI:NewInstance failed: " .. tostring(Result), 2)
 	end
@@ -419,8 +458,14 @@ function Library:Destroy()
 	table.clear(Library.OpenFrames)
 	local RootClone = Library._RootClone
 	Library._RootClone = nil
-	if RootClone and typeof(RootClone) == "Instance" then
-		pcall(function() RootClone:Destroy() end)
+	if RootClone then
+		pcall(function()
+			if typeof(RootClone) == "Instance" then
+				RootClone:Destroy()
+			elseif type(RootClone) == "table" and type(RootClone.Destroy) == "function" then
+				RootClone:Destroy()
+			end
+		end)
 	end
 end
 
