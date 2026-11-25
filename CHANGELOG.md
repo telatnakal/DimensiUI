@@ -1,3 +1,9 @@
+## 1.2.6
+
+- Scope Slider and Keybind global input listeners to their owning component.
+- Replace Colorpicker yielding drag loops with event-driven, owner-scoped input handling.
+- Ensure Colorpicker drag listeners are disconnected when its dialog is destroyed.
+
 # Changelog
 
 ## 1.1.0 — Hardened Release Candidate

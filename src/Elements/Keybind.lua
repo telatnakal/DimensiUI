@@ -186,7 +186,7 @@ function Element:New(Idx, Config)
 				if CaptureConnection then Creator.DisconnectSignal(CaptureConnection); CaptureConnection = nil end
 			end))
 		end)
-	end)
+	end, KeybindFrame.Frame)
 
 	Creator.AddSignal(UserInputService.InputBegan, function(Input)
 		if not Picking and not UserInputService:GetFocusedTextBox() then
@@ -209,7 +209,7 @@ function Element:New(Idx, Config)
 				end
 			end
 		end
-	end)
+	end, KeybindFrame.Frame)
 
 	Library:RegisterOption(Idx, Keybind)
 	return Keybind

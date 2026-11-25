@@ -73,7 +73,7 @@ assert "Themes.Dark" not in (SRC / "Creator.lua").read_text(), "Legacy theme fal
 
 assert (ROOT / "src/Packages/DimensiMotion/init.lua").exists(), "Native motion package missing"
 assert not (ROOT / "src/Packages/Flipper").exists(), "Legacy motion package still exists"
-assert 'Version = "1.2.5"' in (SRC / "init.lua").read_text(), "Version metadata mismatch"
+assert 'Version = "1.2.6"' in (SRC / "init.lua").read_text(), "Version metadata mismatch"
 assert 'function Library:RegisterOption(Idx, Option)' in library_init, "Option registration helper is missing"
 assert 'function Library:UnregisterOption(Idx, Option)' in library_init, "Identity-safe option removal helper is missing"
 assert 'function Library:CreateInstance()' in (SRC / "init.lua").read_text(), "CreateInstance alias is missing"

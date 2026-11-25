@@ -7,7 +7,7 @@ A modular Roblox UI library with a self-contained bundled build, a responsive in
 
 - **Author:** telatnakal
 - **Credit:** telatnakal
-- **Version:** 1.2.5
+- **Version:** 1.2.6
 - **Theme:** Dimensi only (obsidian-violet / Builder Sans typography)
 
 ## Features

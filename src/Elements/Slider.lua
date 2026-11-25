@@ -114,7 +114,7 @@ function Element:New(Idx, Config)
 		then
 			Dragging = true
 		end
-	end)
+	end, SliderFrame.Frame)
 
 	Creator.AddSignal(SliderDot.InputEnded, function(Input)
 		if
@@ -123,7 +123,7 @@ function Element:New(Idx, Config)
 		then
 			Dragging = false
 		end
-	end)
+	end, SliderFrame.Frame)
 
 	Creator.AddSignal(UserInputService.InputChanged, function(Input)
 		if
@@ -138,7 +138,7 @@ function Element:New(Idx, Config)
 				math.clamp((Input.Position.X - SliderRail.AbsolutePosition.X) / SliderRail.AbsoluteSize.X, 0, 1)
 			Slider:SetValue(Slider.Min + ((Slider.Max - Slider.Min) * SizeScale))
 		end
-	end)
+	end, SliderFrame.Frame)
 
 	function Slider:OnChanged(Func)
 		Slider.Changed = Func

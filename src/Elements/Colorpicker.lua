@@ -1,9 +1,6 @@
 local UserInputService = game:GetService("UserInputService")
-local TouchInputService = game:GetService("TouchInputService")
-local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 
-local RenderStepped = RunService.RenderStepped
 local LocalPlayer = Players.LocalPlayer
 local Mouse = LocalPlayer:GetMouse()
 
@@ -399,63 +396,65 @@ function Element:New(Idx, Config)
 			end)
 		end
 
-		Creator.AddSignal(SatVibMap.InputBegan, function(Input)
-			if
-				Input.UserInputType == Enum.UserInputType.MouseButton1
-				or Input.UserInputType == Enum.UserInputType.Touch
-			then
-				while UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) do
-					local MinX = SatVibMap.AbsolutePosition.X
-					local MaxX = MinX + SatVibMap.AbsoluteSize.X
-					local MouseX = math.clamp(Mouse.X, MinX, MaxX)
+		local ActiveDrag = nil
+		local ActiveTouch = nil
 
-					local MinY = SatVibMap.AbsolutePosition.Y
-					local MaxY = MinY + SatVibMap.AbsoluteSize.Y
-					local MouseY = math.clamp(Mouse.Y, MinY, MaxY)
-
-					Sat = (MouseX - MinX) / (MaxX - MinX)
-					Vib = 1 - ((MouseY - MinY) / (MaxY - MinY))
-					Display()
-
-					RenderStepped:Wait()
-				end
+		local function UpdateDrag(Position)
+			if not ActiveDrag or not Dialog.Root.Parent then return end
+			if ActiveDrag == "SV" then
+				local Min = SatVibMap.AbsolutePosition
+				local Size = SatVibMap.AbsoluteSize
+				if Size.X <= 0 or Size.Y <= 0 then return end
+				Sat = math.clamp((Position.X - Min.X) / Size.X, 0, 1)
+				Vib = 1 - math.clamp((Position.Y - Min.Y) / Size.Y, 0, 1)
+			elseif ActiveDrag == "Hue" then
+				local Min = HueSlider.AbsolutePosition.Y
+				local Size = HueSlider.AbsoluteSize.Y
+				if Size <= 0 then return end
+				Hue = math.clamp((Position.Y - Min) / Size, 0, 1)
+			elseif ActiveDrag == "Transparency" then
+				local Min = TransparencySlider.AbsolutePosition.Y
+				local Size = TransparencySlider.AbsoluteSize.Y
+				if Size <= 0 then return end
+				Transparency = 1 - math.clamp((Position.Y - Min) / Size, 0, 1)
 			end
-		end)
+			Display()
+		end
 
-		Creator.AddSignal(HueSlider.InputBegan, function(Input)
-			if
-				Input.UserInputType == Enum.UserInputType.MouseButton1
-				or Input.UserInputType == Enum.UserInputType.Touch
-			then
-				while UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) do
-					local MinY = HueSlider.AbsolutePosition.Y
-					local MaxY = MinY + HueSlider.AbsoluteSize.Y
-					local MouseY = math.clamp(Mouse.Y, MinY, MaxY)
+		local function BeginDrag(Kind, Input)
+			if Input.UserInputType ~= Enum.UserInputType.MouseButton1
+				and Input.UserInputType ~= Enum.UserInputType.Touch then return end
+			ActiveDrag = Kind
+			ActiveTouch = Input.UserInputType == Enum.UserInputType.Touch and Input or nil
+			UpdateDrag(Input.Position)
+		end
 
-					Hue = ((MouseY - MinY) / (MaxY - MinY))
-					Display()
-
-					RenderStepped:Wait()
-				end
-			end
-		end)
-
+		Creator.AddSignal(SatVibMap.InputBegan, function(Input) BeginDrag("SV", Input) end, Dialog.Root)
+		Creator.AddSignal(HueSlider.InputBegan, function(Input) BeginDrag("Hue", Input) end, Dialog.Root)
 		if Config.Transparency then
 			Creator.AddSignal(TransparencySlider.InputBegan, function(Input)
-				if Input.UserInputType == Enum.UserInputType.MouseButton1 then
-					while UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) do
-						local MinY = TransparencySlider.AbsolutePosition.Y
-						local MaxY = MinY + TransparencySlider.AbsoluteSize.Y
-						local MouseY = math.clamp(Mouse.Y, MinY, MaxY)
-
-						Transparency = 1 - ((MouseY - MinY) / (MaxY - MinY))
-						Display()
-
-						RenderStepped:Wait()
-					end
-				end
-			end)
+				BeginDrag("Transparency", Input)
+			end, Dialog.Root)
 		end
+
+		Creator.AddSignal(UserInputService.InputChanged, function(Input)
+			if not ActiveDrag then return end
+			if ActiveTouch then
+				if Input == ActiveTouch or Input.UserInputType == Enum.UserInputType.Touch then
+					UpdateDrag(Input.Position)
+				end
+			elseif Input.UserInputType == Enum.UserInputType.MouseMovement then
+				UpdateDrag(Input.Position)
+			end
+		end, Dialog.Root)
+
+		Creator.AddSignal(UserInputService.InputEnded, function(Input)
+			if Input.UserInputType == Enum.UserInputType.MouseButton1
+				or (ActiveTouch and Input == ActiveTouch) then
+				ActiveDrag = nil
+				ActiveTouch = nil
+			end
+		end, Dialog.Root)
 
 		Display()
 
