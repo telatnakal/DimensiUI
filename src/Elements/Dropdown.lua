@@ -498,7 +498,7 @@ function Element:New(Idx, Config)
 		end
 		if DropdownHolderCanvas then DropdownHolderCanvas:Destroy() end
 		DropdownFrame:Destroy()
-		Library.Options[Idx] = nil
+		Library:UnregisterOption(Idx, Dropdown)
 	end
 
 	Dropdown:BuildDropdownList()
@@ -540,7 +540,7 @@ function Element:New(Idx, Config)
 		Dropdown:Display()
 	end
 
-	Library.Options[Idx] = Dropdown
+	Library:RegisterOption(Idx, Dropdown)
 	return Dropdown
 end
 

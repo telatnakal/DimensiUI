@@ -146,7 +146,7 @@ function Element:New(Idx, Config)
 		if CaptureEndConnection then CaptureEndConnection:Disconnect(); CaptureEndConnection = nil end
 		Picking = false
 		KeybindFrame:Destroy()
-		Library.Options[Idx] = nil
+		Library:UnregisterOption(Idx, Keybind)
 	end
 
 	Creator.AddSignal(KeybindDisplayFrame.InputBegan, function(Input)
@@ -211,7 +211,7 @@ function Element:New(Idx, Config)
 		end
 	end)
 
-	Library.Options[Idx] = Keybind
+	Library:RegisterOption(Idx, Keybind)
 	return Keybind
 end
 

@@ -93,7 +93,7 @@ function Element:New(Idx, Config)
 
 	function Toggle:Destroy()
 		ToggleFrame:Destroy()
-		Library.Options[Idx] = nil
+		Library:UnregisterOption(Idx, Toggle)
 	end
 
 	Creator.AddSignal(ToggleFrame.Frame.MouseButton1Click, function()
@@ -102,7 +102,7 @@ function Element:New(Idx, Config)
 
 	Toggle:SetValue(Toggle.Value)
 
-	Library.Options[Idx] = Toggle
+	Library:RegisterOption(Idx, Toggle)
 	return Toggle
 end
 

@@ -56,3 +56,13 @@
 - Library teardown resets the dialog counter.
 - Rebuilt the standalone bundle from modular source.
 - Roblox runtime behavior remains unverified.
+
+
+## 1.2.5
+
+- Added instance-owned option registration helpers.
+- Option teardown now removes a registry entry only when it still points to the exact option being destroyed, preventing an older component from deleting a newer component registered under the same ID.
+- Preserved the existing replacement behavior for duplicate option IDs while making cleanup identity-safe.
+- Extended static audit checks for option registration and teardown behavior.
+- Rebuilt the standalone bundle from modular source.
+- Roblox runtime behavior remains unverified.

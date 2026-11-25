@@ -86,10 +86,10 @@ function Element:New(Idx, Config)
 
 	function Input:Destroy()
 		InputFrame:Destroy()
-		Library.Options[Idx] = nil
+		Library:UnregisterOption(Idx, Input)
 	end
 
-	Library.Options[Idx] = Input
+	Library:RegisterOption(Idx, Input)
 	return Input
 end
 

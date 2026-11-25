@@ -161,12 +161,12 @@ function Element:New(Idx, Config)
 
 	function Slider:Destroy()
 		SliderFrame:Destroy()
-		Library.Options[Idx] = nil
+		Library:UnregisterOption(Idx, Slider)
 	end
 
 	Slider:SetValue(Config.Default)
 
-	Library.Options[Idx] = Slider
+	Library:RegisterOption(Idx, Slider)
 	return Slider
 end
 

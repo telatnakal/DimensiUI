@@ -73,7 +73,9 @@ assert "Themes.Dark" not in (SRC / "Creator.lua").read_text(), "Legacy theme fal
 
 assert (ROOT / "src/Packages/DimensiMotion/init.lua").exists(), "Native motion package missing"
 assert not (ROOT / "src/Packages/Flipper").exists(), "Legacy motion package still exists"
-assert 'Version = "1.2.4"' in (SRC / "init.lua").read_text(), "Version metadata mismatch"
+assert 'Version = "1.2.5"' in (SRC / "init.lua").read_text(), "Version metadata mismatch"
+assert 'function Library:RegisterOption(Idx, Option)' in library_init, "Option registration helper is missing"
+assert 'function Library:UnregisterOption(Idx, Option)' in library_init, "Identity-safe option removal helper is missing"
 assert 'function Library:CreateInstance()' in (SRC / "init.lua").read_text(), "CreateInstance alias is missing"
 assert 'function Library:AddCleanup(Callback)' in (SRC / "init.lua").read_text(), "Instance cleanup registration is missing"
 assert 'function Acrylic.Destroy()' in (SRC / "Acrylic/init.lua").read_text(), "Acrylic lifecycle cleanup is missing"
@@ -125,6 +127,18 @@ for element_file in (SRC / "Elements").glob("*.lua"):
 for element_file in (SRC / "Elements/Paragraph.lua", SRC / "Elements/Button.lua"):
     source = element_file.read_text()
     assert 'if Config == nil and type(Idx) == "table" then' in source, f"Missing legacy config normalization: {element_file.name}"
+
+assert 'Library:UnregisterOption(Idx, Toggle)' in (SRC / "Elements/Toggle.lua").read_text(), "Toggle destroy must unregister only its own option instance"
+
+assert 'Library:UnregisterOption(Idx, Slider)' in (SRC / "Elements/Slider.lua").read_text(), "Slider destroy must unregister only its own option instance"
+
+assert 'Library:UnregisterOption(Idx, Dropdown)' in (SRC / "Elements/Dropdown.lua").read_text(), "Dropdown destroy must unregister only its own option instance"
+
+assert 'Library:UnregisterOption(Idx, Colorpicker)' in (SRC / "Elements/Colorpicker.lua").read_text(), "Colorpicker destroy must unregister only its own option instance"
+
+assert 'Library:UnregisterOption(Idx, Input)' in (SRC / "Elements/Input.lua").read_text(), "Input destroy must unregister only its own option instance"
+
+assert 'Library:UnregisterOption(Idx, Keybind)' in (SRC / "Elements/Keybind.lua").read_text(), "Keybind destroy must unregister only its own option instance"
 
 first = hashlib.sha256(bundle_file.read_bytes()).hexdigest()
 subprocess.run(["python", str(ROOT / "scripts/build_bundle.py")], check=True, cwd=ROOT, capture_output=True)

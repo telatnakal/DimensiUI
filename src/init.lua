@@ -47,7 +47,7 @@ local Library = {
 	Name = "DimensiUI",
 	Author = "telatnakal",
 	Credit = "telatnakal",
-	Version = "1.2.4",
+	Version = "1.2.5",
 
 	OpenFrames = {},
 	Options = {},
@@ -168,6 +168,21 @@ function Library:AddCleanup(Callback)
 		return false
 	end
 	table.insert(Library._CleanupCallbacks, Callback)
+	return true
+end
+
+function Library:RegisterOption(Idx, Option)
+	if Idx == nil then return false end
+	assert(type(Option) == "table", "RegisterOption expects an option table")
+	if Library.Unloaded then return false end
+	Library.Options[Idx] = Option
+	return true
+end
+
+function Library:UnregisterOption(Idx, Option)
+	if Idx == nil then return false end
+	if Library.Options[Idx] ~= Option then return false end
+	Library.Options[Idx] = nil
 	return true
 end
 

@@ -502,7 +502,7 @@ function Element:New(Idx, Config)
 
 	function Colorpicker:Destroy()
 		ColorpickerFrame:Destroy()
-		Library.Options[Idx] = nil
+		Library:UnregisterOption(Idx, Colorpicker)
 	end
 
 	Creator.AddSignal(ColorpickerFrame.Frame.MouseButton1Click, function()
@@ -511,7 +511,7 @@ function Element:New(Idx, Config)
 
 	Colorpicker:Display()
 
-	Library.Options[Idx] = Colorpicker
+	Library:RegisterOption(Idx, Colorpicker)
 	return Colorpicker
 end
 

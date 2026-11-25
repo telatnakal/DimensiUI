@@ -174,7 +174,7 @@ local Library = {
 	Name = "DimensiUI",
 	Author = "telatnakal",
 	Credit = "telatnakal",
-	Version = "1.2.4",
+	Version = "1.2.5",
 
 	OpenFrames = {},
 	Options = {},
@@ -295,6 +295,21 @@ function Library:AddCleanup(Callback)
 		return false
 	end
 	table.insert(Library._CleanupCallbacks, Callback)
+	return true
+end
+
+function Library:RegisterOption(Idx, Option)
+	if Idx == nil then return false end
+	assert(type(Option) == "table", "RegisterOption expects an option table")
+	if Library.Unloaded then return false end
+	Library.Options[Idx] = Option
+	return true
+end
+
+function Library:UnregisterOption(Idx, Option)
+	if Idx == nil then return false end
+	if Library.Options[Idx] ~= Option then return false end
+	Library.Options[Idx] = nil
 	return true
 end
 
@@ -4221,7 +4236,7 @@ function Element:New(Idx, Config)
 
 	function Colorpicker:Destroy()
 		ColorpickerFrame:Destroy()
-		Library.Options[Idx] = nil
+		Library:UnregisterOption(Idx, Colorpicker)
 	end
 
 	Creator.AddSignal(ColorpickerFrame.Frame.MouseButton1Click, function()
@@ -4230,7 +4245,7 @@ function Element:New(Idx, Config)
 
 	Colorpicker:Display()
 
-	Library.Options[Idx] = Colorpicker
+	Library:RegisterOption(Idx, Colorpicker)
 	return Colorpicker
 end
 
@@ -4738,7 +4753,7 @@ function Element:New(Idx, Config)
 		end
 		if DropdownHolderCanvas then DropdownHolderCanvas:Destroy() end
 		DropdownFrame:Destroy()
-		Library.Options[Idx] = nil
+		Library:UnregisterOption(Idx, Dropdown)
 	end
 
 	Dropdown:BuildDropdownList()
@@ -4780,7 +4795,7 @@ function Element:New(Idx, Config)
 		Dropdown:Display()
 	end
 
-	Library.Options[Idx] = Dropdown
+	Library:RegisterOption(Idx, Dropdown)
 	return Dropdown
 end
 
@@ -4876,10 +4891,10 @@ function Element:New(Idx, Config)
 
 	function Input:Destroy()
 		InputFrame:Destroy()
-		Library.Options[Idx] = nil
+		Library:UnregisterOption(Idx, Input)
 	end
 
-	Library.Options[Idx] = Input
+	Library:RegisterOption(Idx, Input)
 	return Input
 end
 
@@ -5035,7 +5050,7 @@ function Element:New(Idx, Config)
 		if CaptureEndConnection then CaptureEndConnection:Disconnect(); CaptureEndConnection = nil end
 		Picking = false
 		KeybindFrame:Destroy()
-		Library.Options[Idx] = nil
+		Library:UnregisterOption(Idx, Keybind)
 	end
 
 	Creator.AddSignal(KeybindDisplayFrame.InputBegan, function(Input)
@@ -5100,7 +5115,7 @@ function Element:New(Idx, Config)
 		end
 	end)
 
-	Library.Options[Idx] = Keybind
+	Library:RegisterOption(Idx, Keybind)
 	return Keybind
 end
 
@@ -5302,12 +5317,12 @@ function Element:New(Idx, Config)
 
 	function Slider:Destroy()
 		SliderFrame:Destroy()
-		Library.Options[Idx] = nil
+		Library:UnregisterOption(Idx, Slider)
 	end
 
 	Slider:SetValue(Config.Default)
 
-	Library.Options[Idx] = Slider
+	Library:RegisterOption(Idx, Slider)
 	return Slider
 end
 
@@ -5410,7 +5425,7 @@ function Element:New(Idx, Config)
 
 	function Toggle:Destroy()
 		ToggleFrame:Destroy()
-		Library.Options[Idx] = nil
+		Library:UnregisterOption(Idx, Toggle)
 	end
 
 	Creator.AddSignal(ToggleFrame.Frame.MouseButton1Click, function()
@@ -5419,7 +5434,7 @@ function Element:New(Idx, Config)
 
 	Toggle:SetValue(Toggle.Value)
 
-	Library.Options[Idx] = Toggle
+	Library:RegisterOption(Idx, Toggle)
 	return Toggle
 end
 
