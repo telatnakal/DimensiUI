@@ -73,8 +73,8 @@ return function(Config)
 	})
 
 	Window.Sidebar = New("Frame", {
-		Size = UDim2.new(0, Window.TabWidth + 24, 1, -56),
-		Position = UDim2.fromOffset(0, 56),
+		Size = UDim2.new(0, Window.TabWidth + 24, 1, -58),
+		Position = UDim2.fromOffset(0, 58),
 		BackgroundTransparency = 0,
 		BorderSizePixel = 0,
 		ThemeTag = {

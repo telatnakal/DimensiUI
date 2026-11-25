@@ -105,19 +105,20 @@ return function(Config)
 		New("TextLabel", {
 			Text = MapName,
 			FontFace = Typography.Medium,
-			TextSize = 13,
+			TextSize = 12,
 			TextXAlignment = "Left",
 			TextYAlignment = "Center",
 			TextTruncate = Enum.TextTruncate.AtEnd,
 			Size = UDim2.new(1, -150, 0, 24),
 			BackgroundTransparency = 1,
 			LayoutOrder = 3,
-			ThemeTag = { TextColor3 = "SubText" },
+			ThemeTag = { TextColor3 = "Accent" },
 		}),
 	})
 
 	TitleBar.Frame = New("Frame", {
-		Size = UDim2.new(1, 0, 0, 56),
+		Size = UDim2.new(1, 0, 0, 58),
+		BackgroundColor3 = Color3.fromRGB(16, 14, 23),
 		BackgroundTransparency = 0,
 		BorderSizePixel = 0,
 		Parent = Config.Parent,

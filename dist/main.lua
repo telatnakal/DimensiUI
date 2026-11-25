@@ -1818,13 +1818,13 @@ function Card.New(Parent)
 		},
 	}, {
 		New("UICorner", {
-			CornerRadius = UDim.new(0, 14),
+			CornerRadius = UDim.new(0, 10),
 		}),
 		New("UIPadding", {
-			PaddingTop = UDim.new(0, 3),
-			PaddingBottom = UDim.new(0, 3),
-			PaddingLeft = UDim.new(0, 4),
-			PaddingRight = UDim.new(0, 4),
+			PaddingTop = UDim.new(0, 2),
+			PaddingBottom = UDim.new(0, 2),
+			PaddingLeft = UDim.new(0, 3),
+			PaddingRight = UDim.new(0, 3),
 		}),
 		New("UIListLayout", {
 			SortOrder = Enum.SortOrder.LayoutOrder,
@@ -2070,7 +2070,7 @@ return function(Title, Desc, Parent, Hover)
 		FontFace = Typography.Medium,
 		Text = Title,
 		TextColor3 = Color3.fromRGB(241, 243, 247),
-		TextSize = 13,
+		TextSize = 10,
 		TextWrapped = true,
 		LineHeight = 1.12,
 		TextXAlignment = Enum.TextXAlignment.Left,
@@ -2109,15 +2109,15 @@ return function(Title, Desc, Parent, Hover)
 	}, {
 		New("UIListLayout", {
 			SortOrder = Enum.SortOrder.LayoutOrder,
-			Padding = UDim.new(0, 4),
+			Padding = UDim.new(0, 2),
 			VerticalAlignment = Enum.VerticalAlignment.Center,
 		}),
 		New("UIPadding", {
-			PaddingBottom = UDim.new(0, 8),
-			PaddingTop = UDim.new(0, 8),
+			PaddingBottom = UDim.new(0, 5),
+			PaddingTop = UDim.new(0, 5),
 		}),
 		New("UISizeConstraint", {
-			MinSize = Vector2.new(0, 48),
+			MinSize = Vector2.new(0, 40),
 		}),
 		Element.TitleLabel,
 		Element.DescLabel,
@@ -2994,19 +2994,20 @@ return function(Config)
 		New("TextLabel", {
 			Text = MapName,
 			FontFace = Typography.Medium,
-			TextSize = 13,
+			TextSize = 12,
 			TextXAlignment = "Left",
 			TextYAlignment = "Center",
 			TextTruncate = Enum.TextTruncate.AtEnd,
 			Size = UDim2.new(1, -150, 0, 24),
 			BackgroundTransparency = 1,
 			LayoutOrder = 3,
-			ThemeTag = { TextColor3 = "SubText" },
+			ThemeTag = { TextColor3 = "Accent" },
 		}),
 	})
 
 	TitleBar.Frame = New("Frame", {
-		Size = UDim2.new(1, 0, 0, 56),
+		Size = UDim2.new(1, 0, 0, 58),
+		BackgroundColor3 = Color3.fromRGB(16, 14, 23),
 		BackgroundTransparency = 0,
 		BorderSizePixel = 0,
 		Parent = Config.Parent,
@@ -3123,8 +3124,8 @@ return function(Config)
 	})
 
 	Window.Sidebar = New("Frame", {
-		Size = UDim2.new(0, Window.TabWidth + 24, 1, -56),
-		Position = UDim2.fromOffset(0, 56),
+		Size = UDim2.new(0, Window.TabWidth + 24, 1, -58),
+		Position = UDim2.fromOffset(0, 58),
 		BackgroundTransparency = 0,
 		BorderSizePixel = 0,
 		ThemeTag = {

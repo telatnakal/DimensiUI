@@ -20,7 +20,7 @@ return function(Title, Desc, Parent, Hover)
 		FontFace = Typography.Medium,
 		Text = Title,
 		TextColor3 = Color3.fromRGB(241, 243, 247),
-		TextSize = 13,
+		TextSize = 10,
 		TextWrapped = true,
 		LineHeight = 1.12,
 		TextXAlignment = Enum.TextXAlignment.Left,
@@ -59,15 +59,15 @@ return function(Title, Desc, Parent, Hover)
 	}, {
 		New("UIListLayout", {
 			SortOrder = Enum.SortOrder.LayoutOrder,
-			Padding = UDim.new(0, 4),
+			Padding = UDim.new(0, 2),
 			VerticalAlignment = Enum.VerticalAlignment.Center,
 		}),
 		New("UIPadding", {
-			PaddingBottom = UDim.new(0, 8),
-			PaddingTop = UDim.new(0, 8),
+			PaddingBottom = UDim.new(0, 5),
+			PaddingTop = UDim.new(0, 5),
 		}),
 		New("UISizeConstraint", {
-			MinSize = Vector2.new(0, 48),
+			MinSize = Vector2.new(0, 40),
 		}),
 		Element.TitleLabel,
 		Element.DescLabel,
