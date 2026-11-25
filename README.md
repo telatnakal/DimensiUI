@@ -80,6 +80,20 @@ Section:AddButton({
 })
 ```
 
+## Minimize and icon bubble
+
+The title-bar minimize button collapses the window into a small round "D" bubble. Click the bubble to restore the window; drag it to move it. Pressing `RightControl` (configurable with `MinimizeKey`, or the Hide Bind in InterfaceManager) hides everything, including the bubble, and pressing it again brings back whatever was showing.
+
+```lua
+local Window = Library:CreateWindow({
+    Title = "DimensiUI",
+    MinimizeKey = Enum.KeyCode.RightControl,
+    Icon = "rbxassetid://123456789", -- optional
+})
+```
+
+`Icon` accepts a Roblox asset id (`"rbxassetid://ID"` or a number), or an image URL. A URL is downloaded once into the executor workspace (`DimensiUI/`) and reused afterwards; this needs `writefile` and `getcustomasset`, and it is the only network request the library makes. Use a raw link such as `https://raw.githubusercontent.com/<user>/<repo>/main/Assets/d-icon-128.png` (a `github.com/.../blob/...` page link is converted automatically). If the icon cannot be loaded, the bubble shows a plain "D" and a warning is printed.
+
 ## Multiple library instances
 
 Create a separate library instance when an independent UI lifecycle is needed:

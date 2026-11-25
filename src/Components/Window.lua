@@ -3,6 +3,7 @@ local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local Mouse = game:GetService("Players").LocalPlayer:GetMouse()
 local Workspace = game:GetService("Workspace")
+local ContentProvider = game:GetService("ContentProvider")
 local Camera = Workspace.CurrentCamera
 
 local Root = script.Parent.Parent
@@ -89,6 +90,7 @@ return function(Config)
 		New("UICorner", {
 			CornerRadius = UDim.new(0, 12),
 		}),
+		-- Squares off the sidebar's right-hand corners so only the window's left corners stay round.
 		New("Frame", {
 			Name = "Patch",
 			AnchorPoint = Vector2.new(1, 0),
@@ -170,6 +172,7 @@ return function(Config)
 		Window = Window,
 	})
 
+	-- The tab list starts below the brand block, which grows when a long title wraps.
 	local function LayoutSidebar()
 		local Brand = Window.TitleBar.Brand
 		Brand.Visible = not Window.SidebarCollapsed
@@ -216,7 +219,6 @@ return function(Config)
 	function Window:ToggleSidebar()
 		return self:SetSidebarCollapsed(not self.SidebarCollapsed)
 	end
-
 	LayoutSidebar()
 	Creator.AddSignal(Window.TitleBar.Brand:GetPropertyChangedSignal("AbsoluteSize"), LayoutSidebar, Window.Root)
 
@@ -250,8 +252,10 @@ return function(Config)
 	end)
 
 	Creator.AddSignal(Window.TitleBar.Frame.InputBegan, function(Input)
-		if Input.UserInputType == Enum.UserInputType.MouseButton1
-			or Input.UserInputType == Enum.UserInputType.Touch then
+		if
+			Input.UserInputType == Enum.UserInputType.MouseButton1
+			or Input.UserInputType == Enum.UserInputType.Touch
+		then
 			Dragging = true
 			MousePos = Input.Position
 			StartPos = Window.Root.Position
@@ -272,15 +276,19 @@ return function(Config)
 	end, Window.Root)
 
 	Creator.AddSignal(Window.TitleBar.Frame.InputChanged, function(Input)
-		if Input.UserInputType == Enum.UserInputType.MouseMovement
-			or Input.UserInputType == Enum.UserInputType.Touch then
+		if
+			Input.UserInputType == Enum.UserInputType.MouseMovement
+			or Input.UserInputType == Enum.UserInputType.Touch
+		then
 			DragInput = Input
 		end
 	end, Window.Root)
 
 	Creator.AddSignal(ResizeStartFrame.InputBegan, function(Input)
-		if Input.UserInputType == Enum.UserInputType.MouseButton1
-			or Input.UserInputType == Enum.UserInputType.Touch then
+		if
+			Input.UserInputType == Enum.UserInputType.MouseButton1
+			or Input.UserInputType == Enum.UserInputType.Touch
+		then
 			Resizing = true
 			ResizePos = Input.Position
 		end
@@ -297,12 +305,16 @@ return function(Config)
 				X = Instant(Window.Position.X.Offset),
 				Y = Instant(Window.Position.Y.Offset),
 			})
+
 		end
 
-		if (Input.UserInputType == Enum.UserInputType.MouseMovement
-			or Input.UserInputType == Enum.UserInputType.Touch) and Resizing then
+		if
+			(Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch)
+			and Resizing
+		then
 			local Delta = Input.Position - ResizePos
 			local StartSize = Window.Size
+
 			local TargetSize = Vector3.new(StartSize.X.Offset, StartSize.Y.Offset, 0) + Vector3.new(1, 1, 0) * Delta
 			local _, minW, minH, maxW, maxH = getBounds()
 			local viewport = Camera.ViewportSize
@@ -363,7 +375,6 @@ return function(Config)
 			FitToViewport()
 		end
 	end
-
 	Creator.AddSignal(Workspace:GetPropertyChangedSignal("CurrentCamera"), BindCamera, Window.Root)
 	BindCamera()
 
@@ -372,9 +383,11 @@ return function(Config)
 	end, Window.Root)
 
 	Creator.AddSignal(UserInputService.InputBegan, function(Input)
-		if type(Library.MinimizeKeybind) == "table"
+		if
+			type(Library.MinimizeKeybind) == "table"
 			and Library.MinimizeKeybind.Type == "Keybind"
-			and not UserInputService:GetFocusedTextBox() then
+			and not UserInputService:GetFocusedTextBox()
+		then
 			if Input.KeyCode.Name == Library.MinimizeKeybind.Value then
 				Window:ToggleHidden()
 			end
@@ -383,29 +396,99 @@ return function(Config)
 		end
 	end, Window.Root)
 
-	-- Floating round bubble shown while the window is collapsed.
+	-- Floating round "D" bubble shown while the window is collapsed.
 	local BUBBLE_SIZE = 56
 
 	local function ResolveIcon(Icon)
+		-- Hanya sumber yang bisa dimuat langsung oleh ImageLabel. URL biasa ditangani FetchIcon.
 		if type(Icon) == "number" then
 			return "rbxassetid://" .. Icon
 		end
 		if type(Icon) ~= "string" or Icon == "" then
 			return nil
 		end
-		if Icon:match("^rbxassetid://") or Icon:match("^rbxasset://") then
+		if Icon:match("^rbxassetid://") or Icon:match("^rbxasset://") or Icon:match("^rbxthumb://") or Icon:match("roblox%.com/asset") then
 			return Icon
 		end
 		if tonumber(Icon) then
 			return "rbxassetid://" .. Icon
 		end
-		if type(getcustomasset) == "function" then
-			local ok, asset = pcall(getcustomasset, Icon)
+		if Icon:match("^https?://") then
+			return nil
+		end
+		local AssetFn = getcustomasset or getsynasset
+		if type(AssetFn) == "function" then
+			local ok, asset = pcall(AssetFn, Icon)
 			if ok and type(asset) == "string" and asset ~= "" then
 				return asset
 			end
 		end
 		return nil
+	end
+
+	-- Unduh PNG dari URL (mis. GitHub) sekali, simpan di workspace executor, lalu pakai file lokalnya.
+	local PNG_SIGNATURE = "\137PNG\r\n\26\n"
+	local ICON_FOLDER = "DimensiUI"
+
+	local function HashText(Text)
+		local h = 5381
+		for i = 1, #Text do
+			h = (h * 33 + Text:byte(i)) % 4294967296
+		end
+		return string.format("%08x", h)
+	end
+
+	local function FetchIcon(Url)
+		-- Halaman github.com/.../blob/... diubah ke link raw supaya yang terunduh gambarnya, bukan HTML.
+		local User, Repo, Rest = Url:match("^https?://github%.com/([^/]+)/([^/]+)/blob/(.+)$")
+		if User then
+			Url = ("https://raw.githubusercontent.com/%s/%s/%s"):format(User, Repo, (Rest:gsub("%?.*$", "")))
+		end
+
+		if type(writefile) ~= "function" or type(getcustomasset or getsynasset) ~= "function" then
+			return nil, "executor tidak mendukung writefile/getcustomasset"
+		end
+
+		local Path = ("%s/icon_%s.png"):format(ICON_FOLDER, HashText(Url))
+		pcall(function()
+			if type(isfolder) == "function" and type(makefolder) == "function" and not isfolder(ICON_FOLDER) then
+				makefolder(ICON_FOLDER)
+			end
+		end)
+
+		-- Cache: pakai file yang sudah ada kalau isinya memang PNG.
+		if type(isfile) == "function" and isfile(Path) then
+			if type(readfile) ~= "function" then return Path end
+			local okRead, Cached = pcall(readfile, Path)
+			if okRead and type(Cached) == "string" and Cached:sub(1, 8) == PNG_SIGNATURE then
+				return Path
+			end
+		end
+
+		local Body
+		local okGet, Res = pcall(function() return game:HttpGet(Url) end)
+		if okGet and type(Res) == "string" then
+			Body = Res
+		end
+		if not Body then
+			local Req = (syn and syn.request) or http_request or request
+			if type(Req) == "function" then
+				local okReq, Resp = pcall(Req, { Url = Url, Method = "GET" })
+				if okReq and type(Resp) == "table" and Resp.StatusCode == 200 and type(Resp.Body) == "string" then
+					Body = Resp.Body
+				end
+			end
+		end
+		if not Body then
+			return nil, "unduhan gagal (cek URL dan apakah repo publik)"
+		end
+		if Body:sub(1, 8) ~= PNG_SIGNATURE then
+			return nil, "isi unduhan bukan file PNG (pakai link raw, bukan halaman /blob/)"
+		end
+		if not pcall(writefile, Path, Body) then
+			return nil, "writefile gagal"
+		end
+		return Path
 	end
 
 	local BubbleIcon = New("ImageLabel", {
@@ -426,7 +509,6 @@ return function(Config)
 		Text = "D",
 		FontFace = Typography.Bold,
 		TextSize = 28,
-		Visible = false,
 		ThemeTag = { TextColor3 = "Accent" },
 	})
 
@@ -451,34 +533,88 @@ return function(Config)
 		BubbleLetter,
 	})
 
-	-- Load icon from GitHub
-	local IconPath = "DimensiUI_d-icon.png"
-local IconUrl = "https://raw.githubusercontent.com/telatnakal/DimensiUI/main/Assets/d-icon.png"
+	local IconToken = 0
 
-local success, result = pcall(function()
-    local response = game:HttpGet(IconUrl)
-    assert(#response > 1000, "File PNG tidak berhasil diunduh")
+	local function ShowLetter()
+		BubbleIcon.Visible = false
+		BubbleLetter.Visible = true
+	end
 
-    writefile(IconPath, response)
+	Window.IconStatus = "tidak ada Icon (huruf D bawaan)"
 
-    local asset = getcustomasset(IconPath)
-    assert(asset, "getcustomasset gagal")
+	local function ApplyIcon(Resolved)
+		BubbleIcon.Image = Resolved
+		BubbleIcon.Visible = true
+		BubbleLetter.Visible = false
+		Window.IconStatus = "dimuat: " .. tostring(Resolved)
+		-- File lokal (rbxasset://) langsung dipercaya. Hanya asset Roblox yang dicek; kalau gagal
+		-- (id salah / Decal / belum lolos moderasi) balik ke huruf "D".
+		if not tostring(Resolved):match("^rbxasset://") then
+			task.spawn(function()
+				pcall(function()
+					ContentProvider:PreloadAsync({ BubbleIcon }, function(_, status)
+						if status ~= Enum.AssetFetchStatus.Success and BubbleIcon.Parent then
+							Window.IconStatus = "gagal dimuat (" .. tostring(status) .. "): " .. tostring(Resolved)
+							warn("[DimensiUI] Gambar icon gagal dimuat (" .. tostring(status) .. "): " .. tostring(Resolved))
+							ShowLetter()
+						end
+					end)
+				end)
+			end)
+		end
+	end
 
-    BubbleIcon.Image = asset
-    BubbleIcon.Visible = true
-    BubbleLetter.Visible = false
+	function Window:SetIcon(Icon)
+		IconToken = IconToken + 1
+		local Token = IconToken
+		ShowLetter()
+		BubbleIcon.Image = ""
 
-    return asset
-end)
+		if Icon == nil or Icon == "" then
+			Window.IconStatus = "tidak ada Icon (huruf D bawaan)"
+			return false
+		end
 
-if not success then
-    warn("[DimensiUI ICON ERROR] " .. tostring(result))
-    BubbleIcon.Visible = false
-    BubbleLetter.Visible = true
-end
+		local Resolved = ResolveIcon(Icon)
+		if Resolved then
+			ApplyIcon(Resolved)
+			return true
+		end
+
+		if type(Icon) == "string" and Icon:match("^https?://") then
+			-- Async: window tetap langsung muncul, huruf "D" tampil sampai gambar siap.
+			Window.IconStatus = "mengunduh: " .. Icon
+			task.spawn(function()
+				local Path, Reason = FetchIcon(Icon)
+				if Token ~= IconToken or not BubbleIcon.Parent then return end
+				local Asset
+				if Path then
+					local ok, result = pcall(getcustomasset or getsynasset, Path)
+					if ok and type(result) == "string" and result ~= "" then
+						Asset = result
+					else
+						Reason = "getcustomasset gagal untuk " .. tostring(Path)
+					end
+				end
+				if Asset then
+					ApplyIcon(Asset)
+					print("[DimensiUI] Icon dimuat: " .. tostring(Asset))
+				else
+					Window.IconStatus = "gagal: " .. tostring(Reason)
+					warn("[DimensiUI] Icon tidak bisa dimuat dari URL: " .. tostring(Reason))
+				end
+			end)
+			return true
+		end
+
+		Window.IconStatus = "gagal: bukan asset id, URL, atau file executor yang valid"
+		warn("[DimensiUI] Icon tidak bisa dimuat (bukan asset id, URL, atau file executor yang valid): " .. tostring(Icon))
+		return false
+	end
+
+	Window:SetIcon(Config.Icon)
 
 	local BubblePlaced = false
-
 	local function ClampBubble(X, Y)
 		local view = (Workspace.CurrentCamera and Workspace.CurrentCamera.ViewportSize) or Vector2.new(800, 600)
 		return math.clamp(X, 0, math.max(0, view.X - BUBBLE_SIZE)), math.clamp(Y, 0, math.max(0, view.Y - BUBBLE_SIZE))
@@ -491,13 +627,12 @@ end
 		Window.Minimized = Window.Collapsed
 		if not ShowWindow then
 			for _, frame in ipairs(Library.OpenFrames) do
-				if frame and frame.Parent then
-					frame.Visible = false
-				end
+				if frame and frame.Parent then frame.Visible = false end
 			end
 		end
 	end
 
+	-- Title-bar minimize button: collapse into the bubble (or restore from it).
 	function Window:SetCollapsed(Collapsed)
 		Collapsed = not not Collapsed
 		if Window.Collapsed == Collapsed then return false end
@@ -514,6 +649,7 @@ end
 		return Window:SetCollapsed(not Window.Collapsed)
 	end
 
+	-- Hotkey: hide everything (window and bubble) or bring back what was showing.
 	function Window:ToggleHidden()
 		Window.Hidden = not Window.Hidden
 		ApplyVisibility()
@@ -528,11 +664,11 @@ end
 		end
 	end
 
+	-- Bubble: click restores, drag moves.
 	local BubbleDragging, BubbleMoved, BubbleStart, BubbleOrigin = false, false, nil, nil
 
 	Creator.AddSignal(Window.Bubble.InputBegan, function(Input)
-		if Input.UserInputType == Enum.UserInputType.MouseButton1
-			or Input.UserInputType == Enum.UserInputType.Touch then
+		if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
 			BubbleDragging = true
 			BubbleMoved = false
 			BubbleStart = Input.Position
@@ -542,8 +678,7 @@ end
 
 	Creator.AddSignal(UserInputService.InputChanged, function(Input)
 		if not BubbleDragging then return end
-		if Input.UserInputType ~= Enum.UserInputType.MouseMovement
-			and Input.UserInputType ~= Enum.UserInputType.Touch then return end
+		if Input.UserInputType ~= Enum.UserInputType.MouseMovement and Input.UserInputType ~= Enum.UserInputType.Touch then return end
 		local Delta = Input.Position - BubbleStart
 		if not BubbleMoved and Delta.Magnitude < 5 then return end
 		BubbleMoved = true
@@ -554,8 +689,7 @@ end
 
 	Creator.AddSignal(UserInputService.InputEnded, function(Input)
 		if not BubbleDragging then return end
-		if Input.UserInputType == Enum.UserInputType.MouseButton1
-			or Input.UserInputType == Enum.UserInputType.Touch then
+		if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
 			BubbleDragging = false
 			if not BubbleMoved and not Window.Hidden then
 				Window:SetCollapsed(false)
@@ -566,9 +700,7 @@ end
 	function Window:Destroy()
 		for index = #Library.OpenFrames, 1, -1 do
 			local frame = Library.OpenFrames[index]
-			if frame and frame.Parent then
-				pcall(function() frame:Destroy() end)
-			end
+			if frame and frame.Parent then pcall(function() frame:Destroy() end) end
 			table.remove(Library.OpenFrames, index)
 		end
 		if Window.Bubble then Window.Bubble:Destroy() end
@@ -576,7 +708,6 @@ end
 	end
 
 	local DialogModule = require(Components.Dialog):Init(Window)
-
 	function Window:Dialog(Config)
 		assert(type(Config) == "table" and type(Config.Title) == "string" and type(Config.Content) == "string", "Window:Dialog requires Title and Content strings")
 		Config.Buttons = Config.Buttons or {}
@@ -629,7 +760,6 @@ end
 	end
 
 	local TabModule = require(Components.Tab):Init(Window)
-
 	function Window:AddTab(TabConfig)
 		assert(type(TabConfig) == "table", "Window:AddTab expects a table")
 		assert(type(TabConfig.Title) == "string" and TabConfig.Title ~= "", "Window:AddTab requires Title")

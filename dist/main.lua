@@ -3077,6 +3077,7 @@ local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local Mouse = game:GetService("Players").LocalPlayer:GetMouse()
 local Workspace = game:GetService("Workspace")
+local ContentProvider = game:GetService("ContentProvider")
 local Camera = Workspace.CurrentCamera
 
 local Root = script.Parent.Parent
@@ -3473,25 +3474,95 @@ return function(Config)
 	local BUBBLE_SIZE = 56
 
 	local function ResolveIcon(Icon)
+		-- Hanya sumber yang bisa dimuat langsung oleh ImageLabel. URL biasa ditangani FetchIcon.
 		if type(Icon) == "number" then
 			return "rbxassetid://" .. Icon
 		end
 		if type(Icon) ~= "string" or Icon == "" then
 			return nil
 		end
-		if Icon:match("^rbxassetid://") or Icon:match("^rbxasset://") or Icon:match("^https?://") then
+		if Icon:match("^rbxassetid://") or Icon:match("^rbxasset://") or Icon:match("^rbxthumb://") or Icon:match("roblox%.com/asset") then
 			return Icon
 		end
 		if tonumber(Icon) then
 			return "rbxassetid://" .. Icon
 		end
-		if type(getcustomasset) == "function" then
-			local ok, asset = pcall(getcustomasset, Icon)
+		if Icon:match("^https?://") then
+			return nil
+		end
+		local AssetFn = getcustomasset or getsynasset
+		if type(AssetFn) == "function" then
+			local ok, asset = pcall(AssetFn, Icon)
 			if ok and type(asset) == "string" and asset ~= "" then
 				return asset
 			end
 		end
 		return nil
+	end
+
+	-- Unduh PNG dari URL (mis. GitHub) sekali, simpan di workspace executor, lalu pakai file lokalnya.
+	local PNG_SIGNATURE = "\137PNG\r\n\26\n"
+	local ICON_FOLDER = "DimensiUI"
+
+	local function HashText(Text)
+		local h = 5381
+		for i = 1, #Text do
+			h = (h * 33 + Text:byte(i)) % 4294967296
+		end
+		return string.format("%08x", h)
+	end
+
+	local function FetchIcon(Url)
+		-- Halaman github.com/.../blob/... diubah ke link raw supaya yang terunduh gambarnya, bukan HTML.
+		local User, Repo, Rest = Url:match("^https?://github%.com/([^/]+)/([^/]+)/blob/(.+)$")
+		if User then
+			Url = ("https://raw.githubusercontent.com/%s/%s/%s"):format(User, Repo, (Rest:gsub("%?.*$", "")))
+		end
+
+		if type(writefile) ~= "function" or type(getcustomasset or getsynasset) ~= "function" then
+			return nil, "executor tidak mendukung writefile/getcustomasset"
+		end
+
+		local Path = ("%s/icon_%s.png"):format(ICON_FOLDER, HashText(Url))
+		pcall(function()
+			if type(isfolder) == "function" and type(makefolder) == "function" and not isfolder(ICON_FOLDER) then
+				makefolder(ICON_FOLDER)
+			end
+		end)
+
+		-- Cache: pakai file yang sudah ada kalau isinya memang PNG.
+		if type(isfile) == "function" and isfile(Path) then
+			if type(readfile) ~= "function" then return Path end
+			local okRead, Cached = pcall(readfile, Path)
+			if okRead and type(Cached) == "string" and Cached:sub(1, 8) == PNG_SIGNATURE then
+				return Path
+			end
+		end
+
+		local Body
+		local okGet, Res = pcall(function() return game:HttpGet(Url) end)
+		if okGet and type(Res) == "string" then
+			Body = Res
+		end
+		if not Body then
+			local Req = (syn and syn.request) or http_request or request
+			if type(Req) == "function" then
+				local okReq, Resp = pcall(Req, { Url = Url, Method = "GET" })
+				if okReq and type(Resp) == "table" and Resp.StatusCode == 200 and type(Resp.Body) == "string" then
+					Body = Resp.Body
+				end
+			end
+		end
+		if not Body then
+			return nil, "unduhan gagal (cek URL dan apakah repo publik)"
+		end
+		if Body:sub(1, 8) ~= PNG_SIGNATURE then
+			return nil, "isi unduhan bukan file PNG (pakai link raw, bukan halaman /blob/)"
+		end
+		if not pcall(writefile, Path, Body) then
+			return nil, "writefile gagal"
+		end
+		return Path
 	end
 
 	local BubbleIcon = New("ImageLabel", {
@@ -3536,13 +3607,85 @@ return function(Config)
 		BubbleLetter,
 	})
 
-	function Window:SetIcon(Icon)
-		local Resolved = ResolveIcon(Icon)
-		BubbleIcon.Image = Resolved or ""
-		BubbleIcon.Visible = Resolved ~= nil
-		BubbleLetter.Visible = Resolved == nil
-		return Resolved ~= nil
+	local IconToken = 0
+
+	local function ShowLetter()
+		BubbleIcon.Visible = false
+		BubbleLetter.Visible = true
 	end
+
+	Window.IconStatus = "tidak ada Icon (huruf D bawaan)"
+
+	local function ApplyIcon(Resolved)
+		BubbleIcon.Image = Resolved
+		BubbleIcon.Visible = true
+		BubbleLetter.Visible = false
+		Window.IconStatus = "dimuat: " .. tostring(Resolved)
+		-- File lokal (rbxasset://) langsung dipercaya. Hanya asset Roblox yang dicek; kalau gagal
+		-- (id salah / Decal / belum lolos moderasi) balik ke huruf "D".
+		if not tostring(Resolved):match("^rbxasset://") then
+			task.spawn(function()
+				pcall(function()
+					ContentProvider:PreloadAsync({ BubbleIcon }, function(_, status)
+						if status ~= Enum.AssetFetchStatus.Success and BubbleIcon.Parent then
+							Window.IconStatus = "gagal dimuat (" .. tostring(status) .. "): " .. tostring(Resolved)
+							warn("[DimensiUI] Gambar icon gagal dimuat (" .. tostring(status) .. "): " .. tostring(Resolved))
+							ShowLetter()
+						end
+					end)
+				end)
+			end)
+		end
+	end
+
+	function Window:SetIcon(Icon)
+		IconToken = IconToken + 1
+		local Token = IconToken
+		ShowLetter()
+		BubbleIcon.Image = ""
+
+		if Icon == nil or Icon == "" then
+			Window.IconStatus = "tidak ada Icon (huruf D bawaan)"
+			return false
+		end
+
+		local Resolved = ResolveIcon(Icon)
+		if Resolved then
+			ApplyIcon(Resolved)
+			return true
+		end
+
+		if type(Icon) == "string" and Icon:match("^https?://") then
+			-- Async: window tetap langsung muncul, huruf "D" tampil sampai gambar siap.
+			Window.IconStatus = "mengunduh: " .. Icon
+			task.spawn(function()
+				local Path, Reason = FetchIcon(Icon)
+				if Token ~= IconToken or not BubbleIcon.Parent then return end
+				local Asset
+				if Path then
+					local ok, result = pcall(getcustomasset or getsynasset, Path)
+					if ok and type(result) == "string" and result ~= "" then
+						Asset = result
+					else
+						Reason = "getcustomasset gagal untuk " .. tostring(Path)
+					end
+				end
+				if Asset then
+					ApplyIcon(Asset)
+					print("[DimensiUI] Icon dimuat: " .. tostring(Asset))
+				else
+					Window.IconStatus = "gagal: " .. tostring(Reason)
+					warn("[DimensiUI] Icon tidak bisa dimuat dari URL: " .. tostring(Reason))
+				end
+			end)
+			return true
+		end
+
+		Window.IconStatus = "gagal: bukan asset id, URL, atau file executor yang valid"
+		warn("[DimensiUI] Icon tidak bisa dimuat (bukan asset id, URL, atau file executor yang valid): " .. tostring(Icon))
+		return false
+	end
+
 	Window:SetIcon(Config.Icon)
 
 	local BubblePlaced = false

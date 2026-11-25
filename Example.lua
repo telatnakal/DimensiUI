@@ -9,7 +9,7 @@ local Window = DimensiUI:CreateWindow({
 	Size = UDim2.fromOffset(580, 460),
 	Theme = "Dimensi",
 	MinimizeKey = Enum.KeyCode.RightControl, -- sembunyikan total (window + ikon D)
-	-- Icon = "rbxassetid://ID_ICON_KAMU", -- opsional: gambar d-icon.png; tanpa ini tampil huruf "D"
+	Icon = "https://raw.githubusercontent.com/telatnakal/DimensiUI/main/Assets/d-icon.png", -- diunduh sekali ke workspace executor; boleh juga "rbxassetid://ID"
 })
 
 local Tabs = {
