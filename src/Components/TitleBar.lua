@@ -67,6 +67,14 @@ return function(Config)
 		return Button
 	end
 
+	-- Keep the DimensiUI brand prefix enforced by the library itself.
+	-- Callers only need to provide the app name (for example, "BLOOM").
+	local BrandPrefix = "DIMENSI-HUB | "
+	local AppTitle = tostring(Config.Title or "")
+	if string.sub(AppTitle, 1, #BrandPrefix) ~= BrandPrefix then
+		AppTitle = BrandPrefix .. AppTitle
+	end
+
 	TitleBar.Brand = New("Frame", {
 		Position = UDim2.fromOffset(24, 12),
 		Size = UDim2.fromOffset(math.max(96, (Config.Window and Config.Window.TabWidth or 160) - 12), 0),
@@ -79,7 +87,7 @@ return function(Config)
 		}),
 		New("TextLabel", {
 			RichText = true,
-			Text = Config.Title,
+			Text = AppTitle,
 			FontFace = Typography.SemiBold,
 			TextSize = 15,
 			TextXAlignment = "Left",
