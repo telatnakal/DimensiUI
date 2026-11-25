@@ -37,7 +37,7 @@ return function(Config)
 		Minimized = false,
 		Size = UDim2.fromOffset(initialWidth, initialHeight),
 		TabWidth = initialTabWidth,
-		ContentTop = 68,
+		ContentTop = 60,
 		CurrentPos = 0,
 		Position = UDim2.fromOffset(
 			math.max(12, viewport.X / 2 - initialWidth / 2),
@@ -106,22 +106,6 @@ return function(Config)
 		Window.TabHolder,
 	})
 
-	Window.TabDisplay = New("TextLabel", {
-		RichText = true,
-		Text = "Tab",
-		TextTransparency = 0,
-		FontFace = Typography.SemiBold,
-		TextSize = 18,
-		TextXAlignment = "Left",
-		TextYAlignment = "Center",
-		TextTruncate = Enum.TextTruncate.AtEnd,
-		Size = UDim2.new(1, -(Window.TabWidth + 144), 0, 28),
-		Position = UDim2.fromOffset(Window.TabWidth + 48, 14),
-		BackgroundTransparency = 1,
-		ThemeTag = {
-			TextColor3 = "Text",
-		},
-	})
 
 	Window.ContainerHolder = New("CanvasGroup", {
 		Size = UDim2.new(1, -(Window.TabWidth + 72), 1, -(Window.ContentTop + 20)),
@@ -138,7 +122,6 @@ return function(Config)
 	}, {
 		Window.Surface.Frame,
 		Window.Sidebar,
-		Window.TabDisplay,
 		Window.ContainerHolder,
 		TabFrame,
 		ResizeStartFrame,
@@ -151,14 +134,12 @@ return function(Config)
 		Window = Window,
 	})
 
-	-- The tab list starts below the brand block, which grows when a long title wraps.
+	-- Sidebar navigation begins immediately below the single global header.
 	local function LayoutSidebar()
-		local Brand = Window.TitleBar.Brand
-		local Top = math.max(64, Brand.Position.Y.Offset + Brand.AbsoluteSize.Y + 18)
-		TabFrame.Position = UDim2.fromOffset(12, Top)
-		TabFrame.Size = UDim2.new(0, Window.TabWidth, 1, -(Top + 12))
+		TabFrame.Position = UDim2.fromOffset(12, 60)
+		TabFrame.Size = UDim2.new(0, Window.TabWidth, 1, -72)
 	end
-	Creator.AddSignal(Window.TitleBar.Brand:GetPropertyChangedSignal("AbsoluteSize"), LayoutSidebar, Window.Root)
+	LayoutSidebar()
 
 	local SizeMotor = Creator.TrackMotor(Motion.GroupMotor.new({
 		X = Window.Size.X.Offset,
@@ -290,10 +271,7 @@ return function(Config)
 		SizeMotor:setGoal({ X = Instant(width), Y = Instant(height) })
 		PosMotor:setGoal({ X = Instant(x), Y = Instant(y) })
 		Window.Sidebar.Size = UDim2.new(0, Window.TabWidth + 24, 1, 0)
-		Window.TitleBar.Brand.Size = UDim2.fromOffset(math.max(96, Window.TabWidth - 12), 0)
 		LayoutSidebar()
-		Window.TabDisplay.Size = UDim2.new(1, -(Window.TabWidth + 144), 0, 28)
-		Window.TabDisplay.Position = UDim2.fromOffset(Window.TabWidth + 48, 14)
 		Window.ContainerHolder.Size = UDim2.new(1, -(Window.TabWidth + 72), 1, -(Window.ContentTop + 20))
 		Window.ContainerHolder.Position = UDim2.fromOffset(Window.TabWidth + 48, Window.ContentTop)
 	end

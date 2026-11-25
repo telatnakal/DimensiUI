@@ -63,11 +63,11 @@ return function(Title, Desc, Parent, Hover)
 			VerticalAlignment = Enum.VerticalAlignment.Center,
 		}),
 		New("UIPadding", {
-			PaddingBottom = UDim.new(0, 10),
-			PaddingTop = UDim.new(0, 10),
+			PaddingBottom = UDim.new(0, 7),
+			PaddingTop = UDim.new(0, 7),
 		}),
 		New("UISizeConstraint", {
-			MinSize = Vector2.new(0, 48),
+			MinSize = Vector2.new(0, 42),
 		}),
 		Element.TitleLabel,
 		Element.DescLabel,
