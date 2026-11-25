@@ -8,7 +8,9 @@ local Window = DimensiUI:CreateWindow({
 	TabWidth = 160,
 	Size = UDim2.fromOffset(580, 460),
 	Theme = "Dimensi",
-	MinimizeKey = Enum.KeyCode.LeftControl,
+	MinimizeKey = Enum.KeyCode.RightControl,
+	-- Upload d-icon.png to Roblox and replace this with its image asset ID.
+	MinimizeImage = "rbxassetid://YOUR_D_ICON_IMAGE_ID",
 })
 
 local Tabs = {

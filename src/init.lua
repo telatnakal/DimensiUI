@@ -46,7 +46,7 @@ local Library = {
 	Name = "DimensiUI",
 	Author = "telatnakal",
 	Credit = "telatnakal",
-	Version = "1.1.2",
+	Version = "1.2.1",
 
 	OpenFrames = {},
 	Options = {},
@@ -62,7 +62,7 @@ local Library = {
 	_OpenDialogCount = 0,
 	Transparency = true,
 	MinimizeKeybind = nil,
-	MinimizeKey = Enum.KeyCode.LeftControl,
+	MinimizeKey = Enum.KeyCode.RightControl,
 
 	GUI = GUI,
 }
@@ -217,7 +217,8 @@ function Library:CreateWindow(Config)
 	Config.TabWidth = Config.TabWidth or 170
 	Config.Size = Config.Size or UDim2.fromOffset(590, 470)
 	Config.Theme = "Dimensi"
-	Config.MinimizeKey = Config.MinimizeKey or Enum.KeyCode.LeftControl
+	Config.MinimizeKey = Config.MinimizeKey or Enum.KeyCode.RightControl
+	assert(Config.MinimizeImage == nil or type(Config.MinimizeImage) == "string", "Window - MinimizeImage must be an image asset string")
 
 	if Library.Window then
 		print("You cannot create more than one window.")
@@ -230,6 +231,7 @@ function Library:CreateWindow(Config)
 		Title = Config.Title,
 		SubTitle = Config.SubTitle,
 		TabWidth = Config.TabWidth,
+		MinimizeImage = Config.MinimizeImage,
 	})
 
 	Library.MinimizeKey = Config.MinimizeKey

@@ -5,16 +5,18 @@
 | Release metadata | Value |
 |---|---|
 | Project | DimensiUI |
-| Version | `1.1.2` |
+| Version | `1.2.1` |
 | Release type | Stable Release |
 | Author | telatnakal |
 | Theme | Midnight (navy-violet) |
 | Runtime | Roblox Lua / Luau |
 
-**Version:** 1.1.2
+**Version:** 1.2.1
 
 ## Features
 
+- Floating circular restore button with a custom image (`MinimizeImage`) and Right Control default hotkey.
+- Bundled `d-icon.png` logo artwork for the minimize/restore button.
 - Compact settings rows and tighter card spacing for denser, more readable layouts.
 
 - Windows, tabs, sections, buttons, toggles, sliders, dropdowns, inputs, keybinds, color pickers, and paragraphs
@@ -70,6 +72,8 @@ local Window = DimensiUI:CreateWindow({
     TabWidth = 160,
     Size = UDim2.fromOffset(580, 420),
     Theme = "Dimensi", -- Midnight visual preset (backwards-compatible theme key)
+    MinimizeKey = Enum.KeyCode.RightControl,
+    MinimizeImage = "rbxassetid://YOUR_D_ICON_IMAGE_ID", -- upload d-icon.png first
 })
 
 local Tab = Window:AddTab({ Title = "Main", Icon = "home" })
@@ -77,6 +81,20 @@ local Section = Tab:AddSection("Controls")
 Section:AddButton({
     Title = "Example",
     Callback = function() end,
+})
+```
+
+## Minimize button logo
+
+The package includes `d-icon.png`. Upload it as an image/decal in Roblox Creator Dashboard, then pass the resulting asset ID through `MinimizeImage` when creating the window. Roblox does not load a local PNG file directly from a script. The default minimize hotkey is `Enum.KeyCode.RightControl`; it can be overridden with `MinimizeKey`.
+
+Example:
+
+```lua
+local Window = DimensiUI:CreateWindow({
+    Title = "My UI",
+    MinimizeKey = Enum.KeyCode.RightControl,
+    MinimizeImage = "rbxassetid://YOUR_D_ICON_IMAGE_ID",
 })
 ```
 

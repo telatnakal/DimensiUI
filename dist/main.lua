@@ -1,5 +1,5 @@
 --[[
-    DimensiUI v1.1.2 (Bundled Single-File Build)
+    DimensiUI v1.2.1 (Bundled Single-File Build)
     Standalone DimensiUI | Theme: Dimensi | Author: telatnakal
 ]]
 
@@ -189,7 +189,7 @@ local Library = {
 	Name = "DimensiUI",
 	Author = "telatnakal",
 	Credit = "telatnakal",
-	Version = "1.1.2",
+	Version = "1.2.1",
 
 	OpenFrames = {},
 	Options = {},
@@ -205,7 +205,7 @@ local Library = {
 	_OpenDialogCount = 0,
 	Transparency = true,
 	MinimizeKeybind = nil,
-	MinimizeKey = Enum.KeyCode.LeftControl,
+	MinimizeKey = Enum.KeyCode.RightControl,
 
 	GUI = GUI,
 }
@@ -360,7 +360,8 @@ function Library:CreateWindow(Config)
 	Config.TabWidth = Config.TabWidth or 170
 	Config.Size = Config.Size or UDim2.fromOffset(590, 470)
 	Config.Theme = "Dimensi"
-	Config.MinimizeKey = Config.MinimizeKey or Enum.KeyCode.LeftControl
+	Config.MinimizeKey = Config.MinimizeKey or Enum.KeyCode.RightControl
+	assert(Config.MinimizeImage == nil or type(Config.MinimizeImage) == "string", "Window - MinimizeImage must be an image asset string")
 
 	if Library.Window then
 		print("You cannot create more than one window.")
@@ -373,6 +374,7 @@ function Library:CreateWindow(Config)
 		Title = Config.Title,
 		SubTitle = Config.SubTitle,
 		TabWidth = Config.TabWidth,
+		MinimizeImage = Config.MinimizeImage,
 	})
 
 	Library.MinimizeKey = Config.MinimizeKey
@@ -3241,6 +3243,58 @@ return function(Config)
 		Window = Window,
 	})
 
+	-- Floating restore button shown while the main window is minimized.
+	local MinimizeButton = New("ImageButton", {
+		Name = "DimensiRestoreButton",
+		Size = UDim2.fromOffset(64, 64),
+		Position = UDim2.new(1, -88, 0.5, -32),
+		BackgroundColor3 = Color3.fromRGB(18, 15, 32),
+		BackgroundTransparency = 0,
+		Image = Config.MinimizeImage or "",
+		ScaleType = Enum.ScaleType.Crop,
+		Visible = false,
+		ZIndex = 100,
+		Parent = Config.Parent,
+	}, {
+		New("UICorner", { CornerRadius = UDim.new(1, 0) }),
+		New("UIStroke", { Color = Color3.fromRGB(155, 91, 255), Thickness = 2, Transparency = 0.08 }),
+	})
+	Window.MinimizeButton = MinimizeButton
+	local FallbackLetter = New("TextLabel", {
+		Name = "FallbackD",
+		Size = UDim2.fromScale(1, 1),
+		BackgroundTransparency = 1,
+		Text = "D",
+		TextColor3 = Color3.fromRGB(211, 185, 255),
+		TextSize = 38,
+		Font = Enum.Font.GothamBold,
+		ZIndex = 101,
+		Visible = (Config.MinimizeImage or "") == "",
+		Parent = MinimizeButton,
+	})
+	Creator.AddSignal(MinimizeButton.Activated, function()
+		if Window.Minimized then Window:Minimize() end
+	end, MinimizeButton)
+	local DraggingRestore, DragStart, ButtonStart
+	Creator.AddSignal(MinimizeButton.InputBegan, function(Input)
+		if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
+			DraggingRestore = true
+			DragStart = Input.Position
+			ButtonStart = MinimizeButton.Position
+		end
+	end, MinimizeButton)
+	Creator.AddSignal(UserInputService.InputChanged, function(Input)
+		if DraggingRestore and (Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch) then
+			local Delta = Input.Position - DragStart
+			MinimizeButton.Position = UDim2.new(ButtonStart.X.Scale, ButtonStart.X.Offset + Delta.X, ButtonStart.Y.Scale, ButtonStart.Y.Offset + Delta.Y)
+		end
+	end, MinimizeButton)
+	Creator.AddSignal(UserInputService.InputEnded, function(Input)
+		if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
+			DraggingRestore = false
+		end
+	end, MinimizeButton)
+
 	-- The tab list starts below the brand block, which grows when a long title wraps.
 	local function LayoutSidebar()
 		local Brand = Window.TitleBar.Brand
@@ -3468,6 +3522,7 @@ return function(Config)
 	function Window:Minimize()
 		Window.Minimized = not Window.Minimized
 		Window.Root.Visible = not Window.Minimized
+		MinimizeButton.Visible = Window.Minimized
 		if not MinimizeNotif then
 			MinimizeNotif = true
 			local Key = Library.MinimizeKeybind and Library.MinimizeKeybind.Value or Library.MinimizeKey.Name
@@ -3485,6 +3540,7 @@ return function(Config)
 			if frame and frame.Parent then pcall(function() frame:Destroy() end) end
 			table.remove(Library.OpenFrames, index)
 		end
+		if MinimizeButton then MinimizeButton:Destroy() end
 		if Window.Root then Window.Root:Destroy() end
 	end
 
