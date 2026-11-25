@@ -14,9 +14,9 @@ return {
     -- Sidebar tab (selected / hover tint)
     Tab = Color3.fromRGB(33, 38, 48),
 
-    -- Feature rows use a solid Tone fill; hover subtly brightens the row.
-    ElementTransparency = 0,
-    HoverChange = 0.08,
+    -- Rows are transparent; hover fades the Tone fill in by HoverChange
+    ElementTransparency = 1,
+    HoverChange = 0.6,
 
     -- Toggle
     ToggleOff = Color3.fromRGB(58, 66, 80),
