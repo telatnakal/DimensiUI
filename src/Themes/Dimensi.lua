@@ -6,7 +6,7 @@ return {
     Accent = Color3.fromRGB(139, 120, 246),
 
     -- Surfaces (separated by tone, not by borders)
-    WindowBackground = Color3.fromRGB(16, 20, 31),
+    WindowBackground = Color3.fromRGB(23, 30, 45),
     Sidebar = Color3.fromRGB(23, 30, 45),
     Card = Color3.fromRGB(28, 37, 55),
     Tone = Color3.fromRGB(39, 49, 70),
