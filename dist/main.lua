@@ -2201,16 +2201,16 @@ return function(Title, Desc, Parent, Hover)
 		)
 
 		Creator.AddSignal(Element.Frame.MouseEnter, function()
-			SetTransparency(Creator.GetThemeProperty("ElementTransparency") - Creator.GetThemeProperty("HoverChange"))
+			SetTransparency(math.max(0, Creator.GetThemeProperty("ElementTransparency") - Creator.GetThemeProperty("HoverChange")))
 		end, Element.Frame)
 		Creator.AddSignal(Element.Frame.MouseLeave, function()
 			SetTransparency(Creator.GetThemeProperty("ElementTransparency"))
 		end, Element.Frame)
 		Creator.AddSignal(Element.Frame.MouseButton1Down, function()
-			SetTransparency(Creator.GetThemeProperty("ElementTransparency") - Creator.GetThemeProperty("HoverChange") - 0.15)
+			SetTransparency(math.max(0, Creator.GetThemeProperty("ElementTransparency") - Creator.GetThemeProperty("HoverChange") - 0.15))
 		end, Element.Frame)
 		Creator.AddSignal(Element.Frame.MouseButton1Up, function()
-			SetTransparency(Creator.GetThemeProperty("ElementTransparency") - Creator.GetThemeProperty("HoverChange"))
+			SetTransparency(math.max(0, Creator.GetThemeProperty("ElementTransparency") - Creator.GetThemeProperty("HoverChange")))
 		end, Element.Frame)
 	end
 
@@ -3007,8 +3007,10 @@ return function(Config)
 
 	TitleBar.Frame = New("Frame", {
 		Size = UDim2.new(1, 0, 0, 56),
-		BackgroundTransparency = 1,
+		BackgroundTransparency = 0,
+		BorderSizePixel = 0,
 		Parent = Config.Parent,
+		ThemeTag = { BackgroundColor3 = "WindowBackground" },
 	}, {
 		TitleBar.Brand,
 		New("Frame", {
@@ -5195,9 +5197,9 @@ return {
     -- Sidebar tab (selected / hover tint)
     Tab = Color3.fromRGB(33, 38, 48),
 
-    -- Rows are transparent; hover fades the Tone fill in by HoverChange
-    ElementTransparency = 1,
-    HoverChange = 0.6,
+    -- Feature rows use a solid Tone fill; hover subtly brightens the row.
+    ElementTransparency = 0,
+    HoverChange = 0.08,
 
     -- Toggle
     ToggleOff = Color3.fromRGB(58, 66, 80),

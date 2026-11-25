@@ -118,8 +118,10 @@ return function(Config)
 
 	TitleBar.Frame = New("Frame", {
 		Size = UDim2.new(1, 0, 0, 56),
-		BackgroundTransparency = 1,
+		BackgroundTransparency = 0,
+		BorderSizePixel = 0,
 		Parent = Config.Parent,
+		ThemeTag = { BackgroundColor3 = "WindowBackground" },
 	}, {
 		TitleBar.Brand,
 		New("Frame", {
