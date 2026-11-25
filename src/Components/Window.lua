@@ -462,14 +462,14 @@ return function(Config)
 		BubbleLetter,
 	})
 
-	function Window:SetIcon(Icon)
-		local Resolved = ResolveIcon(Icon)
-		BubbleIcon.Image = Resolved or ""
-		BubbleIcon.Visible = Resolved ~= nil
-		BubbleLetter.Visible = Resolved == nil
-		return Resolved ~= nil
-	end
-	Window:SetIcon(Config.Icon)
+	local IconPath = "d-icon.png"
+local IconUrl = "https://raw.githubusercontent.com/telatnakal/DimensiUI/main/Assets/d-icon.png"
+
+if not isfile(IconPath) then
+    writefile(IconPath, game:HttpGet(IconUrl))
+end
+
+Window:SetIcon(getcustomasset(IconPath))
 
 	local BubblePlaced = false
 	local function ClampBubble(X, Y)
