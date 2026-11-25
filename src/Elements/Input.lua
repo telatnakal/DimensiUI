@@ -39,7 +39,7 @@ function Element:New(Idx, Config)
 	local Textbox = require(Components.Textbox)(InputFrame.Frame, true)
 	Textbox.Frame.Position = UDim2.new(1, -12, 0.5, 0)
 	Textbox.Frame.AnchorPoint = Vector2.new(1, 0.5)
-	Textbox.Frame.Size = UDim2.fromOffset(136, 34)
+	Textbox.Frame.Size = UDim2.fromOffset(132, 30)
 	InputFrame.LabelHolder.Size = UDim2.new(1, -180, 0, 0)
 	Textbox.Input.Text = Config.Default or ""
 	Textbox.Input.PlaceholderText = Config.Placeholder or ""

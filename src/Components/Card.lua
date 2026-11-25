@@ -25,10 +25,10 @@ function Card.New(Parent)
 			CornerRadius = UDim.new(0, 12),
 		}),
 		New("UIPadding", {
-			PaddingTop = UDim.new(0, 5),
-			PaddingBottom = UDim.new(0, 5),
-			PaddingLeft = UDim.new(0, 5),
-			PaddingRight = UDim.new(0, 5),
+			PaddingTop = UDim.new(0, 3),
+			PaddingBottom = UDim.new(0, 3),
+			PaddingLeft = UDim.new(0, 3),
+			PaddingRight = UDim.new(0, 3),
 		}),
 		New("UIListLayout", {
 			SortOrder = Enum.SortOrder.LayoutOrder,

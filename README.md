@@ -5,15 +5,17 @@
 | Release metadata | Value |
 |---|---|
 | Project | DimensiUI |
-| Version | `1.1.0` |
+| Version | `1.1.2` |
 | Release type | Stable Release |
 | Author | telatnakal |
 | Theme | Midnight (navy-violet) |
 | Runtime | Roblox Lua / Luau |
 
-- **Version:** 1.1.0
+**Version:** 1.1.2
 
 ## Features
+
+- Compact settings rows and tighter card spacing for denser, more readable layouts.
 
 - Windows, tabs, sections, buttons, toggles, sliders, dropdowns, inputs, keybinds, color pickers, and paragraphs
 - Notifications and dialogs, including notification action buttons

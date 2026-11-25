@@ -46,7 +46,7 @@ local Library = {
 	Name = "DimensiUI",
 	Author = "telatnakal",
 	Credit = "telatnakal",
-	Version = "1.1.0",
+	Version = "1.1.2",
 
 	OpenFrames = {},
 	Options = {},

@@ -1,5 +1,5 @@
 --[[
-    DimensiUI v1.1.0 (Bundled Single-File Build)
+    DimensiUI v1.1.2 (Bundled Single-File Build)
     Standalone DimensiUI | Theme: Dimensi | Author: telatnakal
 ]]
 
@@ -189,7 +189,7 @@ local Library = {
 	Name = "DimensiUI",
 	Author = "telatnakal",
 	Credit = "telatnakal",
-	Version = "1.1.0",
+	Version = "1.1.2",
 
 	OpenFrames = {},
 	Options = {},
@@ -1819,10 +1819,10 @@ function Card.New(Parent)
 			CornerRadius = UDim.new(0, 12),
 		}),
 		New("UIPadding", {
-			PaddingTop = UDim.new(0, 5),
-			PaddingBottom = UDim.new(0, 5),
-			PaddingLeft = UDim.new(0, 5),
-			PaddingRight = UDim.new(0, 5),
+			PaddingTop = UDim.new(0, 3),
+			PaddingBottom = UDim.new(0, 3),
+			PaddingLeft = UDim.new(0, 3),
+			PaddingRight = UDim.new(0, 3),
 		}),
 		New("UIListLayout", {
 			SortOrder = Enum.SortOrder.LayoutOrder,
@@ -2107,15 +2107,15 @@ return function(Title, Desc, Parent, Hover)
 	}, {
 		New("UIListLayout", {
 			SortOrder = Enum.SortOrder.LayoutOrder,
-			Padding = UDim.new(0, 4),
+			Padding = UDim.new(0, 2),
 			VerticalAlignment = Enum.VerticalAlignment.Center,
 		}),
 		New("UIPadding", {
-			PaddingBottom = UDim.new(0, 11),
-			PaddingTop = UDim.new(0, 11),
+			PaddingBottom = UDim.new(0, 7),
+			PaddingTop = UDim.new(0, 7),
 		}),
 		New("UISizeConstraint", {
-			MinSize = Vector2.new(0, 54),
+			MinSize = Vector2.new(0, 44),
 		}),
 		Element.TitleLabel,
 		Element.DescLabel,
@@ -2518,12 +2518,12 @@ return function(Title, Parent)
 
 	-- Section.Container is the card that holds this section's rows.
 	Section.Container = Card.New(nil)
-	Section.Container.Position = UDim2.fromOffset(0, 28)
+	Section.Container.Position = UDim2.fromOffset(0, 24)
 	Section.Layout = Section.Container:FindFirstChildOfClass("UIListLayout")
 
 	Section.Root = New("Frame", {
 		BackgroundTransparency = 1,
-		Size = UDim2.new(1, 0, 0, 38),
+		Size = UDim2.new(1, 0, 0, 32),
 		LayoutOrder = 7,
 		Parent = Parent,
 	}, {
@@ -2535,7 +2535,7 @@ return function(Title, Parent)
 			TextSize = 14,
 			TextXAlignment = "Left",
 			TextYAlignment = "Center",
-			Size = UDim2.new(1, -16, 0, 18),
+			Size = UDim2.new(1, -16, 0, 16),
 			Position = UDim2.fromOffset(5, 0),
 			BackgroundTransparency = 1,
 			ThemeTag = {
@@ -2545,9 +2545,9 @@ return function(Title, Parent)
 		Section.Container,
 	})
 
-	-- Card height = rows + 8px of inner padding; the title takes the first 26px.
+	-- Card height = compact row stack + title spacing.
 	Creator.AddSignal(Section.Layout:GetPropertyChangedSignal("AbsoluteContentSize"), function()
-		Section.Root.Size = UDim2.new(1, 0, 0, Section.Layout.AbsoluteContentSize.Y + 10 + 28)
+		Section.Root.Size = UDim2.new(1, 0, 0, Section.Layout.AbsoluteContentSize.Y + 6 + 24)
 	end, Section.Root)
 
 	return Section
@@ -4200,7 +4200,7 @@ function Element:New(Idx, Config)
 	})
 
 	local DropdownInner = New("TextButton", {
-		Size = UDim2.fromOffset(136, 34),
+		Size = UDim2.fromOffset(132, 30),
 		Position = UDim2.new(1, -12, 0.5, 0),
 		AnchorPoint = Vector2.new(1, 0.5),
 		BackgroundTransparency = 0,
@@ -4689,7 +4689,7 @@ function Element:New(Idx, Config)
 	local Textbox = require(Components.Textbox)(InputFrame.Frame, true)
 	Textbox.Frame.Position = UDim2.new(1, -12, 0.5, 0)
 	Textbox.Frame.AnchorPoint = Vector2.new(1, 0.5)
-	Textbox.Frame.Size = UDim2.fromOffset(136, 34)
+	Textbox.Frame.Size = UDim2.fromOffset(132, 30)
 	InputFrame.LabelHolder.Size = UDim2.new(1, -180, 0, 0)
 	Textbox.Input.Text = Config.Default or ""
 	Textbox.Input.PlaceholderText = Config.Placeholder or ""
@@ -4806,7 +4806,7 @@ function Element:New(Idx, Config)
 	})
 
 	local KeybindDisplayFrame = New("TextButton", {
-		Size = UDim2.fromOffset(136, 34),
+		Size = UDim2.fromOffset(132, 30),
 		Position = UDim2.new(1, -12, 0.5, 0),
 		AnchorPoint = Vector2.new(1, 0.5),
 		BackgroundTransparency = 0,
