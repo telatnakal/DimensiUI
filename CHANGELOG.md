@@ -36,3 +36,13 @@
 - Added explicit Acrylic lifecycle cleanup and restoration of captured DepthOfField states during library destruction.
 - Library destruction now clears option and open-frame registries after releasing owned resources.
 - Rebuilt the standalone bundle from the modular source.
+
+
+## 1.2.3
+
+- Bound Acrylic blur component signals to their owning GUI instances so destroying a window or acrylic component releases its property listeners.
+- Tracked Acrylic model destruction cleanup and explicitly disconnect camera bindings when an Acrylic model is removed.
+- Bound notification close-button and dialog-button input connections to their owning GUI instances.
+- Added notification-holder teardown cleanup so its Acrylic model is destroyed even when the holder is removed externally.
+- Rebuilt the standalone bundle from modular source and extended static assertions for owner-bound cleanup.
+- Roblox runtime behavior remains unverified.

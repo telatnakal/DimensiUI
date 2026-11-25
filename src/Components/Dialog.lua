@@ -165,7 +165,7 @@ function Dialog:Create()
 			pcall(function()
 				NewDialog:Close()
 			end)
-		end)
+		end, Button.Frame)
 
 		return Button
 	end

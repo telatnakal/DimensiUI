@@ -73,10 +73,21 @@ assert "Themes.Dark" not in (SRC / "Creator.lua").read_text(), "Legacy theme fal
 
 assert (ROOT / "src/Packages/DimensiMotion/init.lua").exists(), "Native motion package missing"
 assert not (ROOT / "src/Packages/Flipper").exists(), "Legacy motion package still exists"
-assert 'Version = "1.2.1"' in (SRC / "init.lua").read_text(), "Version metadata mismatch"
+assert 'Version = "1.2.3"' in (SRC / "init.lua").read_text(), "Version metadata mismatch"
 assert 'function Library:CreateInstance()' in (SRC / "init.lua").read_text(), "CreateInstance alias is missing"
 assert 'function Library:AddCleanup(Callback)' in (SRC / "init.lua").read_text(), "Instance cleanup registration is missing"
 assert 'function Acrylic.Destroy()' in (SRC / "Acrylic/init.lua").read_text(), "Acrylic lifecycle cleanup is missing"
+acrylic_source = (SRC / "Acrylic/init.lua").read_text()
+assert "DepthOfFieldDefaults" not in acrylic_source and "Effect.Enabled = false" not in acrylic_source, "Acrylic must not disable effects owned by other systems"
+notification_source = (SRC / "Components/Notification.lua").read_text()
+assert 'GetPropertyChangedSignal("CurrentCamera")' in notification_source, "Notifications must rebind to replacement cameras"
+assert 'Notification button callback must be a function' in notification_source, "Notification button validation is missing"
+assert 'end, NewNotification.Holder)' in notification_source, "Notification close and acrylic cleanup must be owner-bound"
+acrylic_blur_source = (SRC / "Acrylic/AcrylicBlur.lua").read_text()
+assert 'end, comp)' in acrylic_blur_source and 'end, Parent)' in acrylic_blur_source, "Acrylic GUI signals must be owner-bound"
+assert 'model.Destroying:Connect' in acrylic_blur_source and 'Creator.DisconnectSignal(currentCameraConnection)' in acrylic_blur_source, "Acrylic model teardown must release camera bindings"
+window_dialog_source = (SRC / "Components/Window.lua").read_text()
+assert 'Config.Buttons = Config.Buttons or {}' in window_dialog_source, "Dialog Buttons must be optional"
 assert 'pcall(Acrylic.Destroy)' in (SRC / "init.lua").read_text(), "Library destroy must release Acrylic"
 assert 'function Library:NewInstance()' in (SRC / "init.lua").read_text(), "Multi Instance factory is missing"
 assert 'local __DimensiCaches = setmetatable({}, { __mode = "k" })' in bundle, "Bundle per-root module cache is missing"

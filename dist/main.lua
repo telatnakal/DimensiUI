@@ -174,7 +174,7 @@ local Library = {
 	Name = "DimensiUI",
 	Author = "telatnakal",
 	Credit = "telatnakal",
-	Version = "1.2.1",
+	Version = "1.2.3",
 
 	OpenFrames = {},
 	Options = {},
@@ -458,7 +458,6 @@ end
 
 __DimensiModules['Acrylic'] = function(script, require)
 local Lighting = game:GetService("Lighting")
-local Workspace = game:GetService("Workspace")
 
 local Acrylic = {
 	AcrylicBlur = require(script.AcrylicBlur),
@@ -467,52 +466,28 @@ local Acrylic = {
 }
 
 local BaseEffect
-local DepthOfFieldDefaults = {}
-local Initialized = false
 local Destroyed = false
 
-local function CaptureDefaults()
-	table.clear(DepthOfFieldDefaults)
-	local function Capture(Parent)
-		if not Parent then return end
-		for _, Object in ipairs(Parent:GetChildren()) do
-			if Object:IsA("DepthOfFieldEffect") and Object ~= BaseEffect then
-				DepthOfFieldDefaults[Object] = Object.Enabled
-			end
-		end
-	end
-	Capture(Lighting)
-	Capture(Workspace.CurrentCamera)
+local function CreateEffect()
+	local Effect = Instance.new("DepthOfFieldEffect")
+	Effect.Name = "DimensiUI_AcrylicBlur"
+	Effect.FarIntensity = 0
+	Effect.InFocusRadius = 0.1
+	Effect.NearIntensity = 1
+	return Effect
 end
 
 function Acrylic.init()
 	if Destroyed then return false end
-	if Initialized then
-		Acrylic.Enable()
-		return true
-	end
-
-	BaseEffect = Instance.new("DepthOfFieldEffect")
-	BaseEffect.Name = "DimensiUI_AcrylicBlur"
-	BaseEffect.FarIntensity = 0
-	BaseEffect.InFocusRadius = 0.1
-	BaseEffect.NearIntensity = 1
-	CaptureDefaults()
-	for Effect in pairs(DepthOfFieldDefaults) do
-		pcall(function() Effect.Enabled = false end)
+	if not BaseEffect then
+		BaseEffect = CreateEffect()
 	end
 	BaseEffect.Parent = Lighting
-	Initialized = true
 	return true
 end
 
 function Acrylic.Enable()
 	if Destroyed or not BaseEffect then return false end
-	for Effect in pairs(DepthOfFieldDefaults) do
-		if Effect and Effect.Parent then
-			pcall(function() Effect.Enabled = false end)
-		end
-	end
 	BaseEffect.Parent = Lighting
 	return true
 end
@@ -520,11 +495,6 @@ end
 function Acrylic.Disable()
 	if Destroyed or not BaseEffect then return false end
 	BaseEffect.Parent = nil
-	for Effect, WasEnabled in pairs(DepthOfFieldDefaults) do
-		if Effect and Effect.Parent then
-			pcall(function() Effect.Enabled = WasEnabled end)
-		end
-	end
 	return true
 end
 
@@ -535,13 +505,6 @@ function Acrylic.Destroy()
 		pcall(function() BaseEffect:Destroy() end)
 		BaseEffect = nil
 	end
-	for Effect, WasEnabled in pairs(DepthOfFieldDefaults) do
-		if Effect and Effect.Parent then
-			pcall(function() Effect.Enabled = WasEnabled end)
-		end
-	end
-	table.clear(DepthOfFieldDefaults)
-	Initialized = false
 end
 
 return Acrylic
@@ -1722,8 +1685,6 @@ local createAcrylic = require(script.Parent.CreateAcrylic)
 local viewportPointToWorld, getOffset = unpack(require(script.Parent.Utils))
 
 local function createAcrylicBlur(distance)
-	local cleanups = {}
-
 	distance = distance or 0.001
 	local positions = {
 		topLeft = Vector2.new(),
@@ -1793,15 +1754,12 @@ local function createAcrylicBlur(distance)
 	end))
 	bindCamera(workspaceService.CurrentCamera)
 
-	model.Destroying:Connect(function()
+	local modelDestroyConnection
+	modelDestroyConnection = Creator.TrackConnection(model.Destroying:Connect(function()
 		disconnectCamera()
 		Creator.DisconnectSignal(currentCameraConnection)
-		for _, item in cleanups do
-			pcall(function()
-				item:Disconnect()
-			end)
-		end
-	end)
+		Creator.DisconnectSignal(modelDestroyConnection)
+	end))
 
 
 	return onChange, model
@@ -1818,16 +1776,16 @@ return function(distance)
 
 	Creator.AddSignal(comp:GetPropertyChangedSignal("AbsolutePosition"), function()
 		onChange(comp)
-	end)
+	end, comp)
 
 	Creator.AddSignal(comp:GetPropertyChangedSignal("AbsoluteSize"), function()
 		onChange(comp)
-	end)
+	end, comp)
 
 	Blur.AddParent = function(Parent)
 		Creator.AddSignal(Parent:GetPropertyChangedSignal("Visible"), function()
 			Blur.SetVisibility(Parent.Visible)
-		end)
+		end, Parent)
 	end
 
 	Blur.SetVisibility = function(Value)
@@ -2282,7 +2240,7 @@ function Dialog:Create()
 			pcall(function()
 				NewDialog:Close()
 			end)
-		end)
+		end, Button.Frame)
 
 		return Button
 	end
@@ -2455,9 +2413,14 @@ local New = Creator.New
 local Notification = {}
 
 function Notification:Init(GUI)
+	local function GetViewportWidth()
+		local Camera = workspace.CurrentCamera
+		return Camera and Camera.ViewportSize.X or 800
+	end
+
 	Notification.Holder = New("Frame", {
 		Position = UDim2.new(1, -12, 1, -12),
-		Size = UDim2.new(0, math.max(220, math.min(310, workspace.CurrentCamera.ViewportSize.X - 24)), 1, -24),
+		Size = UDim2.new(0, math.max(220, math.min(310, GetViewportWidth() - 24)), 1, -24),
 		AnchorPoint = Vector2.new(1, 1),
 		BackgroundTransparency = 1,
 		Parent = GUI,
@@ -2469,14 +2432,30 @@ function Notification:Init(GUI)
 			Padding = UDim.new(0, 10),
 		}),
 	})
-	local Camera = workspace.CurrentCamera
-	if Camera then
-		Creator.AddSignal(Camera:GetPropertyChangedSignal("ViewportSize"), function()
-			if Notification.Holder and Notification.Holder.Parent then
-				Notification.Holder.Size = UDim2.new(0, math.max(220, math.min(310, Camera.ViewportSize.X - 24)), 1, -24)
-			end
-		end, GUI)
+
+	local function UpdateWidth()
+		if Notification.Holder and Notification.Holder.Parent then
+			Notification.Holder.Size = UDim2.new(0, math.max(220, math.min(310, GetViewportWidth() - 24)), 1, -24)
+		end
 	end
+
+	local BoundCamera
+	local CameraConnection
+	local function BindCamera(Camera)
+		if Camera == BoundCamera then return end
+		if CameraConnection then Creator.DisconnectSignal(CameraConnection) end
+		BoundCamera = Camera
+		CameraConnection = nil
+		if Camera then
+			CameraConnection = Creator.AddSignal(Camera:GetPropertyChangedSignal("ViewportSize"), UpdateWidth, GUI)
+		end
+		UpdateWidth()
+	end
+
+	BindCamera(workspace.CurrentCamera)
+	Creator.AddSignal(workspace:GetPropertyChangedSignal("CurrentCamera"), function()
+		BindCamera(workspace.CurrentCamera)
+	end, GUI)
 end
 
 function Notification:New(Config)
@@ -2487,7 +2466,13 @@ function Notification:New(Config)
 	Config.SubContent = Config.SubContent or ""
 	Config.Duration = Config.Duration or nil
 	Config.Buttons = Config.Buttons or {}
+	assert(type(Config.Buttons) == "table", "Notification Buttons must be a table")
 	assert(type(Config.Title) == "string" and type(Config.Content) == "string" and type(Config.SubContent) == "string", "Notification text must be strings")
+	for Index, Button in ipairs(Config.Buttons) do
+		assert(type(Button) == "table", "Notification button #" .. Index .. " must be a table")
+		assert(type(Button.Title) == "string" and Button.Title ~= "", "Notification button #" .. Index .. " requires a title")
+		assert(Button.Callback == nil or type(Button.Callback) == "function", "Notification button callback must be a function")
+	end
 	local NewNotification = {
 		Closed = false,
 	}
@@ -2606,6 +2591,17 @@ function Notification:New(Config)
 		NewNotification.Root,
 	})
 
+	Creator.AddSignal(NewNotification.CloseButton.MouseButton1Click, function()
+		NewNotification:Close()
+	end, NewNotification.Holder)
+
+	Creator.AddSignal(NewNotification.Holder.Destroying, function()
+		local Paint = NewNotification.AcrylicPaint
+		if Paint and Paint.Model and Paint.Model.Parent then
+			pcall(function() Paint.Model:Destroy() end)
+		end
+	end, NewNotification.Holder)
+
 	local RootMotor = Creator.TrackMotor(Motion.GroupMotor.new({
 		Scale = 1,
 		Offset = 60,
@@ -2615,13 +2611,13 @@ function Notification:New(Config)
 		NewNotification.Root.Position = UDim2.new(Values.Scale, Values.Offset, 0, 0)
 	end)
 
-	Creator.AddSignal(NewNotification.CloseButton.MouseButton1Click, function()
-		NewNotification:Close()
-	end)
-
 	function NewNotification:Open()
 		local ContentSize = NewNotification.LabelHolder.AbsoluteSize.Y
-		NewNotification.Holder.Size = UDim2.new(1, 0, 0, 58 + ContentSize)
+		local ButtonHeight = NewNotification.ButtonHolder and 38 or 0
+		NewNotification.Holder.Size = UDim2.new(1, 0, 0, 58 + ContentSize + ButtonHeight)
+		if NewNotification.ButtonHolder then
+			NewNotification.ButtonHolder.Position = UDim2.new(0, 14, 0, 48 + ContentSize)
+		end
 
 		RootMotor:setGoal({
 			Scale = Spring(0, { frequency = 5 }),
@@ -2646,6 +2642,35 @@ function Notification:New(Config)
 				NewNotification.Holder:Destroy()
 			end
 		end)
+	end
+
+	if #Config.Buttons > 0 then
+		local ButtonHolder = New("Frame", {
+			Name = "ButtonHolder",
+			BackgroundTransparency = 1,
+			Position = UDim2.new(0, 14, 0, 0),
+			Size = UDim2.new(1, -28, 0, 30),
+			Parent = NewNotification.Root,
+		})
+		New("UIListLayout", {
+			FillDirection = Enum.FillDirection.Horizontal,
+			HorizontalAlignment = Enum.HorizontalAlignment.Right,
+			Padding = UDim.new(0, 6),
+			SortOrder = Enum.SortOrder.LayoutOrder,
+			Parent = ButtonHolder,
+		})
+		NewNotification.ButtonHolder = ButtonHolder
+		for Index, ButtonConfig in ipairs(Config.Buttons) do
+			local Button = require(script.Parent.Button)("", ButtonHolder, true)
+			Button.Title.Text = ButtonConfig.Title
+			Button.Frame.LayoutOrder = Index
+			Button.Frame.Size = UDim2.new(1 / #Config.Buttons, -((#Config.Buttons - 1) * 6 / #Config.Buttons), 0, 28)
+			Creator.AddSignal(Button.Frame.MouseButton1Click, function()
+				local Library = require(Root)
+				if ButtonConfig.Callback then Library:SafeCallback(ButtonConfig.Callback) end
+				NewNotification:Close()
+			end, NewNotification.Holder)
+		end
 	end
 
 	NewNotification:Open()
@@ -3555,6 +3580,12 @@ return function(Config)
 	local DialogModule = require(Components.Dialog):Init(Window)
 	function Window:Dialog(Config)
 		assert(type(Config) == "table" and type(Config.Title) == "string" and type(Config.Content) == "string", "Window:Dialog requires Title and Content strings")
+		Config.Buttons = Config.Buttons or {}
+		assert(type(Config.Buttons) == "table", "Window:Dialog Buttons must be a table")
+		for Index, Button in ipairs(Config.Buttons) do
+			assert(type(Button) == "table" and type(Button.Title) == "string" and Button.Title ~= "", "Window:Dialog button #" .. Index .. " requires a title")
+			assert(Button.Callback == nil or type(Button.Callback) == "function", "Window:Dialog button callback must be a function")
+		end
 		if require(Root).Unloaded then return nil end
 		local Dialog = DialogModule:Create()
 		Dialog.Title.Text = Config.Title

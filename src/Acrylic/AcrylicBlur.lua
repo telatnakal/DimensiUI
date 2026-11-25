@@ -3,8 +3,6 @@ local createAcrylic = require(script.Parent.CreateAcrylic)
 local viewportPointToWorld, getOffset = unpack(require(script.Parent.Utils))
 
 local function createAcrylicBlur(distance)
-	local cleanups = {}
-
 	distance = distance or 0.001
 	local positions = {
 		topLeft = Vector2.new(),
@@ -74,15 +72,12 @@ local function createAcrylicBlur(distance)
 	end))
 	bindCamera(workspaceService.CurrentCamera)
 
-	model.Destroying:Connect(function()
+	local modelDestroyConnection
+	modelDestroyConnection = Creator.TrackConnection(model.Destroying:Connect(function()
 		disconnectCamera()
 		Creator.DisconnectSignal(currentCameraConnection)
-		for _, item in cleanups do
-			pcall(function()
-				item:Disconnect()
-			end)
-		end
-	end)
+		Creator.DisconnectSignal(modelDestroyConnection)
+	end))
 
 
 	return onChange, model
@@ -99,16 +94,16 @@ return function(distance)
 
 	Creator.AddSignal(comp:GetPropertyChangedSignal("AbsolutePosition"), function()
 		onChange(comp)
-	end)
+	end, comp)
 
 	Creator.AddSignal(comp:GetPropertyChangedSignal("AbsoluteSize"), function()
 		onChange(comp)
-	end)
+	end, comp)
 
 	Blur.AddParent = function(Parent)
 		Creator.AddSignal(Parent:GetPropertyChangedSignal("Visible"), function()
 			Blur.SetVisibility(Parent.Visible)
-		end)
+		end, Parent)
 	end
 
 	Blur.SetVisibility = function(Value)

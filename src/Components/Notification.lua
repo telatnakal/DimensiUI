@@ -11,9 +11,14 @@ local New = Creator.New
 local Notification = {}
 
 function Notification:Init(GUI)
+	local function GetViewportWidth()
+		local Camera = workspace.CurrentCamera
+		return Camera and Camera.ViewportSize.X or 800
+	end
+
 	Notification.Holder = New("Frame", {
 		Position = UDim2.new(1, -12, 1, -12),
-		Size = UDim2.new(0, math.max(220, math.min(310, workspace.CurrentCamera.ViewportSize.X - 24)), 1, -24),
+		Size = UDim2.new(0, math.max(220, math.min(310, GetViewportWidth() - 24)), 1, -24),
 		AnchorPoint = Vector2.new(1, 1),
 		BackgroundTransparency = 1,
 		Parent = GUI,
@@ -25,14 +30,30 @@ function Notification:Init(GUI)
 			Padding = UDim.new(0, 10),
 		}),
 	})
-	local Camera = workspace.CurrentCamera
-	if Camera then
-		Creator.AddSignal(Camera:GetPropertyChangedSignal("ViewportSize"), function()
-			if Notification.Holder and Notification.Holder.Parent then
-				Notification.Holder.Size = UDim2.new(0, math.max(220, math.min(310, Camera.ViewportSize.X - 24)), 1, -24)
-			end
-		end, GUI)
+
+	local function UpdateWidth()
+		if Notification.Holder and Notification.Holder.Parent then
+			Notification.Holder.Size = UDim2.new(0, math.max(220, math.min(310, GetViewportWidth() - 24)), 1, -24)
+		end
 	end
+
+	local BoundCamera
+	local CameraConnection
+	local function BindCamera(Camera)
+		if Camera == BoundCamera then return end
+		if CameraConnection then Creator.DisconnectSignal(CameraConnection) end
+		BoundCamera = Camera
+		CameraConnection = nil
+		if Camera then
+			CameraConnection = Creator.AddSignal(Camera:GetPropertyChangedSignal("ViewportSize"), UpdateWidth, GUI)
+		end
+		UpdateWidth()
+	end
+
+	BindCamera(workspace.CurrentCamera)
+	Creator.AddSignal(workspace:GetPropertyChangedSignal("CurrentCamera"), function()
+		BindCamera(workspace.CurrentCamera)
+	end, GUI)
 end
 
 function Notification:New(Config)
@@ -43,7 +64,13 @@ function Notification:New(Config)
 	Config.SubContent = Config.SubContent or ""
 	Config.Duration = Config.Duration or nil
 	Config.Buttons = Config.Buttons or {}
+	assert(type(Config.Buttons) == "table", "Notification Buttons must be a table")
 	assert(type(Config.Title) == "string" and type(Config.Content) == "string" and type(Config.SubContent) == "string", "Notification text must be strings")
+	for Index, Button in ipairs(Config.Buttons) do
+		assert(type(Button) == "table", "Notification button #" .. Index .. " must be a table")
+		assert(type(Button.Title) == "string" and Button.Title ~= "", "Notification button #" .. Index .. " requires a title")
+		assert(Button.Callback == nil or type(Button.Callback) == "function", "Notification button callback must be a function")
+	end
 	local NewNotification = {
 		Closed = false,
 	}
@@ -162,6 +189,17 @@ function Notification:New(Config)
 		NewNotification.Root,
 	})
 
+	Creator.AddSignal(NewNotification.CloseButton.MouseButton1Click, function()
+		NewNotification:Close()
+	end, NewNotification.Holder)
+
+	Creator.AddSignal(NewNotification.Holder.Destroying, function()
+		local Paint = NewNotification.AcrylicPaint
+		if Paint and Paint.Model and Paint.Model.Parent then
+			pcall(function() Paint.Model:Destroy() end)
+		end
+	end, NewNotification.Holder)
+
 	local RootMotor = Creator.TrackMotor(Motion.GroupMotor.new({
 		Scale = 1,
 		Offset = 60,
@@ -171,13 +209,13 @@ function Notification:New(Config)
 		NewNotification.Root.Position = UDim2.new(Values.Scale, Values.Offset, 0, 0)
 	end)
 
-	Creator.AddSignal(NewNotification.CloseButton.MouseButton1Click, function()
-		NewNotification:Close()
-	end)
-
 	function NewNotification:Open()
 		local ContentSize = NewNotification.LabelHolder.AbsoluteSize.Y
-		NewNotification.Holder.Size = UDim2.new(1, 0, 0, 58 + ContentSize)
+		local ButtonHeight = NewNotification.ButtonHolder and 38 or 0
+		NewNotification.Holder.Size = UDim2.new(1, 0, 0, 58 + ContentSize + ButtonHeight)
+		if NewNotification.ButtonHolder then
+			NewNotification.ButtonHolder.Position = UDim2.new(0, 14, 0, 48 + ContentSize)
+		end
 
 		RootMotor:setGoal({
 			Scale = Spring(0, { frequency = 5 }),
@@ -202,6 +240,35 @@ function Notification:New(Config)
 				NewNotification.Holder:Destroy()
 			end
 		end)
+	end
+
+	if #Config.Buttons > 0 then
+		local ButtonHolder = New("Frame", {
+			Name = "ButtonHolder",
+			BackgroundTransparency = 1,
+			Position = UDim2.new(0, 14, 0, 0),
+			Size = UDim2.new(1, -28, 0, 30),
+			Parent = NewNotification.Root,
+		})
+		New("UIListLayout", {
+			FillDirection = Enum.FillDirection.Horizontal,
+			HorizontalAlignment = Enum.HorizontalAlignment.Right,
+			Padding = UDim.new(0, 6),
+			SortOrder = Enum.SortOrder.LayoutOrder,
+			Parent = ButtonHolder,
+		})
+		NewNotification.ButtonHolder = ButtonHolder
+		for Index, ButtonConfig in ipairs(Config.Buttons) do
+			local Button = require(script.Parent.Button)("", ButtonHolder, true)
+			Button.Title.Text = ButtonConfig.Title
+			Button.Frame.LayoutOrder = Index
+			Button.Frame.Size = UDim2.new(1 / #Config.Buttons, -((#Config.Buttons - 1) * 6 / #Config.Buttons), 0, 28)
+			Creator.AddSignal(Button.Frame.MouseButton1Click, function()
+				local Library = require(Root)
+				if ButtonConfig.Callback then Library:SafeCallback(ButtonConfig.Callback) end
+				NewNotification:Close()
+			end, NewNotification.Holder)
+		end
 	end
 
 	NewNotification:Open()

@@ -359,6 +359,12 @@ return function(Config)
 	local DialogModule = require(Components.Dialog):Init(Window)
 	function Window:Dialog(Config)
 		assert(type(Config) == "table" and type(Config.Title) == "string" and type(Config.Content) == "string", "Window:Dialog requires Title and Content strings")
+		Config.Buttons = Config.Buttons or {}
+		assert(type(Config.Buttons) == "table", "Window:Dialog Buttons must be a table")
+		for Index, Button in ipairs(Config.Buttons) do
+			assert(type(Button) == "table" and type(Button.Title) == "string" and Button.Title ~= "", "Window:Dialog button #" .. Index .. " requires a title")
+			assert(Button.Callback == nil or type(Button.Callback) == "function", "Window:Dialog button callback must be a function")
+		end
 		if require(Root).Unloaded then return nil end
 		local Dialog = DialogModule:Create()
 		Dialog.Title.Text = Config.Title
