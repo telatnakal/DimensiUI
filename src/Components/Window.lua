@@ -452,41 +452,30 @@ return function(Config)
 	})
 
 	-- Load icon from GitHub
-	local IconPath = "d-icon.png"
-	local IconUrl = "https://raw.githubusercontent.com/telatnakal/DimensiUI/main/Assets/d-icon.png"
+	local IconPath = "DimensiUI_d-icon.png"
+local IconUrl = "https://raw.githubusercontent.com/telatnakal/DimensiUI/main/Assets/d-icon.png"
 
-	function Window:SetIcon(Icon)
-		local success, result = pcall(function()
-			if type(isfile) ~= "function"
-				or type(writefile) ~= "function"
-				or type(getcustomasset) ~= "function" then
-				error("Executor does not support custom assets")
-			end
+local success, result = pcall(function()
+    local response = game:HttpGet(IconUrl)
+    assert(#response > 1000, "File PNG tidak berhasil diunduh")
 
-			if not isfile(IconPath) then
-				local response = game:HttpGet(IconUrl)
-				assert(type(response) == "string" and #response > 0, "Empty image response")
-				writefile(IconPath, response)
-			end
+    writefile(IconPath, response)
 
-			return getcustomasset(IconPath)
-		end)
+    local asset = getcustomasset(IconPath)
+    assert(asset, "getcustomasset gagal")
 
-		if success and type(result) == "string" and result ~= "" then
-			BubbleIcon.Image = result
-			BubbleIcon.Visible = true
-			BubbleLetter.Visible = false
-			return true
-		end
+    BubbleIcon.Image = asset
+    BubbleIcon.Visible = true
+    BubbleLetter.Visible = false
 
-		warn("[DimensiUI] Icon loading failed:", result)
-		BubbleIcon.Image = ""
-		BubbleIcon.Visible = false
-		BubbleLetter.Visible = true
-		return false
-	end
+    return asset
+end)
 
-	Window:SetIcon(Config.Icon)
+if not success then
+    warn("[DimensiUI ICON ERROR] " .. tostring(result))
+    BubbleIcon.Visible = false
+    BubbleLetter.Visible = true
+end
 
 	local BubblePlaced = false
 
