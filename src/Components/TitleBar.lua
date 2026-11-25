@@ -67,57 +67,70 @@ return function(Config)
 		return Button
 	end
 
+	local BrandName = (Config.Brand or "DIMENSI-HUB"):upper()
+	local MapName = (game.Name and game.Name ~= "" and game.Name or "ROBLOX EXPERIENCE"):upper()
+
 	TitleBar.Brand = New("Frame", {
-		Position = UDim2.fromOffset(24, 12),
-		Size = UDim2.fromOffset(math.max(96, (Config.Window and Config.Window.TabWidth or 160) - 12), 0),
-		AutomaticSize = Enum.AutomaticSize.Y,
+		Position = UDim2.fromOffset(24, 0),
+		Size = UDim2.new(1, -116, 1, 0),
 		BackgroundTransparency = 1,
 	}, {
 		New("UIListLayout", {
-			Padding = UDim.new(0, 2),
+			FillDirection = Enum.FillDirection.Horizontal,
+			VerticalAlignment = Enum.VerticalAlignment.Center,
+			Padding = UDim.new(0, 8),
 			SortOrder = Enum.SortOrder.LayoutOrder,
 		}),
 		New("TextLabel", {
-			RichText = true,
-			Text = Config.Title,
+			Text = BrandName,
 			FontFace = Typography.SemiBold,
 			TextSize = 14,
 			TextXAlignment = "Left",
 			TextYAlignment = "Center",
-			TextWrapped = true,
-			AutomaticSize = Enum.AutomaticSize.Y,
-			Size = UDim2.new(1, 0, 0, 17),
+			AutomaticSize = Enum.AutomaticSize.X,
+			Size = UDim2.fromOffset(0, 24),
 			BackgroundTransparency = 1,
 			LayoutOrder = 1,
-			ThemeTag = {
-				TextColor3 = "Text",
-			},
+			ThemeTag = { TextColor3 = "Text" },
 		}),
 		New("TextLabel", {
-			RichText = true,
-			Text = Config.SubTitle,
-			TextTransparency = 0,
+			Text = "|",
 			FontFace = Typography.Regular,
-			TextSize = 11,
-			TextXAlignment = "Left",
-			TextYAlignment = "Center",
-			TextWrapped = true,
-			AutomaticSize = Enum.AutomaticSize.Y,
-			Size = UDim2.new(1, 0, 0, 14),
+			TextSize = 14,
+			Size = UDim2.fromOffset(8, 24),
 			BackgroundTransparency = 1,
 			LayoutOrder = 2,
-			ThemeTag = {
-				TextColor3 = "SubText",
-			},
+			ThemeTag = { TextColor3 = "Accent" },
+		}),
+		New("TextLabel", {
+			Text = MapName,
+			FontFace = Typography.Medium,
+			TextSize = 13,
+			TextXAlignment = "Left",
+			TextYAlignment = "Center",
+			TextTruncate = Enum.TextTruncate.AtEnd,
+			Size = UDim2.new(1, -150, 0, 24),
+			BackgroundTransparency = 1,
+			LayoutOrder = 3,
+			ThemeTag = { TextColor3 = "SubText" },
 		}),
 	})
 
 	TitleBar.Frame = New("Frame", {
 		Size = UDim2.new(1, 0, 0, 56),
-		BackgroundTransparency = 1,
+		BackgroundTransparency = 0,
+		BorderSizePixel = 0,
 		Parent = Config.Parent,
+		ThemeTag = { BackgroundColor3 = "WindowBackground" },
 	}, {
 		TitleBar.Brand,
+		New("Frame", {
+			Name = "HeaderDivider",
+			Position = UDim2.new(0, 0, 1, -1),
+			Size = UDim2.new(1, 0, 0, 1),
+			BorderSizePixel = 0,
+			ThemeTag = { BackgroundColor3 = "Divider" },
+		}),
 	})
 
 	TitleBar.CloseButton = BarButton(Assets.Close, UDim2.new(1, -12, 0, 12), TitleBar.Frame, function()

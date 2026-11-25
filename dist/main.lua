@@ -1,5 +1,5 @@
 --[[
-    DimensiUI v1.0.1 (Bundled Single-File Build)
+    DimensiUI v1.1.0 (Bundled Single-File Build)
     Standalone DimensiUI | Theme: Dimensi | Author: telatnakal
 ]]
 
@@ -189,7 +189,7 @@ local Library = {
 	Name = "DimensiUI",
 	Author = "telatnakal",
 	Credit = "telatnakal",
-	Version = "1.0.1",
+	Version = "1.1.0",
 
 	OpenFrames = {},
 	Options = {},
@@ -355,6 +355,7 @@ function Library:CreateWindow(Config)
 	assert(Config.Theme == nil or type(Config.Theme) == "string", "Window - Theme must be a string")
 	assert(Config.MinimizeKey == nil or (typeof(Config.MinimizeKey) == "EnumItem" and Config.MinimizeKey.EnumType == Enum.KeyCode), "Window - MinimizeKey must be a KeyCode")
 	assert(Config.SubTitle == nil or type(Config.SubTitle) == "string", "Window - SubTitle must be a string")
+	assert(Config.Brand == nil or type(Config.Brand) == "string", "Window - Brand must be a string")
 
 	Config.SubTitle = Config.SubTitle or ""
 	Config.TabWidth = Config.TabWidth or 170
@@ -372,6 +373,7 @@ function Library:CreateWindow(Config)
 		Size = Config.Size,
 		Title = Config.Title,
 		SubTitle = Config.SubTitle,
+		Brand = Config.Brand or "DIMENSI-HUB",
 		TabWidth = Config.TabWidth,
 	})
 
@@ -1819,8 +1821,8 @@ function Card.New(Parent)
 			CornerRadius = UDim.new(0, 14),
 		}),
 		New("UIPadding", {
-			PaddingTop = UDim.new(0, 4),
-			PaddingBottom = UDim.new(0, 4),
+			PaddingTop = UDim.new(0, 3),
+			PaddingBottom = UDim.new(0, 3),
 			PaddingLeft = UDim.new(0, 4),
 			PaddingRight = UDim.new(0, 4),
 		}),
@@ -2111,8 +2113,8 @@ return function(Title, Desc, Parent, Hover)
 			VerticalAlignment = Enum.VerticalAlignment.Center,
 		}),
 		New("UIPadding", {
-			PaddingBottom = UDim.new(0, 10),
-			PaddingTop = UDim.new(0, 10),
+			PaddingBottom = UDim.new(0, 8),
+			PaddingTop = UDim.new(0, 8),
 		}),
 		New("UISizeConstraint", {
 			MinSize = Vector2.new(0, 48),
@@ -2199,16 +2201,16 @@ return function(Title, Desc, Parent, Hover)
 		)
 
 		Creator.AddSignal(Element.Frame.MouseEnter, function()
-			SetTransparency(Creator.GetThemeProperty("ElementTransparency") - Creator.GetThemeProperty("HoverChange"))
+			SetTransparency(math.max(0, Creator.GetThemeProperty("ElementTransparency") - Creator.GetThemeProperty("HoverChange")))
 		end, Element.Frame)
 		Creator.AddSignal(Element.Frame.MouseLeave, function()
 			SetTransparency(Creator.GetThemeProperty("ElementTransparency"))
 		end, Element.Frame)
 		Creator.AddSignal(Element.Frame.MouseButton1Down, function()
-			SetTransparency(Creator.GetThemeProperty("ElementTransparency") - Creator.GetThemeProperty("HoverChange") - 0.15)
+			SetTransparency(math.max(0, Creator.GetThemeProperty("ElementTransparency") - Creator.GetThemeProperty("HoverChange") - 0.15))
 		end, Element.Frame)
 		Creator.AddSignal(Element.Frame.MouseButton1Up, function()
-			SetTransparency(Creator.GetThemeProperty("ElementTransparency") - Creator.GetThemeProperty("HoverChange"))
+			SetTransparency(math.max(0, Creator.GetThemeProperty("ElementTransparency") - Creator.GetThemeProperty("HoverChange")))
 		end, Element.Frame)
 	end
 
@@ -2518,12 +2520,12 @@ return function(Title, Parent)
 
 	-- Section.Container is the card that holds this section's rows.
 	Section.Container = Card.New(nil)
-	Section.Container.Position = UDim2.fromOffset(0, 26)
+	Section.Container.Position = UDim2.fromOffset(0, 24)
 	Section.Layout = Section.Container:FindFirstChildOfClass("UIListLayout")
 
 	Section.Root = New("Frame", {
 		BackgroundTransparency = 1,
-		Size = UDim2.new(1, 0, 0, 34),
+		Size = UDim2.new(1, 0, 0, 30),
 		LayoutOrder = 7,
 		Parent = Parent,
 	}, {
@@ -2535,7 +2537,7 @@ return function(Title, Parent)
 			TextSize = 12,
 			TextXAlignment = "Left",
 			TextYAlignment = "Center",
-			Size = UDim2.new(1, -16, 0, 18),
+			Size = UDim2.new(1, -16, 0, 16),
 			Position = UDim2.fromOffset(4, 0),
 			BackgroundTransparency = 1,
 			ThemeTag = {
@@ -2547,7 +2549,7 @@ return function(Title, Parent)
 
 	-- Card height = rows + 8px of inner padding; the title takes the first 26px.
 	Creator.AddSignal(Section.Layout:GetPropertyChangedSignal("AbsoluteContentSize"), function()
-		Section.Root.Size = UDim2.new(1, 0, 0, Section.Layout.AbsoluteContentSize.Y + 8 + 26)
+		Section.Root.Size = UDim2.new(1, 0, 0, Section.Layout.AbsoluteContentSize.Y + 8 + 24)
 	end, Section.Root)
 
 	return Section
@@ -2667,7 +2669,7 @@ function TabModule:New(Title, Icon, Parent)
 	})
 
 	local ContainerLayout = New("UIListLayout", {
-		Padding = UDim.new(0, 20),
+		Padding = UDim.new(0, 16),
 		SortOrder = Enum.SortOrder.LayoutOrder,
 	})
 
@@ -2679,9 +2681,10 @@ function TabModule:New(Title, Icon, Parent)
 		BottomImage = "rbxassetid://6889812791",
 		MidImage = "rbxassetid://6889812721",
 		TopImage = "rbxassetid://6276641225",
-		ScrollBarImageColor3 = Color3.fromRGB(150, 158, 172),
-		ScrollBarImageTransparency = 0.7,
-		ScrollBarThickness = 3,
+		ScrollBarImageColor3 = Color3.fromRGB(139, 92, 246),
+		ScrollBarImageTransparency = 0.48,
+		ScrollBarThickness = 2,
+		ElasticBehavior = Enum.ElasticBehavior.WhenScrollable,
 		BorderSizePixel = 0,
 		CanvasSize = UDim2.fromScale(0, 0),
 		ScrollingDirection = Enum.ScrollingDirection.Y,
@@ -2756,7 +2759,6 @@ function TabModule:SelectTab(Tab)
 	TabObject.SetTransparency(TINT_SELECTED)
 	TabObject.Selected = true
 	SetActive(TabObject, true)
-	Window.TabDisplay.Text = TabObject.Name
 	task.spawn(function()
 		if Generation ~= TabModule.SelectionGeneration or require(Root).Unloaded then return end
 		Window.ContainerPosMotor:setGoal(Spring(Window.ContentTop + 16, { frequency = 10 }))
@@ -2954,57 +2956,70 @@ return function(Config)
 		return Button
 	end
 
+	local BrandName = (Config.Brand or "DIMENSI-HUB"):upper()
+	local MapName = (game.Name and game.Name ~= "" and game.Name or "ROBLOX EXPERIENCE"):upper()
+
 	TitleBar.Brand = New("Frame", {
-		Position = UDim2.fromOffset(24, 12),
-		Size = UDim2.fromOffset(math.max(96, (Config.Window and Config.Window.TabWidth or 160) - 12), 0),
-		AutomaticSize = Enum.AutomaticSize.Y,
+		Position = UDim2.fromOffset(24, 0),
+		Size = UDim2.new(1, -116, 1, 0),
 		BackgroundTransparency = 1,
 	}, {
 		New("UIListLayout", {
-			Padding = UDim.new(0, 2),
+			FillDirection = Enum.FillDirection.Horizontal,
+			VerticalAlignment = Enum.VerticalAlignment.Center,
+			Padding = UDim.new(0, 8),
 			SortOrder = Enum.SortOrder.LayoutOrder,
 		}),
 		New("TextLabel", {
-			RichText = true,
-			Text = Config.Title,
+			Text = BrandName,
 			FontFace = Typography.SemiBold,
 			TextSize = 14,
 			TextXAlignment = "Left",
 			TextYAlignment = "Center",
-			TextWrapped = true,
-			AutomaticSize = Enum.AutomaticSize.Y,
-			Size = UDim2.new(1, 0, 0, 17),
+			AutomaticSize = Enum.AutomaticSize.X,
+			Size = UDim2.fromOffset(0, 24),
 			BackgroundTransparency = 1,
 			LayoutOrder = 1,
-			ThemeTag = {
-				TextColor3 = "Text",
-			},
+			ThemeTag = { TextColor3 = "Text" },
 		}),
 		New("TextLabel", {
-			RichText = true,
-			Text = Config.SubTitle,
-			TextTransparency = 0,
+			Text = "|",
 			FontFace = Typography.Regular,
-			TextSize = 11,
-			TextXAlignment = "Left",
-			TextYAlignment = "Center",
-			TextWrapped = true,
-			AutomaticSize = Enum.AutomaticSize.Y,
-			Size = UDim2.new(1, 0, 0, 14),
+			TextSize = 14,
+			Size = UDim2.fromOffset(8, 24),
 			BackgroundTransparency = 1,
 			LayoutOrder = 2,
-			ThemeTag = {
-				TextColor3 = "SubText",
-			},
+			ThemeTag = { TextColor3 = "Accent" },
+		}),
+		New("TextLabel", {
+			Text = MapName,
+			FontFace = Typography.Medium,
+			TextSize = 13,
+			TextXAlignment = "Left",
+			TextYAlignment = "Center",
+			TextTruncate = Enum.TextTruncate.AtEnd,
+			Size = UDim2.new(1, -150, 0, 24),
+			BackgroundTransparency = 1,
+			LayoutOrder = 3,
+			ThemeTag = { TextColor3 = "SubText" },
 		}),
 	})
 
 	TitleBar.Frame = New("Frame", {
 		Size = UDim2.new(1, 0, 0, 56),
-		BackgroundTransparency = 1,
+		BackgroundTransparency = 0,
+		BorderSizePixel = 0,
 		Parent = Config.Parent,
+		ThemeTag = { BackgroundColor3 = "WindowBackground" },
 	}, {
 		TitleBar.Brand,
+		New("Frame", {
+			Name = "HeaderDivider",
+			Position = UDim2.new(0, 0, 1, -1),
+			Size = UDim2.new(1, 0, 0, 1),
+			BorderSizePixel = 0,
+			ThemeTag = { BackgroundColor3 = "Divider" },
+		}),
 	})
 
 	TitleBar.CloseButton = BarButton(Assets.Close, UDim2.new(1, -12, 0, 12), TitleBar.Frame, function()
@@ -3072,7 +3087,7 @@ return function(Config)
 		Minimized = false,
 		Size = UDim2.fromOffset(initialWidth, initialHeight),
 		TabWidth = initialTabWidth,
-		ContentTop = 68,
+		ContentTop = 72,
 		CurrentPos = 0,
 		Position = UDim2.fromOffset(
 			math.max(12, viewport.X / 2 - initialWidth / 2),
@@ -3108,7 +3123,8 @@ return function(Config)
 	})
 
 	Window.Sidebar = New("Frame", {
-		Size = UDim2.new(0, Window.TabWidth + 24, 1, 0),
+		Size = UDim2.new(0, Window.TabWidth + 24, 1, -56),
+		Position = UDim2.fromOffset(0, 56),
 		BackgroundTransparency = 0,
 		BorderSizePixel = 0,
 		ThemeTag = {
@@ -3133,34 +3149,18 @@ return function(Config)
 	})
 
 	local TabFrame = New("Frame", {
-		Size = UDim2.new(0, Window.TabWidth, 1, -76),
-		Position = UDim2.new(0, 12, 0, 64),
+		Size = UDim2.new(0, Window.TabWidth, 1, -84),
+		Position = UDim2.new(0, 12, 0, 72),
 		BackgroundTransparency = 1,
 		ClipsDescendants = true,
 	}, {
 		Window.TabHolder,
 	})
 
-	Window.TabDisplay = New("TextLabel", {
-		RichText = true,
-		Text = "Tab",
-		TextTransparency = 0,
-		FontFace = Typography.SemiBold,
-		TextSize = 18,
-		TextXAlignment = "Left",
-		TextYAlignment = "Center",
-		TextTruncate = Enum.TextTruncate.AtEnd,
-		Size = UDim2.new(1, -(Window.TabWidth + 144), 0, 28),
-		Position = UDim2.fromOffset(Window.TabWidth + 48, 14),
-		BackgroundTransparency = 1,
-		ThemeTag = {
-			TextColor3 = "Text",
-		},
-	})
 
 	Window.ContainerHolder = New("CanvasGroup", {
-		Size = UDim2.new(1, -(Window.TabWidth + 72), 1, -(Window.ContentTop + 20)),
-		Position = UDim2.fromOffset(Window.TabWidth + 48, Window.ContentTop),
+		Size = UDim2.new(1, -(Window.TabWidth + 64), 1, -(Window.ContentTop + 16)),
+		Position = UDim2.fromOffset(Window.TabWidth + 40, Window.ContentTop),
 		BackgroundTransparency = 1,
 	})
 
@@ -3173,7 +3173,6 @@ return function(Config)
 	}, {
 		Window.Surface.Frame,
 		Window.Sidebar,
-		Window.TabDisplay,
 		Window.ContainerHolder,
 		TabFrame,
 		ResizeStartFrame,
@@ -3182,6 +3181,7 @@ return function(Config)
 	Window.TitleBar = require(script.Parent.TitleBar)({
 		Title = Config.Title,
 		SubTitle = Config.SubTitle,
+		Brand = Config.Brand,
 		Parent = Window.Root,
 		Window = Window,
 	})
@@ -3189,7 +3189,7 @@ return function(Config)
 	-- The tab list starts below the brand block, which grows when a long title wraps.
 	local function LayoutSidebar()
 		local Brand = Window.TitleBar.Brand
-		local Top = math.max(64, Brand.Position.Y.Offset + Brand.AbsoluteSize.Y + 18)
+		local Top = 72
 		TabFrame.Position = UDim2.fromOffset(12, Top)
 		TabFrame.Size = UDim2.new(0, Window.TabWidth, 1, -(Top + 12))
 	end
@@ -3221,7 +3221,7 @@ return function(Config)
 	end)
 
 	Window.ContainerPosMotor:onStep(function(Value)
-		Window.ContainerHolder.Position = UDim2.fromOffset(Window.TabWidth + 48, Value)
+		Window.ContainerHolder.Position = UDim2.fromOffset(Window.TabWidth + 40, Value)
 	end)
 
 	Creator.AddSignal(Window.TitleBar.Frame.InputBegan, function(Input)
@@ -3324,13 +3324,12 @@ return function(Config)
 		Window.TabWidth = isMobile and math.clamp(Window.TabWidth, 92, 108) or math.clamp(Window.TabWidth, 120, 220)
 		SizeMotor:setGoal({ X = Instant(width), Y = Instant(height) })
 		PosMotor:setGoal({ X = Instant(x), Y = Instant(y) })
-		Window.Sidebar.Size = UDim2.new(0, Window.TabWidth + 24, 1, 0)
-		Window.TitleBar.Brand.Size = UDim2.fromOffset(math.max(96, Window.TabWidth - 12), 0)
+		Window.Sidebar.Size = UDim2.new(0, Window.TabWidth + 24, 1, -56)
+		Window.Sidebar.Position = UDim2.fromOffset(0, 56)
+		Window.TitleBar.Brand.Size = UDim2.new(1, -116, 1, 0)
 		LayoutSidebar()
-		Window.TabDisplay.Size = UDim2.new(1, -(Window.TabWidth + 144), 0, 28)
-		Window.TabDisplay.Position = UDim2.fromOffset(Window.TabWidth + 48, 14)
-		Window.ContainerHolder.Size = UDim2.new(1, -(Window.TabWidth + 72), 1, -(Window.ContentTop + 20))
-		Window.ContainerHolder.Position = UDim2.fromOffset(Window.TabWidth + 48, Window.ContentTop)
+		Window.ContainerHolder.Size = UDim2.new(1, -(Window.TabWidth + 64), 1, -(Window.ContentTop + 16))
+		Window.ContainerHolder.Position = UDim2.fromOffset(Window.TabWidth + 40, Window.ContentTop)
 	end
 
 	local ViewportConnection
@@ -5198,9 +5197,9 @@ return {
     -- Sidebar tab (selected / hover tint)
     Tab = Color3.fromRGB(33, 38, 48),
 
-    -- Rows are transparent; hover fades the Tone fill in by HoverChange
-    ElementTransparency = 1,
-    HoverChange = 0.6,
+    -- Feature rows use a solid Tone fill; hover subtly brightens the row.
+    ElementTransparency = 0,
+    HoverChange = 0.08,
 
     -- Toggle
     ToggleOff = Color3.fromRGB(58, 66, 80),

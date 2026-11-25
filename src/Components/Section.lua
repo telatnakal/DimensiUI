@@ -10,12 +10,12 @@ return function(Title, Parent)
 
 	-- Section.Container is the card that holds this section's rows.
 	Section.Container = Card.New(nil)
-	Section.Container.Position = UDim2.fromOffset(0, 26)
+	Section.Container.Position = UDim2.fromOffset(0, 24)
 	Section.Layout = Section.Container:FindFirstChildOfClass("UIListLayout")
 
 	Section.Root = New("Frame", {
 		BackgroundTransparency = 1,
-		Size = UDim2.new(1, 0, 0, 34),
+		Size = UDim2.new(1, 0, 0, 30),
 		LayoutOrder = 7,
 		Parent = Parent,
 	}, {
@@ -27,7 +27,7 @@ return function(Title, Parent)
 			TextSize = 12,
 			TextXAlignment = "Left",
 			TextYAlignment = "Center",
-			Size = UDim2.new(1, -16, 0, 18),
+			Size = UDim2.new(1, -16, 0, 16),
 			Position = UDim2.fromOffset(4, 0),
 			BackgroundTransparency = 1,
 			ThemeTag = {
@@ -39,7 +39,7 @@ return function(Title, Parent)
 
 	-- Card height = rows + 8px of inner padding; the title takes the first 26px.
 	Creator.AddSignal(Section.Layout:GetPropertyChangedSignal("AbsoluteContentSize"), function()
-		Section.Root.Size = UDim2.new(1, 0, 0, Section.Layout.AbsoluteContentSize.Y + 8 + 26)
+		Section.Root.Size = UDim2.new(1, 0, 0, Section.Layout.AbsoluteContentSize.Y + 8 + 24)
 	end, Section.Root)
 
 	return Section

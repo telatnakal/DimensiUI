@@ -37,7 +37,7 @@ return function(Config)
 		Minimized = false,
 		Size = UDim2.fromOffset(initialWidth, initialHeight),
 		TabWidth = initialTabWidth,
-		ContentTop = 68,
+		ContentTop = 72,
 		CurrentPos = 0,
 		Position = UDim2.fromOffset(
 			math.max(12, viewport.X / 2 - initialWidth / 2),
@@ -73,7 +73,8 @@ return function(Config)
 	})
 
 	Window.Sidebar = New("Frame", {
-		Size = UDim2.new(0, Window.TabWidth + 24, 1, 0),
+		Size = UDim2.new(0, Window.TabWidth + 24, 1, -56),
+		Position = UDim2.fromOffset(0, 56),
 		BackgroundTransparency = 0,
 		BorderSizePixel = 0,
 		ThemeTag = {
@@ -98,34 +99,18 @@ return function(Config)
 	})
 
 	local TabFrame = New("Frame", {
-		Size = UDim2.new(0, Window.TabWidth, 1, -76),
-		Position = UDim2.new(0, 12, 0, 64),
+		Size = UDim2.new(0, Window.TabWidth, 1, -84),
+		Position = UDim2.new(0, 12, 0, 72),
 		BackgroundTransparency = 1,
 		ClipsDescendants = true,
 	}, {
 		Window.TabHolder,
 	})
 
-	Window.TabDisplay = New("TextLabel", {
-		RichText = true,
-		Text = "Tab",
-		TextTransparency = 0,
-		FontFace = Typography.SemiBold,
-		TextSize = 18,
-		TextXAlignment = "Left",
-		TextYAlignment = "Center",
-		TextTruncate = Enum.TextTruncate.AtEnd,
-		Size = UDim2.new(1, -(Window.TabWidth + 144), 0, 28),
-		Position = UDim2.fromOffset(Window.TabWidth + 48, 14),
-		BackgroundTransparency = 1,
-		ThemeTag = {
-			TextColor3 = "Text",
-		},
-	})
 
 	Window.ContainerHolder = New("CanvasGroup", {
-		Size = UDim2.new(1, -(Window.TabWidth + 72), 1, -(Window.ContentTop + 20)),
-		Position = UDim2.fromOffset(Window.TabWidth + 48, Window.ContentTop),
+		Size = UDim2.new(1, -(Window.TabWidth + 64), 1, -(Window.ContentTop + 16)),
+		Position = UDim2.fromOffset(Window.TabWidth + 40, Window.ContentTop),
 		BackgroundTransparency = 1,
 	})
 
@@ -138,7 +123,6 @@ return function(Config)
 	}, {
 		Window.Surface.Frame,
 		Window.Sidebar,
-		Window.TabDisplay,
 		Window.ContainerHolder,
 		TabFrame,
 		ResizeStartFrame,
@@ -147,6 +131,7 @@ return function(Config)
 	Window.TitleBar = require(script.Parent.TitleBar)({
 		Title = Config.Title,
 		SubTitle = Config.SubTitle,
+		Brand = Config.Brand,
 		Parent = Window.Root,
 		Window = Window,
 	})
@@ -154,7 +139,7 @@ return function(Config)
 	-- The tab list starts below the brand block, which grows when a long title wraps.
 	local function LayoutSidebar()
 		local Brand = Window.TitleBar.Brand
-		local Top = math.max(64, Brand.Position.Y.Offset + Brand.AbsoluteSize.Y + 18)
+		local Top = 72
 		TabFrame.Position = UDim2.fromOffset(12, Top)
 		TabFrame.Size = UDim2.new(0, Window.TabWidth, 1, -(Top + 12))
 	end
@@ -186,7 +171,7 @@ return function(Config)
 	end)
 
 	Window.ContainerPosMotor:onStep(function(Value)
-		Window.ContainerHolder.Position = UDim2.fromOffset(Window.TabWidth + 48, Value)
+		Window.ContainerHolder.Position = UDim2.fromOffset(Window.TabWidth + 40, Value)
 	end)
 
 	Creator.AddSignal(Window.TitleBar.Frame.InputBegan, function(Input)
@@ -289,13 +274,12 @@ return function(Config)
 		Window.TabWidth = isMobile and math.clamp(Window.TabWidth, 92, 108) or math.clamp(Window.TabWidth, 120, 220)
 		SizeMotor:setGoal({ X = Instant(width), Y = Instant(height) })
 		PosMotor:setGoal({ X = Instant(x), Y = Instant(y) })
-		Window.Sidebar.Size = UDim2.new(0, Window.TabWidth + 24, 1, 0)
-		Window.TitleBar.Brand.Size = UDim2.fromOffset(math.max(96, Window.TabWidth - 12), 0)
+		Window.Sidebar.Size = UDim2.new(0, Window.TabWidth + 24, 1, -56)
+		Window.Sidebar.Position = UDim2.fromOffset(0, 56)
+		Window.TitleBar.Brand.Size = UDim2.new(1, -116, 1, 0)
 		LayoutSidebar()
-		Window.TabDisplay.Size = UDim2.new(1, -(Window.TabWidth + 144), 0, 28)
-		Window.TabDisplay.Position = UDim2.fromOffset(Window.TabWidth + 48, 14)
-		Window.ContainerHolder.Size = UDim2.new(1, -(Window.TabWidth + 72), 1, -(Window.ContentTop + 20))
-		Window.ContainerHolder.Position = UDim2.fromOffset(Window.TabWidth + 48, Window.ContentTop)
+		Window.ContainerHolder.Size = UDim2.new(1, -(Window.TabWidth + 64), 1, -(Window.ContentTop + 16))
+		Window.ContainerHolder.Position = UDim2.fromOffset(Window.TabWidth + 40, Window.ContentTop)
 	end
 
 	local ViewportConnection

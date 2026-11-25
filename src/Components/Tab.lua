@@ -110,7 +110,7 @@ function TabModule:New(Title, Icon, Parent)
 	})
 
 	local ContainerLayout = New("UIListLayout", {
-		Padding = UDim.new(0, 20),
+		Padding = UDim.new(0, 16),
 		SortOrder = Enum.SortOrder.LayoutOrder,
 	})
 
@@ -122,9 +122,10 @@ function TabModule:New(Title, Icon, Parent)
 		BottomImage = "rbxassetid://6889812791",
 		MidImage = "rbxassetid://6889812721",
 		TopImage = "rbxassetid://6276641225",
-		ScrollBarImageColor3 = Color3.fromRGB(150, 158, 172),
-		ScrollBarImageTransparency = 0.7,
-		ScrollBarThickness = 3,
+		ScrollBarImageColor3 = Color3.fromRGB(139, 92, 246),
+		ScrollBarImageTransparency = 0.48,
+		ScrollBarThickness = 2,
+		ElasticBehavior = Enum.ElasticBehavior.WhenScrollable,
 		BorderSizePixel = 0,
 		CanvasSize = UDim2.fromScale(0, 0),
 		ScrollingDirection = Enum.ScrollingDirection.Y,
@@ -199,7 +200,6 @@ function TabModule:SelectTab(Tab)
 	TabObject.SetTransparency(TINT_SELECTED)
 	TabObject.Selected = true
 	SetActive(TabObject, true)
-	Window.TabDisplay.Text = TabObject.Name
 	task.spawn(function()
 		if Generation ~= TabModule.SelectionGeneration or require(Root).Unloaded then return end
 		Window.ContainerPosMotor:setGoal(Spring(Window.ContentTop + 16, { frequency = 10 }))

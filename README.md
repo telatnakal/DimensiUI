@@ -5,13 +5,13 @@
 | Release metadata | Value |
 |---|---|
 | Project | DimensiUI |
-| Version | `1.0.1` |
+| Version | `1.1.0` |
 | Release type | Stable Release |
 | Author | telatnakal |
 | Theme | Dimensi (obsidian-violet) |
 | Runtime | Roblox Lua / Luau |
 
-- **Version:** 1.0.1
+- **Version:** 1.1.0
 
 ## Features
 
@@ -20,6 +20,10 @@
 - Single Dimensi theme with runtime accent customization
 - Shared typography resolver with Builder Sans candidate and Roblox font fallbacks
 - Responsive window sizing and viewport-aware controls
+- Global `DIMENSI-HUB | [PLACE NAME]` header with automatic Roblox place-name label
+- Fixed header and sidebar with independent per-tab content scrolling
+- Per-tab scroll position retained when switching tabs
+- Compact content rows and minimal section headings
 - Clean, border-free layout: tonal sidebar, rounded cards with hairline row dividers, and a right-aligned control column
 - Solid surfaces with optional window transparency (no blur effects)
 - Instance factory APIs: `NewInstance()` and `CreateInstance()`
@@ -63,8 +67,8 @@ Use `default.project.json` with Rojo or place the `src/` hierarchy into Roblox S
 local DimensiUI = loadstring(game:HttpGet("YOUR_RAW_SOURCE_URL"))()
 
 local Window = DimensiUI:CreateWindow({
-    Title = "DimensiUI",
-    SubTitle = "Interface",
+    Title = "DimensiUI", -- retained for API compatibility
+    Brand = "DIMENSI-HUB",
     TabWidth = 160,
     Size = UDim2.fromOffset(580, 420),
     Theme = "Dimensi",

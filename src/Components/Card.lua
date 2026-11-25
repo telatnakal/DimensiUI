@@ -25,8 +25,8 @@ function Card.New(Parent)
 			CornerRadius = UDim.new(0, 14),
 		}),
 		New("UIPadding", {
-			PaddingTop = UDim.new(0, 4),
-			PaddingBottom = UDim.new(0, 4),
+			PaddingTop = UDim.new(0, 3),
+			PaddingBottom = UDim.new(0, 3),
 			PaddingLeft = UDim.new(0, 4),
 			PaddingRight = UDim.new(0, 4),
 		}),

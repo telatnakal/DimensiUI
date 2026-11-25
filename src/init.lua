@@ -46,7 +46,7 @@ local Library = {
 	Name = "DimensiUI",
 	Author = "telatnakal",
 	Credit = "telatnakal",
-	Version = "1.0.1",
+	Version = "1.1.0",
 
 	OpenFrames = {},
 	Options = {},
@@ -212,6 +212,7 @@ function Library:CreateWindow(Config)
 	assert(Config.Theme == nil or type(Config.Theme) == "string", "Window - Theme must be a string")
 	assert(Config.MinimizeKey == nil or (typeof(Config.MinimizeKey) == "EnumItem" and Config.MinimizeKey.EnumType == Enum.KeyCode), "Window - MinimizeKey must be a KeyCode")
 	assert(Config.SubTitle == nil or type(Config.SubTitle) == "string", "Window - SubTitle must be a string")
+	assert(Config.Brand == nil or type(Config.Brand) == "string", "Window - Brand must be a string")
 
 	Config.SubTitle = Config.SubTitle or ""
 	Config.TabWidth = Config.TabWidth or 170
@@ -229,6 +230,7 @@ function Library:CreateWindow(Config)
 		Size = Config.Size,
 		Title = Config.Title,
 		SubTitle = Config.SubTitle,
+		Brand = Config.Brand or "DIMENSI-HUB",
 		TabWidth = Config.TabWidth,
 	})
 

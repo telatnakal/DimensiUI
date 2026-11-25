@@ -63,8 +63,8 @@ return function(Title, Desc, Parent, Hover)
 			VerticalAlignment = Enum.VerticalAlignment.Center,
 		}),
 		New("UIPadding", {
-			PaddingBottom = UDim.new(0, 10),
-			PaddingTop = UDim.new(0, 10),
+			PaddingBottom = UDim.new(0, 8),
+			PaddingTop = UDim.new(0, 8),
 		}),
 		New("UISizeConstraint", {
 			MinSize = Vector2.new(0, 48),
@@ -151,16 +151,16 @@ return function(Title, Desc, Parent, Hover)
 		)
 
 		Creator.AddSignal(Element.Frame.MouseEnter, function()
-			SetTransparency(Creator.GetThemeProperty("ElementTransparency") - Creator.GetThemeProperty("HoverChange"))
+			SetTransparency(math.max(0, Creator.GetThemeProperty("ElementTransparency") - Creator.GetThemeProperty("HoverChange")))
 		end, Element.Frame)
 		Creator.AddSignal(Element.Frame.MouseLeave, function()
 			SetTransparency(Creator.GetThemeProperty("ElementTransparency"))
 		end, Element.Frame)
 		Creator.AddSignal(Element.Frame.MouseButton1Down, function()
-			SetTransparency(Creator.GetThemeProperty("ElementTransparency") - Creator.GetThemeProperty("HoverChange") - 0.15)
+			SetTransparency(math.max(0, Creator.GetThemeProperty("ElementTransparency") - Creator.GetThemeProperty("HoverChange") - 0.15))
 		end, Element.Frame)
 		Creator.AddSignal(Element.Frame.MouseButton1Up, function()
-			SetTransparency(Creator.GetThemeProperty("ElementTransparency") - Creator.GetThemeProperty("HoverChange"))
+			SetTransparency(math.max(0, Creator.GetThemeProperty("ElementTransparency") - Creator.GetThemeProperty("HoverChange")))
 		end, Element.Frame)
 	end
 
