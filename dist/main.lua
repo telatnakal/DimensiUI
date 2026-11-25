@@ -5400,7 +5400,7 @@ function Element:New(Idx, Config)
 	}
 
 	local ToggleFrame = require(Components.Element)(Config.Title, Config.Description, self.Container, true)
-	ToggleFrame.LabelHolder.Size = UDim2.new(1, -46, 0, 0)
+	ToggleFrame.LabelHolder.Size = UDim2.new(1, -38, 0, 0)
 	ToggleFrame.DescLabel.Size = UDim2.new(1, 0, 0, 0)
 
 	Toggle.SetTitle = ToggleFrame.SetTitle
@@ -5408,7 +5408,7 @@ function Element:New(Idx, Config)
 
 	local ToggleCircle = New("ImageLabel", {
 		AnchorPoint = Vector2.new(0, 0.5),
-		Size = UDim2.fromOffset(10, 10),
+		Size = UDim2.fromOffset(7, 7),
 		Position = UDim2.new(0, 2, 0.5, 0),
 		Image = "https://www.roblox.com/asset/?id=12266946128",
 		ImageTransparency = 0.5,
@@ -5425,7 +5425,7 @@ function Element:New(Idx, Config)
 	})
 
 	local ToggleSlider = New("Frame", {
-		Size = UDim2.fromOffset(28, 16),
+		Size = UDim2.fromOffset(20, 12),
 		AnchorPoint = Vector2.new(1, 0.5),
 		Position = UDim2.new(1, -10, 0.5, 0),
 		Parent = ToggleFrame.Frame,
@@ -5435,7 +5435,7 @@ function Element:New(Idx, Config)
 		},
 	}, {
 		New("UICorner", {
-			CornerRadius = UDim.new(0, 8),
+			CornerRadius = UDim.new(0, 6),
 		}),
 		ToggleBorder,
 		ToggleCircle,
@@ -5455,7 +5455,7 @@ function Element:New(Idx, Config)
 		TweenService:Create(
 			ToggleCircle,
 			TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
-			{ Position = UDim2.new(0, Toggle.Value and 16 or 2, 0.5, 0) }
+			{ Position = UDim2.new(0, Toggle.Value and 11 or 2, 0.5, 0) }
 		):Play()
 		TweenService:Create(
 			ToggleSlider,
