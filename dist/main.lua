@@ -1,5 +1,5 @@
 --[[
-    DimensiUI v1.2.0 (Bundled Single-File Build)
+    DimensiUI v1.2.4 (Bundled Single-File Build)
     Standalone DimensiUI | Default Theme: Dark Purple | Author: telatnakal
 ]]
 
@@ -174,7 +174,7 @@ local Library = {
 	Name = "DimensiUI",
 	Author = "telatnakal",
 	Credit = "telatnakal",
-	Version = "1.2.3",
+	Version = "1.2.4",
 
 	OpenFrames = {},
 	Options = {},
@@ -187,6 +187,7 @@ local Library = {
 
 	Theme = "Dimensi",
 	DialogOpen = false,
+	_OpenDialogCount = 0,
 	UseAcrylic = true,
 	Acrylic = true,
 	Transparency = true,
@@ -373,6 +374,7 @@ function Library:Destroy()
 	end
 	Library.Unloaded = true
 	Library.DialogOpen = false
+	Library._OpenDialogCount = 0
 	if Library.Window and Library.UseAcrylic and Library.Window.AcrylicPaint and Library.Window.AcrylicPaint.Model then
 		pcall(function()
 			Library.Window.AcrylicPaint.Model:Destroy()
@@ -2081,6 +2083,7 @@ local Root = script.Parent.Parent
 local Typography = require(Root.Typography)
 local Motion = require(Root.Packages.DimensiMotion)
 local Creator = require(Root.Creator)
+local Library = require(Root)
 
 local Spring = Motion.Spring.new
 local Instant = Motion.Instant.new
@@ -2099,7 +2102,18 @@ function Dialog:Create()
 	local NewDialog = {
 		Buttons = 0,
 		Closed = false,
+		_IsOpen = false,
 	}
+
+	function NewDialog:SetOpenState(IsOpen)
+		IsOpen = not not IsOpen
+		if self._IsOpen == IsOpen then
+			return
+		end
+		self._IsOpen = IsOpen
+		Library._OpenDialogCount = math.max(0, (Library._OpenDialogCount or 0) + (IsOpen and 1 or -1))
+		Library.DialogOpen = Library._OpenDialogCount > 0
+	end
 
 	NewDialog.TintFrame = New("TextButton", {
 		Text = "",
@@ -2193,8 +2207,8 @@ function Dialog:Create()
 	local RootMotor, RootTransparency = Creator.SpringMotor(1, NewDialog.Root, "GroupTransparency")
 
 	function NewDialog:Open()
-		if NewDialog.Closed or require(Root).Unloaded then return false end
-		require(Root).DialogOpen = true
+		if NewDialog.Closed or Library.Unloaded or not NewDialog.TintFrame.Parent then return false end
+		NewDialog:SetOpenState(true)
 		NewDialog.Scale.Scale = 1.1
 		TintTransparency(0.75)
 		RootTransparency(0)
@@ -2204,7 +2218,7 @@ function Dialog:Create()
 	function NewDialog:Close()
 		if NewDialog.Closed then return end
 		NewDialog.Closed = true
-		require(Root).DialogOpen = false
+		NewDialog:SetOpenState(false)
 		TintTransparency(1)
 		RootTransparency(1)
 		Scale(1.1)
@@ -2216,6 +2230,11 @@ function Dialog:Create()
 			NewDialog.TintFrame:Destroy()
 		end
 	end
+
+	Creator.AddSignal(NewDialog.TintFrame.Destroying, function()
+		NewDialog:SetOpenState(false)
+		NewDialog.Closed = true
+	end, NewDialog.TintFrame)
 
 	function NewDialog:Button(Title, Callback)
 		assert(Title == nil or type(Title) == "string", "Dialog:Button Title must be a string")

@@ -47,7 +47,7 @@ local Library = {
 	Name = "DimensiUI",
 	Author = "telatnakal",
 	Credit = "telatnakal",
-	Version = "1.2.3",
+	Version = "1.2.4",
 
 	OpenFrames = {},
 	Options = {},
@@ -60,6 +60,7 @@ local Library = {
 
 	Theme = "Dimensi",
 	DialogOpen = false,
+	_OpenDialogCount = 0,
 	UseAcrylic = true,
 	Acrylic = true,
 	Transparency = true,
@@ -246,6 +247,7 @@ function Library:Destroy()
 	end
 	Library.Unloaded = true
 	Library.DialogOpen = false
+	Library._OpenDialogCount = 0
 	if Library.Window and Library.UseAcrylic and Library.Window.AcrylicPaint and Library.Window.AcrylicPaint.Model then
 		pcall(function()
 			Library.Window.AcrylicPaint.Model:Destroy()

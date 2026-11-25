@@ -73,7 +73,7 @@ assert "Themes.Dark" not in (SRC / "Creator.lua").read_text(), "Legacy theme fal
 
 assert (ROOT / "src/Packages/DimensiMotion/init.lua").exists(), "Native motion package missing"
 assert not (ROOT / "src/Packages/Flipper").exists(), "Legacy motion package still exists"
-assert 'Version = "1.2.3"' in (SRC / "init.lua").read_text(), "Version metadata mismatch"
+assert 'Version = "1.2.4"' in (SRC / "init.lua").read_text(), "Version metadata mismatch"
 assert 'function Library:CreateInstance()' in (SRC / "init.lua").read_text(), "CreateInstance alias is missing"
 assert 'function Library:AddCleanup(Callback)' in (SRC / "init.lua").read_text(), "Instance cleanup registration is missing"
 assert 'function Acrylic.Destroy()' in (SRC / "Acrylic/init.lua").read_text(), "Acrylic lifecycle cleanup is missing"
@@ -132,3 +132,10 @@ second = hashlib.sha256(bundle_file.read_bytes()).hexdigest()
 assert first == second, "Bundle build is not deterministic"
 print(f"PASS: {len(modules)} source modules; {len(paths)} bundle modules; require paths resolved; source parity; no legacy refs; deterministic build")
 print(f"Bundle SHA256: {second}")
+
+# Dialog open-state ownership and concurrent dialog accounting.
+dialog_source = (SRC / "Components/Dialog.lua").read_text()
+assert "function NewDialog:SetOpenState(IsOpen)" in dialog_source, "Dialog open-state accounting is missing"
+assert "Library._OpenDialogCount > 0" in dialog_source, "Concurrent dialog state is not reference-counted"
+assert "NewDialog.TintFrame.Destroying" in dialog_source, "External dialog destruction must release open-state ownership"
+assert "Library._OpenDialogCount = 0" in library_init, "Library teardown must reset dialog accounting"

@@ -46,3 +46,13 @@
 - Added notification-holder teardown cleanup so its Acrylic model is destroyed even when the holder is removed externally.
 - Rebuilt the standalone bundle from modular source and extended static assertions for owner-bound cleanup.
 - Roblox runtime behavior remains unverified.
+
+
+## 1.2.4
+
+- Replaced the single DialogOpen boolean transition with per-instance open-dialog reference counting.
+- Closing one dialog no longer clears the modal state while another dialog in the same library instance remains open.
+- External dialog destruction now releases its modal ownership and marks the dialog closed.
+- Library teardown resets the dialog counter.
+- Rebuilt the standalone bundle from modular source.
+- Roblox runtime behavior remains unverified.
