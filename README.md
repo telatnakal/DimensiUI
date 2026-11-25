@@ -92,7 +92,7 @@ local Window = Library:CreateWindow({
 })
 ```
 
-`Icon` accepts a Roblox asset id (`"rbxassetid://ID"` or a number), or an image URL. A URL is downloaded once into the executor workspace (`DimensiUI/`) and reused afterwards; this needs `writefile` and `getcustomasset`, and it is the only network request the library makes. Use a raw link such as `https://raw.githubusercontent.com/<user>/<repo>/main/Assets/d-icon-128.png` (a `github.com/.../blob/...` page link is converted automatically). If the icon cannot be loaded, the bubble shows a plain "D" and a warning is printed.
+`Icon` is optional. Left empty, the bubble shows the built-in "D" logo (a small PNG embedded in the library, written once to the executor workspace folder `DimensiUI/`; this needs `writefile` and `getcustomasset`, and makes no network request). `Icon = false` shows a plain "D" letter instead. To use your own image pass a Roblox asset id (`"rbxassetid://ID"` or a number), a file path in the executor workspace, or an image URL. A URL is downloaded once into `DimensiUI/` and reused afterwards (the only network request the library can make; a `github.com/.../blob/...` page link is converted to its raw link). If a custom icon cannot be loaded, a notification explains why and the built-in logo is used. `Window.IconStatus` holds a short description of what the bubble is currently showing.
 
 ## Multiple library instances
 

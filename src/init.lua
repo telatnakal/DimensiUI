@@ -212,7 +212,7 @@ function Library:CreateWindow(Config)
 	assert(Config.Theme == nil or type(Config.Theme) == "string", "Window - Theme must be a string")
 	assert(Config.MinimizeKey == nil or (typeof(Config.MinimizeKey) == "EnumItem" and Config.MinimizeKey.EnumType == Enum.KeyCode), "Window - MinimizeKey must be a KeyCode")
 	assert(Config.SubTitle == nil or type(Config.SubTitle) == "string", "Window - SubTitle must be a string")
-	assert(Config.Icon == nil or type(Config.Icon) == "string" or type(Config.Icon) == "number", "Window - Icon must be an asset id, asset URL, or custom asset path")
+	assert(Config.Icon == nil or Config.Icon == false or type(Config.Icon) == "string" or type(Config.Icon) == "number", "Window - Icon must be false, an asset id, an image URL, or a custom asset path")
 
 	Config.SubTitle = Config.SubTitle or ""
 	Config.TabWidth = Config.TabWidth or 170

@@ -12,6 +12,7 @@ local Motion = require(Root.Packages.DimensiMotion)
 local Creator = require(Root.Creator)
 local Surface = require(Root.Surface)
 local Assets = require(script.Parent.Assets)
+local BubbleIconData = require(Root.BubbleIcon)
 local Components = script.Parent
 
 local Spring = Motion.Spring.new
@@ -534,29 +535,64 @@ return function(Config)
 	})
 
 	local IconToken = 0
+	Window.IconStatus = "huruf D"
 
 	local function ShowLetter()
 		BubbleIcon.Visible = false
 		BubbleLetter.Visible = true
 	end
 
-	Window.IconStatus = "tidak ada Icon (huruf D bawaan)"
+	local function ReportIconProblem(Message)
+		warn("[DimensiUI] Icon: " .. Message)
+		task.defer(function()
+			pcall(function()
+				Library:Notify({ Title = "DimensiUI", Content = "Icon: " .. Message, Duration = 10 })
+			end)
+		end)
+	end
 
-	local function ApplyIcon(Resolved)
+	-- Logo "D" bawaan: PNG tertanam di library, ditulis sekali ke workspace executor.
+	local function LoadEmbeddedIcon()
+		local AssetFn = getcustomasset or getsynasset
+		if type(writefile) ~= "function" or type(AssetFn) ~= "function" then
+			return nil, "executor tidak mendukung writefile/getcustomasset"
+		end
+		local Path = ("%s/bubble_%d_%s.png"):format(ICON_FOLDER, #BubbleIconData, HashText(BubbleIconData))
+		pcall(function()
+			if type(isfolder) == "function" and type(makefolder) == "function" and not isfolder(ICON_FOLDER) then
+				makefolder(ICON_FOLDER)
+			end
+		end)
+		local NeedWrite = true
+		if type(isfile) == "function" and type(readfile) == "function" and isfile(Path) then
+			local okRead, Cached = pcall(readfile, Path)
+			if okRead and Cached == BubbleIconData then
+				NeedWrite = false
+			end
+		end
+		if NeedWrite and not pcall(writefile, Path, BubbleIconData) then
+			return nil, "writefile gagal"
+		end
+		local ok, Asset = pcall(AssetFn, Path)
+		if ok and type(Asset) == "string" and Asset ~= "" then
+			return Asset
+		end
+		return nil, "getcustomasset gagal"
+	end
+
+	local function ApplyIcon(Resolved, Label, OnFail)
 		BubbleIcon.Image = Resolved
 		BubbleIcon.Visible = true
 		BubbleLetter.Visible = false
-		Window.IconStatus = "dimuat: " .. tostring(Resolved)
+		Window.IconStatus = Label .. ": " .. tostring(Resolved)
 		-- File lokal (rbxasset://) langsung dipercaya. Hanya asset Roblox yang dicek; kalau gagal
-		-- (id salah / Decal / belum lolos moderasi) balik ke huruf "D".
+		-- (id salah / Decal / belum lolos moderasi) panggil OnFail.
 		if not tostring(Resolved):match("^rbxasset://") then
 			task.spawn(function()
 				pcall(function()
 					ContentProvider:PreloadAsync({ BubbleIcon }, function(_, status)
-						if status ~= Enum.AssetFetchStatus.Success and BubbleIcon.Parent then
-							Window.IconStatus = "gagal dimuat (" .. tostring(status) .. "): " .. tostring(Resolved)
-							warn("[DimensiUI] Gambar icon gagal dimuat (" .. tostring(status) .. "): " .. tostring(Resolved))
-							ShowLetter()
+						if status ~= Enum.AssetFetchStatus.Success and BubbleIcon.Parent and BubbleIcon.Image == Resolved then
+							OnFail("gambar gagal dimuat (" .. tostring(status) .. "): " .. tostring(Resolved))
 						end
 					end)
 				end)
@@ -564,25 +600,55 @@ return function(Config)
 		end
 	end
 
+	local function UseDefaultIcon()
+		local Asset, Reason = LoadEmbeddedIcon()
+		if Asset then
+			ApplyIcon(Asset, "bawaan", function(Message)
+				ShowLetter()
+				Window.IconStatus = "huruf D (" .. Message .. ")"
+			end)
+			return true
+		end
+		ShowLetter()
+		Window.IconStatus = "huruf D (logo bawaan tidak bisa dipakai: " .. tostring(Reason) .. ")"
+		return false, Reason
+	end
+
+	-- Icon: nil = logo bawaan, false = huruf "D", angka/"rbxassetid://ID"/path file/URL = gambar sendiri.
 	function Window:SetIcon(Icon)
 		IconToken = IconToken + 1
 		local Token = IconToken
 		ShowLetter()
 		BubbleIcon.Image = ""
 
-		if Icon == nil or Icon == "" then
-			Window.IconStatus = "tidak ada Icon (huruf D bawaan)"
+		if Icon == false then
+			Window.IconStatus = "huruf D (Icon = false)"
 			return false
+		end
+
+		if Icon == nil or Icon == "" then
+			local ok, Reason = UseDefaultIcon()
+			if not ok then
+				warn("[DimensiUI] Logo bawaan tidak bisa dipakai, bubble memakai huruf D: " .. tostring(Reason))
+			end
+			return ok
+		end
+
+		local function Fail(Message)
+			if Token ~= IconToken then return end
+			ReportIconProblem(Message .. " (memakai logo bawaan)")
+			UseDefaultIcon()
 		end
 
 		local Resolved = ResolveIcon(Icon)
 		if Resolved then
-			ApplyIcon(Resolved)
+			ApplyIcon(Resolved, "dimuat", Fail)
 			return true
 		end
 
 		if type(Icon) == "string" and Icon:match("^https?://") then
-			-- Async: window tetap langsung muncul, huruf "D" tampil sampai gambar siap.
+			-- Async: window tetap langsung muncul dengan logo bawaan sampai gambar dari URL siap.
+			UseDefaultIcon()
 			Window.IconStatus = "mengunduh: " .. Icon
 			task.spawn(function()
 				local Path, Reason = FetchIcon(Icon)
@@ -597,18 +663,15 @@ return function(Config)
 					end
 				end
 				if Asset then
-					ApplyIcon(Asset)
-					print("[DimensiUI] Icon dimuat: " .. tostring(Asset))
+					ApplyIcon(Asset, "dimuat dari URL", Fail)
 				else
-					Window.IconStatus = "gagal: " .. tostring(Reason)
-					warn("[DimensiUI] Icon tidak bisa dimuat dari URL: " .. tostring(Reason))
+					Fail(tostring(Reason))
 				end
 			end)
 			return true
 		end
 
-		Window.IconStatus = "gagal: bukan asset id, URL, atau file executor yang valid"
-		warn("[DimensiUI] Icon tidak bisa dimuat (bukan asset id, URL, atau file executor yang valid): " .. tostring(Icon))
+		Fail("bukan asset id, URL, atau file executor yang valid: " .. tostring(Icon))
 		return false
 	end
 
