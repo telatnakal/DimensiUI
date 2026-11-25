@@ -7,7 +7,7 @@ A modular Roblox UI library with a self-contained bundled build, a responsive in
 
 - **Author:** telatnakal
 - **Credit:** telatnakal
-- **Version:** 1.1.2
+- **Version:** 1.2.0
 - **Theme:** Dimensi only (obsidian-violet / Builder Sans typography)
 
 ## Features
@@ -18,6 +18,7 @@ A modular Roblox UI library with a self-contained bundled build, a responsive in
 - Optional acrylic and transparency effects
 - SaveManager and InterfaceManager addons
 - Modular source and a bundled single-file build
+- Isolated library instances through `Library:NewInstance()`
 
 ## Installation
 
@@ -37,6 +38,9 @@ Addon raw URLs:
 ```lua
 local DimensiUI = loadstring(game:HttpGet("YOUR_RAW_SOURCE_URL"))()
 
+
+-- Create another independent library instance when a separate UI lifecycle is needed.
+local SecondaryUI = DimensiUI:NewInstance()
 
 local Window = DimensiUI:CreateWindow({
     Title = "DimensiUI",
@@ -61,3 +65,8 @@ Section:AddButton({ Title = "Example", Callback = function() end })
 ## Attribution and license
 
 Author and project credit displayed by this library: **telatnakal**. License and source provenance must be reviewed before public distribution. This archive does not include a verified upstream license inventory.
+
+
+## Multiple instances
+
+Each library instance owns an independent root module tree and its own GUI, theme registry, tab state, notifications, motion resources, and cleanup lifecycle. Create additional instances with `local OtherUI = DimensiUI:NewInstance()`. Each instance can create one window using the existing `CreateWindow` API. Destroy instances independently with `OtherUI:Destroy()`; destroying one instance is not intended to unload another.

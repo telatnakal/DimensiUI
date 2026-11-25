@@ -1,5 +1,5 @@
 --[[
-    DimensiUI v1.1.1 (Bundled Single-File Build)
+    DimensiUI v1.2.0 (Bundled Single-File Build)
     Standalone DimensiUI | Default Theme: Dark Purple | Author: telatnakal
 ]]
 
@@ -29,6 +29,17 @@ local function __MakeNode(path, name, parent, isModule)
 			return self._isModule
 		end
 		return className == "Folder" or className == "Instance"
+	end
+	function node:Clone()
+		assert(self._path == "", "Only the DimensiUI root can be cloned")
+		local function cloneTree(source, parent)
+			local copy = __MakeNode(source._path, source.Name, parent, source._isModule)
+			for _, child in ipairs(source._children) do
+				cloneTree(child, copy)
+			end
+			return copy
+		end
+		return cloneTree(self, nil)
 	end
 	setmetatable(node, {
 		__index = function(self, key)
@@ -89,15 +100,25 @@ local __Node_Packages_DimensiMotion_Spring = __MakeNode('Packages/DimensiMotion/
 
 
 local __RealRequire = require
+local __DimensiCaches = setmetatable({}, { __mode = "k" })
 local function __DimensiRequire(target)
 	if type(target) == "table" and target._path ~= nil then
-		if __DimensiCache[target._path] ~= nil then
-			return __DimensiCache[target._path]
+		local root = target
+		while root.Parent do
+			root = root.Parent
+		end
+		local cache = __DimensiCaches[root]
+		if not cache then
+			cache = {}
+			__DimensiCaches[root] = cache
+		end
+		if cache[target._path] ~= nil then
+			return cache[target._path]
 		end
 		local loader = __DimensiModules[target._path]
 		assert(loader, "DimensiUI module not found: " .. tostring(target._path))
 		local result = loader(target, __DimensiRequire)
-		__DimensiCache[target._path] = result
+		cache[target._path] = result
 		return result
 	end
 	return __RealRequire(target)
@@ -153,7 +174,7 @@ local Library = {
 	Name = "DimensiUI",
 	Author = "telatnakal",
 	Credit = "telatnakal",
-	Version = "1.1.2",
+	Version = "1.2.0",
 
 	OpenFrames = {},
 	Options = {},
@@ -232,6 +253,31 @@ for _, ElementComponent in ipairs(ElementsTable) do
 end
 
 Library.Elements = Elements
+
+function Library:NewInstance()
+	assert(not Library.Unloaded, "DimensiUI has been destroyed")
+	assert(Root and type(Root.Clone) == "function", "DimensiUI:NewInstance requires a cloneable root ModuleScript")
+
+	local Clone
+	local Success, Result = pcall(function()
+		Clone = Root:Clone()
+		if typeof(Clone) == "Instance" then
+			Clone.Parent = Root.Parent
+		end
+		local NewLibrary = require(Clone)
+		NewLibrary._RootClone = Clone
+		return NewLibrary
+	end)
+
+	if not Success then
+		if Clone and typeof(Clone) == "Instance" then
+			pcall(function() Clone:Destroy() end)
+		end
+		error("DimensiUI:NewInstance failed: " .. tostring(Result), 2)
+	end
+
+	return Result
+end
 
 function Library:CreateWindow(Config)
 	assert(not Library.Unloaded, "DimensiUI has been destroyed")
@@ -327,6 +373,11 @@ function Library:Destroy()
 	TabModule.TabCount = 0
 	TabModule.SelectionGeneration += 1
 	Library.Window = nil
+	local RootClone = Library._RootClone
+	Library._RootClone = nil
+	if RootClone and typeof(RootClone) == "Instance" then
+		pcall(function() RootClone:Destroy() end)
+	end
 end
 
 function Library:ToggleAcrylic(Value)
@@ -367,7 +418,12 @@ function Library:Notify(Config)
 end
 
 if type(getgenv) == "function" then
-	pcall(function() getgenv().DimensiUI = Library end)
+	pcall(function()
+		local Environment = getgenv()
+		if Environment.DimensiUI == nil then
+			Environment.DimensiUI = Library
+		end
+	end)
 end
 
 return Library

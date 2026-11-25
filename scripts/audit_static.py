@@ -73,7 +73,10 @@ assert "Themes.Dark" not in (SRC / "Creator.lua").read_text(), "Legacy theme fal
 
 assert (ROOT / "src/Packages/DimensiMotion/init.lua").exists(), "Native motion package missing"
 assert not (ROOT / "src/Packages/Flipper").exists(), "Legacy motion package still exists"
-assert 'Version = "1.1.2"' in (SRC / "init.lua").read_text(), "Version metadata mismatch"
+assert 'Version = "1.2.0"' in (SRC / "init.lua").read_text(), "Version metadata mismatch"
+assert 'function Library:NewInstance()' in (SRC / "init.lua").read_text(), "Multi Instance factory is missing"
+assert 'local __DimensiCaches = setmetatable({}, { __mode = "k" })' in bundle, "Bundle per-root module cache is missing"
+assert 'function node:Clone()' in bundle, "Bundle root clone support is missing"
 
 
 # Typography contract.

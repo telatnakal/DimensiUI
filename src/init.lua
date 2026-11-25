@@ -47,7 +47,7 @@ local Library = {
 	Name = "DimensiUI",
 	Author = "telatnakal",
 	Credit = "telatnakal",
-	Version = "1.1.2",
+	Version = "1.2.0",
 
 	OpenFrames = {},
 	Options = {},
@@ -126,6 +126,31 @@ for _, ElementComponent in ipairs(ElementsTable) do
 end
 
 Library.Elements = Elements
+
+function Library:NewInstance()
+	assert(not Library.Unloaded, "DimensiUI has been destroyed")
+	assert(Root and type(Root.Clone) == "function", "DimensiUI:NewInstance requires a cloneable root ModuleScript")
+
+	local Clone
+	local Success, Result = pcall(function()
+		Clone = Root:Clone()
+		if typeof(Clone) == "Instance" then
+			Clone.Parent = Root.Parent
+		end
+		local NewLibrary = require(Clone)
+		NewLibrary._RootClone = Clone
+		return NewLibrary
+	end)
+
+	if not Success then
+		if Clone and typeof(Clone) == "Instance" then
+			pcall(function() Clone:Destroy() end)
+		end
+		error("DimensiUI:NewInstance failed: " .. tostring(Result), 2)
+	end
+
+	return Result
+end
 
 function Library:CreateWindow(Config)
 	assert(not Library.Unloaded, "DimensiUI has been destroyed")
@@ -221,6 +246,11 @@ function Library:Destroy()
 	TabModule.TabCount = 0
 	TabModule.SelectionGeneration += 1
 	Library.Window = nil
+	local RootClone = Library._RootClone
+	Library._RootClone = nil
+	if RootClone and typeof(RootClone) == "Instance" then
+		pcall(function() RootClone:Destroy() end)
+	end
 end
 
 function Library:ToggleAcrylic(Value)
@@ -261,7 +291,12 @@ function Library:Notify(Config)
 end
 
 if type(getgenv) == "function" then
-	pcall(function() getgenv().DimensiUI = Library end)
+	pcall(function()
+		local Environment = getgenv()
+		if Environment.DimensiUI == nil then
+			Environment.DimensiUI = Library
+		end
+	end)
 end
 
 return Library

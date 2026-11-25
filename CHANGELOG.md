@@ -19,3 +19,11 @@
 - Improved dropdown popup sizing/positioning and cleanup of open-frame references and owner-bound input connections.
 - Rebuilt `dist/main.lua` from `src/` and extended static checks for single-theme/build parity.
 - Roblox runtime and device visual validation is still required.
+
+## 1.2.0
+
+- Added `Library:NewInstance()` to create an isolated library instance from a cloned root ModuleScript.
+- Isolated Creator, Tab, Notification, Acrylic, and element module state through per-root ModuleScript caches.
+- Added per-root module caching and root-tree cloning to the standalone bundle runtime.
+- Each cloned library instance owns its GUI and module lifecycle; destroying one instance does not reset another instance's module state.
+- Runtime behavior still requires verification in Roblox Studio/client.

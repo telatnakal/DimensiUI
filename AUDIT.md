@@ -157,3 +157,10 @@ These fixes were statically checked and bundled. They are not a substitute for R
 
 ### Outstanding architectural blocker
 The current code still exposes a singleton Library from `src/init.lua`; `Creator` registries/motors and `TabModule` state are module-level shared tables. `CreateWindow` also rejects a second window. Therefore the agreed independent Multi Instance architecture is NOT implemented in this archive. Converting this safely requires an instance-context refactor across Creator, Window, Tab, elements, Dialog, Notification, Acrylic, and addons while preserving public API compatibility. Do not represent 1.1.2 as completing all 41 planned refactor scopes.
+
+
+## Multi Instance implementation update (1.2.0)
+
+The library now exposes `Library:NewInstance()`. It clones the root ModuleScript and requires that clone, which gives each library instance its own ModuleScript require cache. This scopes the stateful Creator, Tab, Notification, Acrylic, Elements, and Motion modules to the cloned root tree while preserving the existing API on the original library instance. The standalone bundle implements equivalent root-tree cloning and per-root module caches.
+
+This implementation is statically integrated but is not yet certified by Roblox Studio runtime tests. Verify that root ModuleScript cloning is permitted in the target deployment environment, that cloned roots can be required from their parent, and that destroying one instance leaves other instances fully functional.
