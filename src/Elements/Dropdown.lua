@@ -84,24 +84,24 @@ function Element:New(Idx, Config)
 		Size = UDim2.new(0.42, 0, 0, 32),
 		Position = UDim2.new(1, -10, 0.5, 0),
 		AnchorPoint = Vector2.new(1, 0.5),
-		BackgroundTransparency = 0.9,
+		BackgroundTransparency = 0,
 		Parent = DropdownFrame.Frame,
 		ThemeTag = {
-			BackgroundColor3 = "DropdownFrame",
+			BackgroundColor3 = "Input",
 		},
 	}, {
 		New("UICorner", {
-			CornerRadius = UDim.new(0, 5),
+			CornerRadius = UDim.new(0, 6),
 		}),
 		New("UISizeConstraint", {
 			MinSize = Vector2.new(84, 32),
 			MaxSize = Vector2.new(160, 32),
 		}),
 		New("UIStroke", {
-			Transparency = 0.5,
+			Transparency = 0,
 			ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
 			ThemeTag = {
-				Color = "InElementBorder",
+				Color = "InputBorder",
 			},
 		}),
 		DropdownIco,

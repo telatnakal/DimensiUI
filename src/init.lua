@@ -9,7 +9,6 @@ local Mouse = LocalPlayer:GetMouse()
 local Root = script
 local Creator = require(Root.Creator)
 local ElementsTable = require(Root.Elements)
-local Acrylic = require(Root.Acrylic)
 local Components = Root.Components
 local NotificationModule = require(Components.Notification)
 
@@ -61,8 +60,6 @@ local Library = {
 	Theme = "Dimensi",
 	DialogOpen = false,
 	_OpenDialogCount = 0,
-	UseAcrylic = true,
-	Acrylic = true,
 	Transparency = true,
 	MinimizeKeybind = nil,
 	MinimizeKey = Enum.KeyCode.LeftControl,
@@ -212,7 +209,6 @@ function Library:CreateWindow(Config)
 	assert(type(Config.Title) == "string" and Config.Title ~= "", "Window - Missing Title")
 	assert(Config.Size == nil or typeof(Config.Size) == "UDim2", "Window - Size must be a UDim2")
 	assert(Config.TabWidth == nil or (type(Config.TabWidth) == "number" and Config.TabWidth == Config.TabWidth and math.abs(Config.TabWidth) < math.huge and Config.TabWidth >= 100 and Config.TabWidth <= 400), "Window - TabWidth must be between 100 and 400")
-	assert(Config.Acrylic == nil or type(Config.Acrylic) == "boolean", "Window - Acrylic must be boolean")
 	assert(Config.Theme == nil or type(Config.Theme) == "string", "Window - Theme must be a string")
 	assert(Config.MinimizeKey == nil or (typeof(Config.MinimizeKey) == "EnumItem" and Config.MinimizeKey.EnumType == Enum.KeyCode), "Window - MinimizeKey must be a KeyCode")
 	assert(Config.SubTitle == nil or type(Config.SubTitle) == "string", "Window - SubTitle must be a string")
@@ -220,9 +216,6 @@ function Library:CreateWindow(Config)
 	Config.SubTitle = Config.SubTitle or ""
 	Config.TabWidth = Config.TabWidth or 170
 	Config.Size = Config.Size or UDim2.fromOffset(590, 470)
-	if Config.Acrylic == nil then
-		Config.Acrylic = false
-	end
 	Config.Theme = "Dimensi"
 	Config.MinimizeKey = Config.MinimizeKey or Enum.KeyCode.LeftControl
 
@@ -240,11 +233,6 @@ function Library:CreateWindow(Config)
 	})
 
 	Library.MinimizeKey = Config.MinimizeKey
-
-	Library.UseAcrylic = Config.Acrylic
-	if Library.UseAcrylic then
-		Acrylic.init()
-	end
 
 	Library.Window = Window
 	Library:SetTheme(Config.Theme)
@@ -283,17 +271,9 @@ function Library:Destroy()
 	Library.Unloaded = true
 	Library.DialogOpen = false
 	Library._OpenDialogCount = 0
-	if Library.Window and Library.UseAcrylic and Library.Window.AcrylicPaint and Library.Window.AcrylicPaint.Model then
-		pcall(function()
-			Library.Window.AcrylicPaint.Model:Destroy()
-		end)
-	end
 	for Index = #Library._CleanupCallbacks, 1, -1 do
 		local Callback = table.remove(Library._CleanupCallbacks, Index)
 		pcall(Callback)
-	end
-	if Acrylic and type(Acrylic.Destroy) == "function" then
-		pcall(Acrylic.Destroy)
 	end
 	Creator.Disconnect()
 	if Library.GUI then
@@ -323,32 +303,12 @@ function Library:Destroy()
 	end
 end
 
-function Library:ToggleAcrylic(Value)
-	if type(Value) ~= "boolean" then return false end
-	if Library.Window then
-		if Library.UseAcrylic and Library.Window.AcrylicPaint then
-			Library.Acrylic = not not Value
-			local Paint = Library.Window.AcrylicPaint
-			if Paint.Model then
-				Paint.Model.Transparency = Value and 0.98 or 1
-			end
-			if Value then
-				Acrylic.Enable()
-			else
-				Acrylic.Disable()
-			end
-		end
-		return true
-	end
-	return false
-end
-
 function Library:ToggleTransparency(Value)
 	if type(Value) ~= "boolean" then return false end
-	if Library.Window and Library.Window.AcrylicPaint and Library.Window.AcrylicPaint.Frame then
-		local Background = Library.Window.AcrylicPaint.Frame:FindFirstChild("Background")
+	if Library.Window and Library.Window.Surface and Library.Window.Surface.Frame then
+		local Background = Library.Window.Surface.Frame:FindFirstChild("Background")
 		if Background then
-			Background.BackgroundTransparency = Value and 0.35 or 0
+			Background.BackgroundTransparency = Value and 0.15 or 0
 		end
 		return true
 	end

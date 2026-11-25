@@ -8,7 +8,7 @@ local Root = script.Parent.Parent
 local Typography = require(Root.Typography)
 local Motion = require(Root.Packages.DimensiMotion)
 local Creator = require(Root.Creator)
-local Acrylic = require(Root.Acrylic)
+local Surface = require(Root.Surface)
 local Assets = require(script.Parent.Assets)
 local Components = script.Parent
 
@@ -49,7 +49,7 @@ return function(Config)
 	local DragEndConnection
 	local MinimizeNotif = false
 
-	Window.AcrylicPaint = Acrylic.AcrylicPaint()
+	Window.Surface = Surface()
 
 	local Selector = New("Frame", {
 		Size = UDim2.fromOffset(4, 0),
@@ -95,12 +95,22 @@ return function(Config)
 		Selector,
 	})
 
+	Window.Divider = New("Frame", {
+		Size = UDim2.new(0, 1, 1, -66),
+		Position = UDim2.fromOffset(Window.TabWidth + 19, 54),
+		BackgroundTransparency = 0,
+		BorderSizePixel = 0,
+		ThemeTag = {
+			BackgroundColor3 = "Divider",
+		},
+	})
+
 	Window.TabDisplay = New("TextLabel", {
 		RichText = true,
 		Text = "Tab",
 		TextTransparency = 0,
 		FontFace = Typography.SemiBold,
-		TextSize = 20,
+		TextSize = 18,
 		TextXAlignment = "Left",
 		TextYAlignment = "Center",
 		Size = UDim2.new(1, -16, 0, 28),
@@ -124,10 +134,11 @@ return function(Config)
 		Parent = Config.Parent,
 		Active = true,
 	}, {
-		Window.AcrylicPaint.Frame,
+		Window.Surface.Frame,
 		Window.TabDisplay,
 		Window.ContainerHolder,
 		TabFrame,
+		Window.Divider,
 		ResizeStartFrame,
 	})
 
@@ -137,10 +148,6 @@ return function(Config)
 		Parent = Window.Root,
 		Window = Window,
 	})
-
-	if Library.UseAcrylic then
-		Window.AcrylicPaint.AddParent(Window.Root)
-	end
 
 	local SizeMotor = Creator.TrackMotor(Motion.GroupMotor.new({
 		X = Window.Size.X.Offset,
@@ -292,6 +299,7 @@ return function(Config)
 		SizeMotor:setGoal({ X = Instant(width), Y = Instant(height) })
 		PosMotor:setGoal({ X = Instant(x), Y = Instant(y) })
 		TabFrame.Size = UDim2.new(0, Window.TabWidth, 1, -66)
+		Window.Divider.Position = UDim2.fromOffset(Window.TabWidth + 19, 54)
 		Window.TabDisplay.Position = UDim2.fromOffset(Window.TabWidth + 26, 56)
 		Window.ContainerHolder.Size = UDim2.new(1, -Window.TabWidth - 32, 1, -102)
 		Window.ContainerHolder.Position = UDim2.fromOffset(Window.TabWidth + 26, 90)
@@ -338,7 +346,7 @@ return function(Config)
 			local Key = Library.MinimizeKeybind and Library.MinimizeKeybind.Value or Library.MinimizeKey.Name
 			Library:Notify({
 				Title = "Interface",
-				Content = "Press " .. Key .. " to toggle the inteface.",
+				Content = "Press " .. Key .. " to toggle the interface.",
 				Duration = 6
 			})
 		end
@@ -349,9 +357,6 @@ return function(Config)
 			local frame = Library.OpenFrames[index]
 			if frame and frame.Parent then pcall(function() frame:Destroy() end) end
 			table.remove(Library.OpenFrames, index)
-		end
-		if Library.UseAcrylic and Window.AcrylicPaint and Window.AcrylicPaint.Model then
-			pcall(function() Window.AcrylicPaint.Model:Destroy() end)
 		end
 		if Window.Root then Window.Root:Destroy() end
 	end
@@ -372,8 +377,8 @@ return function(Config)
 		local Content = New("TextLabel", {
 			FontFace = Typography.Regular,
 			Text = Config.Content,
-			TextColor3 = Color3.fromRGB(240, 240, 240),
-			TextSize = 12,
+			TextColor3 = Color3.fromRGB(150, 158, 172),
+			TextSize = 13,
 			TextWrapped = true,
 			LineHeight = 1.12,
 			TextXAlignment = Enum.TextXAlignment.Left,
@@ -384,7 +389,7 @@ return function(Config)
 			Parent = Dialog.Root,
 			ClipsDescendants = false,
 			ThemeTag = {
-				TextColor3 = "Text",
+				TextColor3 = "SubText",
 			},
 		})
 

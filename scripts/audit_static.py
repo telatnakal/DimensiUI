@@ -35,7 +35,7 @@ for file in SRC.rglob("*.lua"):
             else:
                 target.append(segment)
         path = "/".join(target)
-        if path not in modules and path not in {"Acrylic", "Components", "Elements", "Packages", "Themes"}:
+        if path not in modules and path not in {"Components", "Elements", "Packages", "Themes"}:
             missing.append((rel, match.group(0), path))
 assert not missing, f"Unresolved module references: {missing}"
 
@@ -161,19 +161,16 @@ for file in SRC.rglob("*.lua"):
 
 assert 'function Library:CreateInstance()' in (SRC / "init.lua").read_text(), "CreateInstance alias is missing"
 assert 'function Library:AddCleanup(Callback)' in (SRC / "init.lua").read_text(), "Instance cleanup registration is missing"
-assert 'function Acrylic.Destroy()' in (SRC / "Acrylic/init.lua").read_text(), "Acrylic lifecycle cleanup is missing"
-acrylic_source = (SRC / "Acrylic/init.lua").read_text()
-assert "DepthOfFieldDefaults" not in acrylic_source and "Effect.Enabled = false" not in acrylic_source, "Acrylic must not disable effects owned by other systems"
+assert not (SRC / "Acrylic").exists(), "Acrylic module must stay removed"
+assert (SRC / "Surface.lua").exists(), "Solid surface module is missing"
 notification_source = (SRC / "Components/Notification.lua").read_text()
 assert 'GetPropertyChangedSignal("CurrentCamera")' in notification_source, "Notifications must rebind to replacement cameras"
 assert 'Notification button callback must be a function' in notification_source, "Notification button validation is missing"
-assert 'end, NewNotification.Holder)' in notification_source, "Notification close and acrylic cleanup must be owner-bound"
-acrylic_blur_source = (SRC / "Acrylic/AcrylicBlur.lua").read_text()
-assert 'end, comp)' in acrylic_blur_source and 'end, Parent)' in acrylic_blur_source, "Acrylic GUI signals must be owner-bound"
-assert 'model.Destroying:Connect' in acrylic_blur_source and 'Creator.DisconnectSignal(currentCameraConnection)' in acrylic_blur_source, "Acrylic model teardown must release camera bindings"
+assert 'end, NewNotification.Holder)' in notification_source, "Notification close cleanup must be owner-bound"
+for file in [*SRC.rglob("*.lua"), *ROOT.joinpath("Addons").rglob("*.lua")]:
+    assert "acrylic" not in file.read_text().lower(), f"Acrylic reference remains: {file.relative_to(ROOT)}"
 window_dialog_source = (SRC / "Components/Window.lua").read_text()
 assert 'Config.Buttons = Config.Buttons or {}' in window_dialog_source, "Dialog Buttons must be optional"
-assert 'pcall(Acrylic.Destroy)' in (SRC / "init.lua").read_text(), "Library destroy must release Acrylic"
 assert 'function Library:NewInstance()' in (SRC / "init.lua").read_text(), "Multi Instance factory is missing"
 
 # Multi-instance factory must work in both modular ModuleScript and synthetic bundled roots.
@@ -223,9 +220,9 @@ for element_file in (SRC / "Elements/Paragraph.lua", SRC / "Elements/Button.lua"
 
 assert 'Library:UnregisterOption(Idx, Toggle)' in (SRC / "Elements/Toggle.lua").read_text(), "Toggle destroy must unregister only its own option instance"
 toggle_source = (SRC / "Elements/Toggle.lua").read_text()
-assert "UDim2.fromOffset(28, 16)" in toggle_source, "Toggle track must use compact 28x16 sizing"
-assert "UDim2.fromOffset(10, 10)" in toggle_source, "Toggle indicator must use compact 10x10 sizing"
-assert "Toggle.Value and 16 or 2" in toggle_source, "Toggle indicator position must match compact track geometry"
+assert "TRACK_WIDTH = 36" in toggle_source and "TRACK_HEIGHT = 20" in toggle_source, "Toggle track must use 36x20 sizing"
+assert "KNOB_SIZE = 14" in toggle_source and "KNOB_PAD = 3" in toggle_source, "Toggle knob must use 14px sizing with 3px padding"
+assert "TRACK_WIDTH - KNOB_SIZE - KNOB_PAD" in toggle_source, "Toggle knob position must match track geometry"
 
 assert 'Library:UnregisterOption(Idx, Slider)' in (SRC / "Elements/Slider.lua").read_text(), "Slider destroy must unregister only its own option instance"
 

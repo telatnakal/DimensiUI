@@ -99,7 +99,7 @@ return function(Config)
 			New("TextLabel", {
 				RichText = true,
 				Text = Config.SubTitle,
-				TextTransparency = 0.4,
+				TextTransparency = 0,
 				FontFace = Typography.Regular,
 				TextSize = 12,
 				TextXAlignment = "Left",
@@ -108,12 +108,12 @@ return function(Config)
 				AutomaticSize = Enum.AutomaticSize.X,
 				BackgroundTransparency = 1,
 				ThemeTag = {
-					TextColor3 = "Text",
+					TextColor3 = "SubText",
 				},
 			}),
 		}),
 		New("Frame", {
-			BackgroundTransparency = 0.5,
+			BackgroundTransparency = 0,
 			Size = UDim2.new(1, 0, 0, 1),
 			Position = UDim2.new(0, 0, 1, 0),
 			ThemeTag = {

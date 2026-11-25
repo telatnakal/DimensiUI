@@ -40,14 +40,25 @@ function Element:New(Idx, Config)
 	Slider.SetTitle = SliderFrame.SetTitle
 	Slider.SetDesc = SliderFrame.SetDesc
 
-	local SliderDot = New("ImageLabel", {
+	local SliderDot = New("Frame", {
 		AnchorPoint = Vector2.new(0, 0.5),
 		Position = UDim2.new(0, -7, 0.5, 0),
 		Size = UDim2.fromOffset(14, 14),
-		Image = "https://www.roblox.com/asset/?id=12266946128",
+		BackgroundTransparency = 0,
 		ThemeTag = {
-			ImageColor3 = "Accent",
+			BackgroundColor3 = "SliderKnob",
 		},
+	}, {
+		New("UICorner", {
+			CornerRadius = UDim.new(1, 0),
+		}),
+		New("UIStroke", {
+			Thickness = 2,
+			ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+			ThemeTag = {
+				Color = "Accent",
+			},
+		}),
 	})
 
 	local SliderRail = New("Frame", {
@@ -86,10 +97,10 @@ function Element:New(Idx, Config)
 	})
 
 	local SliderInner = New("Frame", {
-		Size = UDim2.new(0.42, 0, 0, 4),
+		Size = UDim2.new(0.42, 0, 0, 6),
 		AnchorPoint = Vector2.new(1, 0.5),
 		Position = UDim2.new(1, -10, 0.5, 0),
-		BackgroundTransparency = 0.4,
+		BackgroundTransparency = 0,
 		Parent = SliderFrame.Frame,
 		ThemeTag = {
 			BackgroundColor3 = "SliderRail",
@@ -99,7 +110,7 @@ function Element:New(Idx, Config)
 			CornerRadius = UDim.new(1, 0),
 		}),
 		New("UISizeConstraint", {
-			MinSize = Vector2.new(84, 4),
+			MinSize = Vector2.new(84, 6),
 			MaxSize = Vector2.new(150, math.huge),
 		}),
 		SliderDisplay,

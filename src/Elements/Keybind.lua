@@ -61,15 +61,15 @@ function Element:New(Idx, Config)
 		Size = UDim2.fromOffset(0, 30),
 		Position = UDim2.new(1, -10, 0.5, 0),
 		AnchorPoint = Vector2.new(1, 0.5),
-		BackgroundTransparency = 0.9,
+		BackgroundTransparency = 0,
 		Parent = KeybindFrame.Frame,
 		AutomaticSize = Enum.AutomaticSize.X,
 		ThemeTag = {
-			BackgroundColor3 = "Keybind",
+			BackgroundColor3 = "Input",
 		},
 	}, {
 		New("UICorner", {
-			CornerRadius = UDim.new(0, 5),
+			CornerRadius = UDim.new(0, 6),
 		}),
 		New("UISizeConstraint", {
 			MaxSize = Vector2.new(104, 32),
@@ -79,10 +79,10 @@ function Element:New(Idx, Config)
 			PaddingRight = UDim.new(0, 8),
 		}),
 		New("UIStroke", {
-			Transparency = 0.5,
+			Transparency = 0,
 			ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
 			ThemeTag = {
-				Color = "InElementBorder",
+				Color = "InputBorder",
 			},
 		}),
 		KeybindDisplayLabel,

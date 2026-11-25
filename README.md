@@ -20,7 +20,7 @@
 - Single Dimensi theme with runtime accent customization
 - Shared typography resolver with Builder Sans candidate and Roblox font fallbacks
 - Responsive window sizing and viewport-aware controls
-- Optional Acrylic/transparency effects
+- Clean solid surfaces with optional window transparency (no blur effects)
 - Instance factory APIs: `NewInstance()` and `CreateInstance()`
 - Instance-owned cleanup callbacks through `AddCleanup()`
 - SaveManager and InterfaceManager addons with per-instance factories
@@ -70,7 +70,6 @@ local Window = DimensiUI:CreateWindow({
     SubTitle = "Interface",
     TabWidth = 160,
     Size = UDim2.fromOffset(580, 420),
-    Acrylic = false,
     Theme = "Dimensi",
 })
 

@@ -11,9 +11,9 @@ return function(Theme, Parent, DialogCheck)
 	local Button = {}
 
 	Button.Title = New("TextLabel", {
-		FontFace = Typography.Regular,
-		TextColor3 = Color3.fromRGB(200, 200, 200),
-		TextSize = 14,
+		FontFace = Typography.Medium,
+		TextColor3 = Color3.fromRGB(241, 243, 247),
+		TextSize = 13,
 		TextWrapped = true,
 		TextXAlignment = Enum.TextXAlignment.Center,
 		TextYAlignment = Enum.TextYAlignment.Center,
@@ -34,7 +34,7 @@ return function(Theme, Parent, DialogCheck)
 		},
 	}, {
 		New("UICorner", {
-			CornerRadius = UDim.new(0, 4),
+			CornerRadius = UDim.new(0, 6),
 		}),
 	})
 
@@ -46,11 +46,11 @@ return function(Theme, Parent, DialogCheck)
 		},
 	}, {
 		New("UICorner", {
-			CornerRadius = UDim.new(0, 4),
+			CornerRadius = UDim.new(0, 6),
 		}),
 		New("UIStroke", {
 			ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-			Transparency = 0.65,
+			Transparency = 0,
 			ThemeTag = {
 				Color = "DialogButtonBorder",
 			},

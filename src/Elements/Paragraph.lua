@@ -19,8 +19,10 @@ function Paragraph:New(Idx, Config)
 	Config.Content = Config.Content or ""
 
 	local Paragraph = require(Components.Element)(Config.Title, Config.Content, Paragraph.Container, false)
-	Paragraph.Frame.BackgroundTransparency = 0.82
-	Paragraph.Border.Transparency = 0.6
+	-- Info boxes use a quieter fill than interactive rows; drop the shared transparency tag so it persists.
+	Creator.OverrideTag(Paragraph.Frame, { BackgroundColor3 = "Element" })
+	Paragraph.Frame.BackgroundTransparency = 0.7
+	Paragraph.Border.Transparency = 0.3
 
 	return Paragraph
 end

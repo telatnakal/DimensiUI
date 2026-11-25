@@ -7,7 +7,6 @@ local Window = DimensiUI:CreateWindow({
 	SubTitle = "v" .. DimensiUI.Version,
 	TabWidth = 160,
 	Size = UDim2.fromOffset(580, 460),
-	Acrylic = false,
 	Theme = "Dimensi",
 	MinimizeKey = Enum.KeyCode.LeftControl,
 })

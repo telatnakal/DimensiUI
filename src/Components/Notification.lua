@@ -2,7 +2,7 @@ local Root = script.Parent.Parent
 local Typography = require(Root.Typography)
 local Motion = require(Root.Packages.DimensiMotion)
 local Creator = require(Root.Creator)
-local Acrylic = require(Root.Acrylic)
+local Surface = require(Root.Surface)
 
 local Spring = Motion.Spring.new
 local Instant = Motion.Instant.new
@@ -75,15 +75,15 @@ function Notification:New(Config)
 		Closed = false,
 	}
 
-	NewNotification.AcrylicPaint = Acrylic.AcrylicPaint()
+	NewNotification.Surface = Surface()
 
 	NewNotification.Title = New("TextLabel", {
 		Position = UDim2.new(0, 14, 0, 17),
 		Text = Config.Title,
 		RichText = true,
-		TextColor3 = Color3.fromRGB(255, 255, 255),
+		TextColor3 = Color3.fromRGB(241, 243, 247),
 		TextTransparency = 0,
-		FontFace = Typography.Regular,
+		FontFace = Typography.SemiBold,
 		TextSize = 13,
 		TextXAlignment = "Left",
 		TextYAlignment = "Center",
@@ -162,12 +162,26 @@ function Notification:New(Config)
 		}),
 	})
 
+	NewNotification.Accent = New("Frame", {
+		Position = UDim2.new(0, 6, 0, 12),
+		Size = UDim2.new(0, 3, 1, -24),
+		BackgroundTransparency = 0,
+		ThemeTag = {
+			BackgroundColor3 = "Accent",
+		},
+	}, {
+		New("UICorner", {
+			CornerRadius = UDim.new(1, 0),
+		}),
+	})
+
 	NewNotification.Root = New("Frame", {
 		BackgroundTransparency = 1,
 		Size = UDim2.new(1, 0, 1, 0),
 		Position = UDim2.fromScale(1, 0),
 	}, {
-		NewNotification.AcrylicPaint.Frame,
+		NewNotification.Surface.Frame,
+		NewNotification.Accent,
 		NewNotification.Title,
 		NewNotification.CloseButton,
 		NewNotification.LabelHolder,
@@ -191,13 +205,6 @@ function Notification:New(Config)
 
 	Creator.AddSignal(NewNotification.CloseButton.MouseButton1Click, function()
 		NewNotification:Close()
-	end, NewNotification.Holder)
-
-	Creator.AddSignal(NewNotification.Holder.Destroying, function()
-		local Paint = NewNotification.AcrylicPaint
-		if Paint and Paint.Model and Paint.Model.Parent then
-			pcall(function() Paint.Model:Destroy() end)
-		end
 	end, NewNotification.Holder)
 
 	local RootMotor = Creator.TrackMotor(Motion.GroupMotor.new({
@@ -232,10 +239,6 @@ function Notification:New(Config)
 				Offset = Spring(60, { frequency = 5 }),
 			})
 			task.wait(0.4)
-			if require(Root).UseAcrylic then
-				local Paint = NewNotification.AcrylicPaint
-				if Paint and Paint.Model then pcall(function() Paint.Model:Destroy() end) end
-			end
 			if NewNotification.Holder and NewNotification.Holder.Parent then
 				NewNotification.Holder:Destroy()
 			end

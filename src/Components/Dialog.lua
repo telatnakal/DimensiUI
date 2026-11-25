@@ -46,7 +46,7 @@ function Dialog:Create()
 		Parent = Dialog.Window.Root,
 	}, {
 		New("UICorner", {
-			CornerRadius = UDim.new(0, 8),
+			CornerRadius = UDim.new(0, 10),
 		}),
 	})
 
@@ -85,7 +85,7 @@ function Dialog:Create()
 	NewDialog.Title = New("TextLabel", {
 		FontFace = Typography.SemiBold,
 		Text = "Dialog",
-		TextColor3 = Color3.fromRGB(240, 240, 240),
+		TextColor3 = Color3.fromRGB(241, 243, 247),
 		TextSize = 16,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		Size = UDim2.new(1, 0, 0, 22),
@@ -114,10 +114,10 @@ function Dialog:Create()
 		},
 	}, {
 		New("UICorner", {
-			CornerRadius = UDim.new(0, 8),
+			CornerRadius = UDim.new(0, 10),
 		}),
 		New("UIStroke", {
-			Transparency = 0.5,
+			Transparency = 0,
 			ThemeTag = {
 				Color = "DialogBorder",
 			},

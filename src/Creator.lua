@@ -184,18 +184,23 @@ function Creator.GetThemeProperty(Property)
 	return nil
 end
 
+local function ApplyThemeEntry(Instance, Properties)
+	for Property, ColorIdx in next, Properties do
+		local ok, err = pcall(function()
+			Instance[Property] = Creator.GetThemeProperty(ColorIdx)
+		end)
+		if not ok then
+			warn("DimensiUI theme property update failed:", err)
+			Creator.Registry[Instance] = nil
+			return false
+		end
+	end
+	return true
+end
+
 function Creator.UpdateTheme()
 	for Instance, Object in next, Creator.Registry do
-		for Property, ColorIdx in next, Object.Properties do
-			local ok, err = pcall(function()
-				Instance[Property] = Creator.GetThemeProperty(ColorIdx)
-			end)
-			if not ok then
-				warn("DimensiUI theme property update failed:", err)
-			Creator.Registry[Instance] = nil
-			break
-			end
-		end
+		ApplyThemeEntry(Instance, Object.Properties)
 	end
 
 	for _, Motor in next, Creator.TransparencyMotors do
@@ -222,7 +227,7 @@ function Creator.AddThemeObject(Object, Properties)
 		Creator.Registry[Object] = nil
 		Creator.DisconnectSignal(DestroyConnection)
 	end))
-	Creator.UpdateTheme()
+	ApplyThemeEntry(Object, Properties)
 	return Object
 end
 
@@ -232,7 +237,7 @@ function Creator.OverrideTag(Object, Properties)
 		return false
 	end
 	Entry.Properties = Properties
-	Creator.UpdateTheme()
+	ApplyThemeEntry(Object, Properties)
 	return true
 end
 

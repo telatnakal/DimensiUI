@@ -8,6 +8,23 @@ local Spring = Motion.Spring.new
 local Instant = Motion.Instant.new
 local Components = Root.Components
 
+-- Background tint (Tab theme color) per interaction state
+local TINT_IDLE = 1
+local TINT_HOVER = 0.93
+local TINT_PRESSED = 0.9
+local TINT_SELECTED = 0.86
+local TINT_SELECTED_HOVER = 0.82
+
+local function SetActive(Item, Active)
+	if Item.Label then
+		Item.Label.FontFace = Active and Typography.Medium or Typography.Regular
+		Creator.OverrideTag(Item.Label, { TextColor3 = Active and "Text" or "SubText" })
+	end
+	if Item.IconImage then
+		Creator.OverrideTag(Item.IconImage, { ImageColor3 = Active and "Accent" or "SubText" })
+	end
+end
+
 local TabModule = {
 	Window = nil,
 	Tabs = {},
@@ -54,8 +71,37 @@ function TabModule:New(Title, Icon, Parent)
 		Icon = nil
 	end
 
+	Tab.Label = New("TextLabel", {
+		AnchorPoint = Vector2.new(0, 0.5),
+		Position = Icon and UDim2.new(0, 34, 0.5, 0) or UDim2.new(0, 14, 0.5, 0),
+		Text = Title,
+		RichText = true,
+		TextTransparency = 0,
+		FontFace = Typography.Regular,
+		TextSize = 13,
+		TextXAlignment = "Left",
+		TextYAlignment = "Center",
+		Size = UDim2.new(1, -40, 1, 0),
+		BackgroundTransparency = 1,
+		TextTruncate = Enum.TextTruncate.AtEnd,
+		ThemeTag = {
+			TextColor3 = "SubText",
+		},
+	})
+
+	Tab.IconImage = New("ImageLabel", {
+		AnchorPoint = Vector2.new(0, 0.5),
+		Size = UDim2.fromOffset(16, 16),
+		Position = UDim2.new(0, 12, 0.5, 0),
+		BackgroundTransparency = 1,
+		Image = Icon and Icon or nil,
+		ThemeTag = {
+			ImageColor3 = "SubText",
+		},
+	})
+
 	Tab.Frame = New("TextButton", {
-		Size = UDim2.new(1, 0, 0, 38),
+		Size = UDim2.new(1, 0, 0, 36),
 		BackgroundTransparency = 1,
 		Parent = Parent,
 		ThemeTag = {
@@ -63,35 +109,10 @@ function TabModule:New(Title, Icon, Parent)
 		},
 	}, {
 		New("UICorner", {
-			CornerRadius = UDim.new(0, 6),
+			CornerRadius = UDim.new(0, 8),
 		}),
-		New("TextLabel", {
-			AnchorPoint = Vector2.new(0, 0.5),
-			Position = Icon and UDim2.new(0, 30, 0.5, 0) or UDim2.new(0, 12, 0.5, 0),
-			Text = Title,
-			RichText = true,
-			TextColor3 = Color3.fromRGB(255, 255, 255),
-			TextTransparency = 0,
-			FontFace = Typography.Regular,
-			TextSize = 12,
-			TextXAlignment = "Left",
-			TextYAlignment = "Center",
-			Size = UDim2.new(1, -12, 1, 0),
-			BackgroundTransparency = 1,
-			ThemeTag = {
-				TextColor3 = "Text",
-			},
-		}),
-		New("ImageLabel", {
-			AnchorPoint = Vector2.new(0, 0.5),
-			Size = UDim2.fromOffset(16, 16),
-			Position = UDim2.new(0, 8, 0.5, 0),
-			BackgroundTransparency = 1,
-			Image = Icon and Icon or nil,
-			ThemeTag = {
-				ImageColor3 = "Text",
-			},
-		}),
+		Tab.Label,
+		Tab.IconImage,
 	})
 
 	local ContainerLayout = New("UIListLayout", {
@@ -107,8 +128,8 @@ function TabModule:New(Title, Icon, Parent)
 		BottomImage = "rbxassetid://6889812791",
 		MidImage = "rbxassetid://6889812721",
 		TopImage = "rbxassetid://6276641225",
-		ScrollBarImageColor3 = Color3.fromRGB(255, 255, 255),
-		ScrollBarImageTransparency = 0.95,
+		ScrollBarImageColor3 = Color3.fromRGB(150, 158, 172),
+		ScrollBarImageTransparency = 0.7,
 		ScrollBarThickness = 3,
 		BorderSizePixel = 0,
 		CanvasSize = UDim2.fromScale(0, 0),
@@ -130,16 +151,16 @@ function TabModule:New(Title, Icon, Parent)
 	Tab.Motor, Tab.SetTransparency = Creator.SpringMotor(1, Tab.Frame, "BackgroundTransparency")
 
 	Creator.AddSignal(Tab.Frame.MouseEnter, function()
-		Tab.SetTransparency(Tab.Selected and 0.85 or 0.89)
+		Tab.SetTransparency(Tab.Selected and TINT_SELECTED_HOVER or TINT_HOVER)
 	end, Tab.Frame)
 	Creator.AddSignal(Tab.Frame.MouseLeave, function()
-		Tab.SetTransparency(Tab.Selected and 0.89 or 1)
+		Tab.SetTransparency(Tab.Selected and TINT_SELECTED or TINT_IDLE)
 	end, Tab.Frame)
 	Creator.AddSignal(Tab.Frame.MouseButton1Down, function()
-		Tab.SetTransparency(0.92)
+		Tab.SetTransparency(TINT_PRESSED)
 	end, Tab.Frame)
 	Creator.AddSignal(Tab.Frame.MouseButton1Up, function()
-		Tab.SetTransparency(Tab.Selected and 0.85 or 0.89)
+		Tab.SetTransparency(Tab.Selected and TINT_SELECTED_HOVER or TINT_HOVER)
 	end, Tab.Frame)
 	Creator.AddSignal(Tab.Frame.MouseButton1Click, function()
 		TabModule:SelectTab(TabIndex)
@@ -176,11 +197,13 @@ function TabModule:SelectTab(Tab)
 	local Generation = TabModule.SelectionGeneration
 	TabModule.SelectedTab = Tab
 	for _, Item in next, TabModule.Tabs do
-		Item.SetTransparency(1)
+		Item.SetTransparency(TINT_IDLE)
 		Item.Selected = false
+		SetActive(Item, false)
 	end
-	TabObject.SetTransparency(0.89)
+	TabObject.SetTransparency(TINT_SELECTED)
 	TabObject.Selected = true
+	SetActive(TabObject, true)
 	Window.TabDisplay.Text = TabObject.Name
 	Window.SelectorPosMotor:setGoal(Spring(TabModule:GetCurrentTabPos(), { frequency = 6 }))
 	task.spawn(function()

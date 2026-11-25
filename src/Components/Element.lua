@@ -12,7 +12,7 @@ return function(Title, Desc, Parent, Hover)
 	Element.TitleLabel = New("TextLabel", {
 		FontFace = Typography.Medium,
 		Text = Title,
-		TextColor3 = Color3.fromRGB(240, 240, 240),
+		TextColor3 = Color3.fromRGB(241, 243, 247),
 		TextSize = 13,
 		TextWrapped = true,
 		LineHeight = 1.12,
@@ -29,7 +29,7 @@ return function(Title, Desc, Parent, Hover)
 	Element.DescLabel = New("TextLabel", {
 		FontFace = Typography.Regular,
 		Text = Desc,
-		TextColor3 = Color3.fromRGB(200, 200, 200),
+		TextColor3 = Color3.fromRGB(150, 158, 172),
 		TextSize = 12,
 		TextWrapped = true,
 		LineHeight = 1.12,
@@ -56,17 +56,17 @@ return function(Title, Desc, Parent, Hover)
 			VerticalAlignment = Enum.VerticalAlignment.Center,
 		}),
 		New("UIPadding", {
-			PaddingBottom = UDim.new(0, 10),
-			PaddingTop = UDim.new(0, 10),
+			PaddingBottom = UDim.new(0, 12),
+			PaddingTop = UDim.new(0, 12),
 		}),
 		Element.TitleLabel,
 		Element.DescLabel,
 	})
 
 	Element.Border = New("UIStroke", {
-		Transparency = 0.5,
+		Transparency = 0,
 		ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-		Color = Color3.fromRGB(0, 0, 0),
+		Color = Color3.fromRGB(46, 52, 64),
 		ThemeTag = {
 			Color = "ElementBorder",
 		},
@@ -86,7 +86,7 @@ return function(Title, Desc, Parent, Hover)
 		},
 	}, {
 		New("UICorner", {
-			CornerRadius = UDim.new(0, 6),
+			CornerRadius = UDim.new(0, 8),
 		}),
 		Element.Border,
 		Element.LabelHolder,
