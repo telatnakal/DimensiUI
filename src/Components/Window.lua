@@ -89,7 +89,6 @@ return function(Config)
 		New("UICorner", {
 			CornerRadius = UDim.new(0, 12),
 		}),
-		-- Squares off the sidebar's right-hand corners so only the window's left corners stay round.
 		New("Frame", {
 			Name = "Patch",
 			AnchorPoint = Vector2.new(1, 0),
@@ -171,7 +170,6 @@ return function(Config)
 		Window = Window,
 	})
 
-	-- The tab list starts below the brand block, which grows when a long title wraps.
 	local function LayoutSidebar()
 		local Brand = Window.TitleBar.Brand
 		Brand.Visible = not Window.SidebarCollapsed
@@ -218,6 +216,7 @@ return function(Config)
 	function Window:ToggleSidebar()
 		return self:SetSidebarCollapsed(not self.SidebarCollapsed)
 	end
+
 	LayoutSidebar()
 	Creator.AddSignal(Window.TitleBar.Brand:GetPropertyChangedSignal("AbsoluteSize"), LayoutSidebar, Window.Root)
 
@@ -251,10 +250,8 @@ return function(Config)
 	end)
 
 	Creator.AddSignal(Window.TitleBar.Frame.InputBegan, function(Input)
-		if
-			Input.UserInputType == Enum.UserInputType.MouseButton1
-			or Input.UserInputType == Enum.UserInputType.Touch
-		then
+		if Input.UserInputType == Enum.UserInputType.MouseButton1
+			or Input.UserInputType == Enum.UserInputType.Touch then
 			Dragging = true
 			MousePos = Input.Position
 			StartPos = Window.Root.Position
@@ -275,19 +272,15 @@ return function(Config)
 	end, Window.Root)
 
 	Creator.AddSignal(Window.TitleBar.Frame.InputChanged, function(Input)
-		if
-			Input.UserInputType == Enum.UserInputType.MouseMovement
-			or Input.UserInputType == Enum.UserInputType.Touch
-		then
+		if Input.UserInputType == Enum.UserInputType.MouseMovement
+			or Input.UserInputType == Enum.UserInputType.Touch then
 			DragInput = Input
 		end
 	end, Window.Root)
 
 	Creator.AddSignal(ResizeStartFrame.InputBegan, function(Input)
-		if
-			Input.UserInputType == Enum.UserInputType.MouseButton1
-			or Input.UserInputType == Enum.UserInputType.Touch
-		then
+		if Input.UserInputType == Enum.UserInputType.MouseButton1
+			or Input.UserInputType == Enum.UserInputType.Touch then
 			Resizing = true
 			ResizePos = Input.Position
 		end
@@ -304,16 +297,12 @@ return function(Config)
 				X = Instant(Window.Position.X.Offset),
 				Y = Instant(Window.Position.Y.Offset),
 			})
-
 		end
 
-		if
-			(Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch)
-			and Resizing
-		then
+		if (Input.UserInputType == Enum.UserInputType.MouseMovement
+			or Input.UserInputType == Enum.UserInputType.Touch) and Resizing then
 			local Delta = Input.Position - ResizePos
 			local StartSize = Window.Size
-
 			local TargetSize = Vector3.new(StartSize.X.Offset, StartSize.Y.Offset, 0) + Vector3.new(1, 1, 0) * Delta
 			local _, minW, minH, maxW, maxH = getBounds()
 			local viewport = Camera.ViewportSize
@@ -374,6 +363,7 @@ return function(Config)
 			FitToViewport()
 		end
 	end
+
 	Creator.AddSignal(Workspace:GetPropertyChangedSignal("CurrentCamera"), BindCamera, Window.Root)
 	BindCamera()
 
@@ -382,11 +372,9 @@ return function(Config)
 	end, Window.Root)
 
 	Creator.AddSignal(UserInputService.InputBegan, function(Input)
-		if
-			type(Library.MinimizeKeybind) == "table"
+		if type(Library.MinimizeKeybind) == "table"
 			and Library.MinimizeKeybind.Type == "Keybind"
-			and not UserInputService:GetFocusedTextBox()
-		then
+			and not UserInputService:GetFocusedTextBox() then
 			if Input.KeyCode.Name == Library.MinimizeKeybind.Value then
 				Window:ToggleHidden()
 			end
@@ -395,7 +383,7 @@ return function(Config)
 		end
 	end, Window.Root)
 
-	-- Floating round "D" bubble shown while the window is collapsed.
+	-- Floating round bubble shown while the window is collapsed.
 	local BUBBLE_SIZE = 56
 
 	local function ResolveIcon(Icon)
@@ -405,7 +393,7 @@ return function(Config)
 		if type(Icon) ~= "string" or Icon == "" then
 			return nil
 		end
-		if Icon:match("^rbxassetid://") or Icon:match("^rbxasset://") or Icon:match("^https?://") then
+		if Icon:match("^rbxassetid://") or Icon:match("^rbxasset://") then
 			return Icon
 		end
 		if tonumber(Icon) then
@@ -438,6 +426,7 @@ return function(Config)
 		Text = "D",
 		FontFace = Typography.Bold,
 		TextSize = 28,
+		Visible = false,
 		ThemeTag = { TextColor3 = "Accent" },
 	})
 
@@ -462,16 +451,45 @@ return function(Config)
 		BubbleLetter,
 	})
 
+	-- Load icon from GitHub
 	local IconPath = "d-icon.png"
-local IconUrl = "https://raw.githubusercontent.com/telatnakal/DimensiUI/main/Assets/d-icon.png"
+	local IconUrl = "https://raw.githubusercontent.com/telatnakal/DimensiUI/main/Assets/d-icon.png"
 
-if not isfile(IconPath) then
-    writefile(IconPath, game:HttpGet(IconUrl))
-end
+	function Window:SetIcon(Icon)
+		local success, result = pcall(function()
+			if type(isfile) ~= "function"
+				or type(writefile) ~= "function"
+				or type(getcustomasset) ~= "function" then
+				error("Executor does not support custom assets")
+			end
 
-Window:SetIcon(getcustomasset(IconPath))
+			if not isfile(IconPath) then
+				local response = game:HttpGet(IconUrl)
+				assert(type(response) == "string" and #response > 0, "Empty image response")
+				writefile(IconPath, response)
+			end
+
+			return getcustomasset(IconPath)
+		end)
+
+		if success and type(result) == "string" and result ~= "" then
+			BubbleIcon.Image = result
+			BubbleIcon.Visible = true
+			BubbleLetter.Visible = false
+			return true
+		end
+
+		warn("[DimensiUI] Icon loading failed:", result)
+		BubbleIcon.Image = ""
+		BubbleIcon.Visible = false
+		BubbleLetter.Visible = true
+		return false
+	end
+
+	Window:SetIcon(Config.Icon)
 
 	local BubblePlaced = false
+
 	local function ClampBubble(X, Y)
 		local view = (Workspace.CurrentCamera and Workspace.CurrentCamera.ViewportSize) or Vector2.new(800, 600)
 		return math.clamp(X, 0, math.max(0, view.X - BUBBLE_SIZE)), math.clamp(Y, 0, math.max(0, view.Y - BUBBLE_SIZE))
@@ -484,12 +502,13 @@ Window:SetIcon(getcustomasset(IconPath))
 		Window.Minimized = Window.Collapsed
 		if not ShowWindow then
 			for _, frame in ipairs(Library.OpenFrames) do
-				if frame and frame.Parent then frame.Visible = false end
+				if frame and frame.Parent then
+					frame.Visible = false
+				end
 			end
 		end
 	end
 
-	-- Title-bar minimize button: collapse into the bubble (or restore from it).
 	function Window:SetCollapsed(Collapsed)
 		Collapsed = not not Collapsed
 		if Window.Collapsed == Collapsed then return false end
@@ -506,7 +525,6 @@ Window:SetIcon(getcustomasset(IconPath))
 		return Window:SetCollapsed(not Window.Collapsed)
 	end
 
-	-- Hotkey: hide everything (window and bubble) or bring back what was showing.
 	function Window:ToggleHidden()
 		Window.Hidden = not Window.Hidden
 		ApplyVisibility()
@@ -521,11 +539,11 @@ Window:SetIcon(getcustomasset(IconPath))
 		end
 	end
 
-	-- Bubble: click restores, drag moves.
 	local BubbleDragging, BubbleMoved, BubbleStart, BubbleOrigin = false, false, nil, nil
 
 	Creator.AddSignal(Window.Bubble.InputBegan, function(Input)
-		if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
+		if Input.UserInputType == Enum.UserInputType.MouseButton1
+			or Input.UserInputType == Enum.UserInputType.Touch then
 			BubbleDragging = true
 			BubbleMoved = false
 			BubbleStart = Input.Position
@@ -535,7 +553,8 @@ Window:SetIcon(getcustomasset(IconPath))
 
 	Creator.AddSignal(UserInputService.InputChanged, function(Input)
 		if not BubbleDragging then return end
-		if Input.UserInputType ~= Enum.UserInputType.MouseMovement and Input.UserInputType ~= Enum.UserInputType.Touch then return end
+		if Input.UserInputType ~= Enum.UserInputType.MouseMovement
+			and Input.UserInputType ~= Enum.UserInputType.Touch then return end
 		local Delta = Input.Position - BubbleStart
 		if not BubbleMoved and Delta.Magnitude < 5 then return end
 		BubbleMoved = true
@@ -546,7 +565,8 @@ Window:SetIcon(getcustomasset(IconPath))
 
 	Creator.AddSignal(UserInputService.InputEnded, function(Input)
 		if not BubbleDragging then return end
-		if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
+		if Input.UserInputType == Enum.UserInputType.MouseButton1
+			or Input.UserInputType == Enum.UserInputType.Touch then
 			BubbleDragging = false
 			if not BubbleMoved and not Window.Hidden then
 				Window:SetCollapsed(false)
@@ -557,7 +577,9 @@ Window:SetIcon(getcustomasset(IconPath))
 	function Window:Destroy()
 		for index = #Library.OpenFrames, 1, -1 do
 			local frame = Library.OpenFrames[index]
-			if frame and frame.Parent then pcall(function() frame:Destroy() end) end
+			if frame and frame.Parent then
+				pcall(function() frame:Destroy() end)
+			end
 			table.remove(Library.OpenFrames, index)
 		end
 		if Window.Bubble then Window.Bubble:Destroy() end
@@ -565,6 +587,7 @@ Window:SetIcon(getcustomasset(IconPath))
 	end
 
 	local DialogModule = require(Components.Dialog):Init(Window)
+
 	function Window:Dialog(Config)
 		assert(type(Config) == "table" and type(Config.Title) == "string" and type(Config.Content) == "string", "Window:Dialog requires Title and Content strings")
 		Config.Buttons = Config.Buttons or {}
@@ -617,6 +640,7 @@ Window:SetIcon(getcustomasset(IconPath))
 	end
 
 	local TabModule = require(Components.Tab):Init(Window)
+
 	function Window:AddTab(TabConfig)
 		assert(type(TabConfig) == "table", "Window:AddTab expects a table")
 		assert(type(TabConfig.Title) == "string" and TabConfig.Title ~= "", "Window:AddTab requires Title")
