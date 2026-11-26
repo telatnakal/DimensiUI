@@ -10,7 +10,7 @@ return function(Parent, InElement)
 
 	Textbox.Input = New("TextBox", {
 		FontFace = Typography.Regular,
-		TextColor3 = Color3.fromRGB(241, 243, 247),
+		TextColor3 = Color3.fromRGB(239, 242, 250),
 		TextSize = 13,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		TextYAlignment = Enum.TextYAlignment.Center,

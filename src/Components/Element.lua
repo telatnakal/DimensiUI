@@ -19,7 +19,7 @@ return function(Title, Desc, Parent, Hover)
 	Element.TitleLabel = New("TextLabel", {
 		FontFace = Typography.Medium,
 		Text = Title,
-		TextColor3 = Color3.fromRGB(241, 243, 247),
+		TextColor3 = Color3.fromRGB(239, 242, 250),
 		TextSize = 14,
 		TextWrapped = true,
 		LineHeight = 1.12,
@@ -36,7 +36,7 @@ return function(Title, Desc, Parent, Hover)
 	Element.DescLabel = New("TextLabel", {
 		FontFace = Typography.Regular,
 		Text = Desc,
-		TextColor3 = Color3.fromRGB(150, 158, 172),
+		TextColor3 = Color3.fromRGB(157, 169, 191),
 		TextSize = 13,
 		TextWrapped = true,
 		LineHeight = 1.12,
@@ -63,11 +63,11 @@ return function(Title, Desc, Parent, Hover)
 			VerticalAlignment = Enum.VerticalAlignment.Center,
 		}),
 		New("UIPadding", {
-			PaddingBottom = UDim.new(0, 7),
-			PaddingTop = UDim.new(0, 7),
+			PaddingBottom = UDim.new(0, 5),
+			PaddingTop = UDim.new(0, 5),
 		}),
 		New("UISizeConstraint", {
-			MinSize = Vector2.new(0, 44),
+			MinSize = Vector2.new(0, 38),
 		}),
 		Element.TitleLabel,
 		Element.DescLabel,
@@ -86,7 +86,7 @@ return function(Title, Desc, Parent, Hover)
 	Element.Frame = New("TextButton", {
 		Size = UDim2.new(1, 0, 0, 0),
 		BackgroundTransparency = 1,
-		BackgroundColor3 = Color3.fromRGB(33, 38, 48),
+		BackgroundColor3 = Color3.fromRGB(39, 49, 70),
 		Parent = Parent,
 		AutomaticSize = Enum.AutomaticSize.Y,
 		AutoButtonColor = false,

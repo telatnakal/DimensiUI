@@ -43,7 +43,7 @@ function Element:New(Idx, Config)
 	local KeybindDisplayLabel = New("TextLabel", {
 		FontFace = Typography.Regular,
 		Text = Config.Default,
-		TextColor3 = Color3.fromRGB(240, 240, 240),
+		TextColor3 = Color3.fromRGB(239, 242, 250),
 		TextSize = 13,
 		TextXAlignment = Enum.TextXAlignment.Center,
 		Size = UDim2.new(0, 0, 0, 14),

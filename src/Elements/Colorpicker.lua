@@ -87,7 +87,7 @@ function Element:New(Idx, Config)
 			return New("TextLabel", {
 				FontFace = Typography.Medium,
 				Text = Text,
-				TextColor3 = Color3.fromRGB(240, 240, 240),
+				TextColor3 = Color3.fromRGB(239, 242, 250),
 				TextSize = 13,
 				TextXAlignment = Enum.TextXAlignment.Left,
 				Size = UDim2.new(1, 0, 0, 32),

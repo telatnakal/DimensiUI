@@ -935,7 +935,7 @@ return function(Config)
 		local Content = New("TextLabel", {
 			FontFace = Typography.Regular,
 			Text = Config.Content,
-			TextColor3 = Color3.fromRGB(150, 158, 172),
+			TextColor3 = Color3.fromRGB(157, 169, 191),
 			TextSize = 13,
 			TextWrapped = true,
 			LineHeight = 1.12,

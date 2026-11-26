@@ -113,7 +113,7 @@ function TabModule:New(Title, Icon, Parent, Description)
 	})
 
 	local ContainerLayout = New("UIListLayout", {
-		Padding = UDim.new(0, 16),
+		Padding = UDim.new(0, 12),
 		SortOrder = Enum.SortOrder.LayoutOrder,
 	})
 
@@ -125,12 +125,15 @@ function TabModule:New(Title, Icon, Parent, Description)
 		BottomImage = "rbxassetid://6889812791",
 		MidImage = "rbxassetid://6889812721",
 		TopImage = "rbxassetid://6276641225",
-		ScrollBarImageColor3 = Color3.fromRGB(150, 158, 172),
+		ScrollBarImageColor3 = Color3.fromRGB(157, 169, 191),
 		ScrollBarImageTransparency = 0.7,
 		ScrollBarThickness = 3,
 		BorderSizePixel = 0,
 		CanvasSize = UDim2.fromScale(0, 0),
 		ScrollingDirection = Enum.ScrollingDirection.Y,
+		ThemeTag = {
+			ScrollBarImageColor3 = "SubText",
+		},
 	}, {
 		ContainerLayout,
 		New("UIPadding", {

@@ -55,7 +55,7 @@ function Element:New(Idx, Config)
 	local DropdownDisplay = New("TextLabel", {
 		FontFace = Typography.Regular,
 		Text = "Value",
-		TextColor3 = Color3.fromRGB(240, 240, 240),
+		TextColor3 = Color3.fromRGB(239, 242, 250),
 		TextSize = 13,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		Size = UDim2.new(1, -30, 0, 14),
@@ -115,6 +115,9 @@ function Element:New(Idx, Config)
 		ScrollBarThickness = 4,
 		BorderSizePixel = 0,
 		CanvasSize = UDim2.fromScale(0, 0),
+		ThemeTag = {
+			ScrollBarImageColor3 = "SubText",
+		},
 	}, {
 		DropdownListLayout,
 	})
@@ -274,7 +277,7 @@ function Element:New(Idx, Config)
 
 			local ButtonSelector = New("Frame", {
 				Size = UDim2.fromOffset(4, 14),
-				BackgroundColor3 = Color3.fromRGB(76, 194, 255),
+				BackgroundColor3 = Color3.fromRGB(139, 120, 246),
 				Position = UDim2.fromOffset(-1, 16),
 				AnchorPoint = Vector2.new(0, 0.5),
 				ThemeTag = {
@@ -289,7 +292,7 @@ function Element:New(Idx, Config)
 			local ButtonLabel = New("TextLabel", {
 				FontFace = Typography.Regular,
 				Text = Value,
-				TextColor3 = Color3.fromRGB(200, 200, 200),
+				TextColor3 = Color3.fromRGB(157, 169, 191),
 				TextSize = 12,
 				TextXAlignment = Enum.TextXAlignment.Left,
 				BackgroundColor3 = Color3.fromRGB(255, 255, 255),

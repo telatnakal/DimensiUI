@@ -172,8 +172,17 @@ function Creator.Disconnect()
 end
 
 function Creator.GetThemeProperty(Property)
-	if Property == "Accent" and Creator.AccentOverride then
-		return Creator.AccentOverride
+	local Override = Creator.AccentOverride
+	if Override then
+		if Property == "Accent" then
+			return Override
+		elseif Property == "Hover" then
+			-- lighter tint of the accent (matches the default Hover/Accent relationship)
+			return Override:Lerp(Color3.new(1, 1, 1), 0.3)
+		elseif Property == "DropdownOption" then
+			-- deep, muted version of the accent for selected dropdown rows
+			return Override:Lerp(Color3.new(0, 0, 0), 0.5)
+		end
 	end
 	local Library = require(Root)
 	local Theme = Themes.Dimensi

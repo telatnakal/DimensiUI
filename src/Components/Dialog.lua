@@ -81,7 +81,7 @@ function Dialog:Create()
 	NewDialog.Title = New("TextLabel", {
 		FontFace = Typography.SemiBold,
 		Text = "Dialog",
-		TextColor3 = Color3.fromRGB(241, 243, 247),
+		TextColor3 = Color3.fromRGB(239, 242, 250),
 		TextSize = 16,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		Size = UDim2.new(1, 0, 0, 22),

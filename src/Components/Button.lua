@@ -12,7 +12,7 @@ return function(Theme, Parent, DialogCheck)
 
 	Button.Title = New("TextLabel", {
 		FontFace = Typography.Medium,
-		TextColor3 = Color3.fromRGB(241, 243, 247),
+		TextColor3 = Color3.fromRGB(239, 242, 250),
 		TextSize = 14,
 		TextWrapped = true,
 		TextXAlignment = Enum.TextXAlignment.Center,

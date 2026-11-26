@@ -787,8 +787,17 @@ function Creator.Disconnect()
 end
 
 function Creator.GetThemeProperty(Property)
-	if Property == "Accent" and Creator.AccentOverride then
-		return Creator.AccentOverride
+	local Override = Creator.AccentOverride
+	if Override then
+		if Property == "Accent" then
+			return Override
+		elseif Property == "Hover" then
+			-- lighter tint of the accent (matches the default Hover/Accent relationship)
+			return Override:Lerp(Color3.new(1, 1, 1), 0.3)
+		elseif Property == "DropdownOption" then
+			-- deep, muted version of the accent for selected dropdown rows
+			return Override:Lerp(Color3.new(0, 0, 0), 0.5)
+		end
 	end
 	local Library = require(Root)
 	local Theme = Themes.Dimensi
@@ -1861,7 +1870,7 @@ return function(Theme, Parent, DialogCheck)
 
 	Button.Title = New("TextLabel", {
 		FontFace = Typography.Medium,
-		TextColor3 = Color3.fromRGB(241, 243, 247),
+		TextColor3 = Color3.fromRGB(239, 242, 250),
 		TextSize = 14,
 		TextWrapped = true,
 		TextXAlignment = Enum.TextXAlignment.Center,
@@ -2061,7 +2070,7 @@ function Dialog:Create()
 	NewDialog.Title = New("TextLabel", {
 		FontFace = Typography.SemiBold,
 		Text = "Dialog",
-		TextColor3 = Color3.fromRGB(241, 243, 247),
+		TextColor3 = Color3.fromRGB(239, 242, 250),
 		TextSize = 16,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		Size = UDim2.new(1, 0, 0, 22),
@@ -2191,7 +2200,7 @@ return function(Title, Desc, Parent, Hover)
 	Element.TitleLabel = New("TextLabel", {
 		FontFace = Typography.Medium,
 		Text = Title,
-		TextColor3 = Color3.fromRGB(241, 243, 247),
+		TextColor3 = Color3.fromRGB(239, 242, 250),
 		TextSize = 14,
 		TextWrapped = true,
 		LineHeight = 1.12,
@@ -2208,7 +2217,7 @@ return function(Title, Desc, Parent, Hover)
 	Element.DescLabel = New("TextLabel", {
 		FontFace = Typography.Regular,
 		Text = Desc,
-		TextColor3 = Color3.fromRGB(150, 158, 172),
+		TextColor3 = Color3.fromRGB(157, 169, 191),
 		TextSize = 13,
 		TextWrapped = true,
 		LineHeight = 1.12,
@@ -2235,11 +2244,11 @@ return function(Title, Desc, Parent, Hover)
 			VerticalAlignment = Enum.VerticalAlignment.Center,
 		}),
 		New("UIPadding", {
-			PaddingBottom = UDim.new(0, 7),
-			PaddingTop = UDim.new(0, 7),
+			PaddingBottom = UDim.new(0, 5),
+			PaddingTop = UDim.new(0, 5),
 		}),
 		New("UISizeConstraint", {
-			MinSize = Vector2.new(0, 44),
+			MinSize = Vector2.new(0, 38),
 		}),
 		Element.TitleLabel,
 		Element.DescLabel,
@@ -2258,7 +2267,7 @@ return function(Title, Desc, Parent, Hover)
 	Element.Frame = New("TextButton", {
 		Size = UDim2.new(1, 0, 0, 0),
 		BackgroundTransparency = 1,
-		BackgroundColor3 = Color3.fromRGB(33, 38, 48),
+		BackgroundColor3 = Color3.fromRGB(39, 49, 70),
 		Parent = Parent,
 		AutomaticSize = Enum.AutomaticSize.Y,
 		AutoButtonColor = false,
@@ -2424,7 +2433,7 @@ function Notification:New(Config)
 		Position = UDim2.new(0, 14, 0, 17),
 		Text = Config.Title,
 		RichText = true,
-		TextColor3 = Color3.fromRGB(241, 243, 247),
+		TextColor3 = Color3.fromRGB(239, 242, 250),
 		TextTransparency = 0,
 		FontFace = Typography.SemiBold,
 		TextSize = 13,
@@ -2441,7 +2450,7 @@ function Notification:New(Config)
 	NewNotification.ContentLabel = New("TextLabel", {
 		FontFace = Typography.Regular,
 		Text = Config.Content,
-		TextColor3 = Color3.fromRGB(240, 240, 240),
+		TextColor3 = Color3.fromRGB(239, 242, 250),
 		TextSize = 12,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		AutomaticSize = Enum.AutomaticSize.Y,
@@ -2457,7 +2466,7 @@ function Notification:New(Config)
 	NewNotification.SubContentLabel = New("TextLabel", {
 		FontFace = Typography.Regular,
 		Text = Config.SubContent,
-		TextColor3 = Color3.fromRGB(240, 240, 240),
+		TextColor3 = Color3.fromRGB(239, 242, 250),
 		TextSize = 12,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		AutomaticSize = Enum.AutomaticSize.Y,
@@ -2794,7 +2803,7 @@ function TabModule:New(Title, Icon, Parent, Description)
 	})
 
 	local ContainerLayout = New("UIListLayout", {
-		Padding = UDim.new(0, 16),
+		Padding = UDim.new(0, 12),
 		SortOrder = Enum.SortOrder.LayoutOrder,
 	})
 
@@ -2806,12 +2815,15 @@ function TabModule:New(Title, Icon, Parent, Description)
 		BottomImage = "rbxassetid://6889812791",
 		MidImage = "rbxassetid://6889812721",
 		TopImage = "rbxassetid://6276641225",
-		ScrollBarImageColor3 = Color3.fromRGB(150, 158, 172),
+		ScrollBarImageColor3 = Color3.fromRGB(157, 169, 191),
 		ScrollBarImageTransparency = 0.7,
 		ScrollBarThickness = 3,
 		BorderSizePixel = 0,
 		CanvasSize = UDim2.fromScale(0, 0),
 		ScrollingDirection = Enum.ScrollingDirection.Y,
+		ThemeTag = {
+			ScrollBarImageColor3 = "SubText",
+		},
 	}, {
 		ContainerLayout,
 		New("UIPadding", {
@@ -2919,7 +2931,7 @@ return function(Parent, InElement)
 
 	Textbox.Input = New("TextBox", {
 		FontFace = Typography.Regular,
-		TextColor3 = Color3.fromRGB(241, 243, 247),
+		TextColor3 = Color3.fromRGB(239, 242, 250),
 		TextSize = 13,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		TextYAlignment = Enum.TextYAlignment.Center,
@@ -4129,7 +4141,7 @@ return function(Config)
 		local Content = New("TextLabel", {
 			FontFace = Typography.Regular,
 			Text = Config.Content,
-			TextColor3 = Color3.fromRGB(150, 158, 172),
+			TextColor3 = Color3.fromRGB(157, 169, 191),
 			TextSize = 13,
 			TextWrapped = true,
 			LineHeight = 1.12,
@@ -4319,7 +4331,7 @@ function Element:New(Idx, Config)
 			return New("TextLabel", {
 				FontFace = Typography.Medium,
 				Text = Text,
-				TextColor3 = Color3.fromRGB(240, 240, 240),
+				TextColor3 = Color3.fromRGB(239, 242, 250),
 				TextSize = 13,
 				TextXAlignment = Enum.TextXAlignment.Left,
 				Size = UDim2.new(1, 0, 0, 32),
@@ -4802,7 +4814,7 @@ function Element:New(Idx, Config)
 	local DropdownDisplay = New("TextLabel", {
 		FontFace = Typography.Regular,
 		Text = "Value",
-		TextColor3 = Color3.fromRGB(240, 240, 240),
+		TextColor3 = Color3.fromRGB(239, 242, 250),
 		TextSize = 13,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		Size = UDim2.new(1, -30, 0, 14),
@@ -4862,6 +4874,9 @@ function Element:New(Idx, Config)
 		ScrollBarThickness = 4,
 		BorderSizePixel = 0,
 		CanvasSize = UDim2.fromScale(0, 0),
+		ThemeTag = {
+			ScrollBarImageColor3 = "SubText",
+		},
 	}, {
 		DropdownListLayout,
 	})
@@ -5021,7 +5036,7 @@ function Element:New(Idx, Config)
 
 			local ButtonSelector = New("Frame", {
 				Size = UDim2.fromOffset(4, 14),
-				BackgroundColor3 = Color3.fromRGB(76, 194, 255),
+				BackgroundColor3 = Color3.fromRGB(139, 120, 246),
 				Position = UDim2.fromOffset(-1, 16),
 				AnchorPoint = Vector2.new(0, 0.5),
 				ThemeTag = {
@@ -5036,7 +5051,7 @@ function Element:New(Idx, Config)
 			local ButtonLabel = New("TextLabel", {
 				FontFace = Typography.Regular,
 				Text = Value,
-				TextColor3 = Color3.fromRGB(200, 200, 200),
+				TextColor3 = Color3.fromRGB(157, 169, 191),
 				TextSize = 12,
 				TextXAlignment = Enum.TextXAlignment.Left,
 				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
@@ -5419,7 +5434,7 @@ function Element:New(Idx, Config)
 	local KeybindDisplayLabel = New("TextLabel", {
 		FontFace = Typography.Regular,
 		Text = Config.Default,
-		TextColor3 = Color3.fromRGB(240, 240, 240),
+		TextColor3 = Color3.fromRGB(239, 242, 250),
 		TextSize = 13,
 		TextXAlignment = Enum.TextXAlignment.Center,
 		Size = UDim2.new(0, 0, 0, 14),

@@ -81,7 +81,7 @@ function Notification:New(Config)
 		Position = UDim2.new(0, 14, 0, 17),
 		Text = Config.Title,
 		RichText = true,
-		TextColor3 = Color3.fromRGB(241, 243, 247),
+		TextColor3 = Color3.fromRGB(239, 242, 250),
 		TextTransparency = 0,
 		FontFace = Typography.SemiBold,
 		TextSize = 13,
@@ -98,7 +98,7 @@ function Notification:New(Config)
 	NewNotification.ContentLabel = New("TextLabel", {
 		FontFace = Typography.Regular,
 		Text = Config.Content,
-		TextColor3 = Color3.fromRGB(240, 240, 240),
+		TextColor3 = Color3.fromRGB(239, 242, 250),
 		TextSize = 12,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		AutomaticSize = Enum.AutomaticSize.Y,
@@ -114,7 +114,7 @@ function Notification:New(Config)
 	NewNotification.SubContentLabel = New("TextLabel", {
 		FontFace = Typography.Regular,
 		Text = Config.SubContent,
-		TextColor3 = Color3.fromRGB(240, 240, 240),
+		TextColor3 = Color3.fromRGB(239, 242, 250),
 		TextSize = 12,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		AutomaticSize = Enum.AutomaticSize.Y,
