@@ -300,7 +300,7 @@ assert "AnchorPoint = Vector2.new(0.5, 0.5)" in window_source, "Bubble must be a
 assert "UDim2.new(0, BUBBLE_MARGIN + BUBBLE_SIZE / 2, 0.5, 0)" in window_source, "Bubble must dock at the left edge"
 assert "UDim2.new(0, X + BUBBLE_SIZE / 2, 0.5, Y)" in window_source, "Bubble placement must be centre-anchored with scale-based vertical centring"
 assert "BubbleDocked = true" in window_source and "-(height + inset) * BUBBLE_DOCK_Y - inset / 2" in window_source, "Every minimize must re-dock the bubble at the fixed screen fraction"
-assert "BUBBLE_MARGIN = 8" in window_source and "BUBBLE_DOCK_Y = 0.25" in window_source, "Bubble must dock near the left edge (8px gap), 25% from the top"
+assert "BUBBLE_MARGIN = 48" in window_source and "BUBBLE_DOCK_Y = 0.25" in window_source, "Bubble must dock near the left edge (8px gap), 25% from the top"
 assert 'New("UIScale"' in window_source and "SetBubbleShown" in window_source, "Bubble show/hide animation is missing"
 assert "BubbleToken" in window_source, "Bubble animation must guard against stale hide callbacks"
 assert "Window:SetCollapsed(false)" in window_source, "Clicking the bubble must restore the window"
