@@ -3598,8 +3598,8 @@ return function(Config)
 	-- Floating round "D" bubble shown while the window is minimized: docked near the left edge,
 	-- at 25% of the screen height, and clickable to restore the window.
 	local BUBBLE_SIZE = 44
-	local BUBBLE_MARGIN = 48 -- gap between the screen's left edge and the bubble
-	local BUBBLE_DOCK_Y = 0.25 -- docked vertical centre, as a fraction of the screen height (from the top)
+	local BUBBLE_MARGIN = 36 -- gap between the screen's left edge and the bubble
+	local BUBBLE_DOCK_Y = 0.75 -- docked vertical centre, as a fraction of the screen height (from the top)
 
 	local function ResolveIcon(Icon)
 		-- Hanya sumber yang bisa dimuat langsung oleh ImageLabel. URL biasa ditangani FetchIcon.
