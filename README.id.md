@@ -49,7 +49,7 @@
 - **Notifikasi dan dialog**, termasuk tombol aksi pada notifikasi.
 - **Sistem visual Midnight:** permukaan navy dengan aksen violet yang selektif, plus kustomisasi aksen saat runtime.
 - **Layout responsif:** ukuran window mengikuti viewport, sidebar bisa dilipat, dan perataan kontrol adaptif.
-- **Bubble minimize:** window mengecil menjadi logo DimensiUI bulat yang menempel di tepi paling kiri, pada 25% tinggi layar dari atas, dan membuka kembali window saat diklik.
+- **Bubble minimize:** window mengecil menjadi logo DimensiUI bulat yang menempel di tepi kiri, pada 25% tinggi layar dari atas, dan membuka kembali window saat diklik.
 - **Lifecycle bersih:** instance library terpisah (`NewInstance()`), callback pembersihan per instance (`AddCleanup()`), dan package motion internal (`DimensiMotion`).
 - **Addon:** `SaveManager` dan `InterfaceManager`, keduanya dengan factory per instance.
 - **Dua cara distribusi:** source modular (`src/`) dan bundle satu file hasil build (`dist/main.lua`).
@@ -133,7 +133,7 @@ Tombol minimize di title bar mengecilkan window menjadi logo DimensiUI bulat yan
 
 | Perilaku | Detail |
 |---|---|
-| Posisi | Menempel di **tepi paling kiri**, dengan pusatnya pada **25% tinggi layar** (dari atas). Setiap minimize mengembalikannya ke posisi ini, di resolusi apa pun. |
+| Posisi | Menempel di **tepi kiri** (jarak 8 px), dengan pusatnya pada **25% tinggi layar** (dari atas). Setiap minimize mengembalikannya ke posisi ini, di resolusi apa pun. |
 | Visibilitas | Selalu digambar di atas elemen interface lain (`ZIndex = 100`) dan tetap berada di dalam layar saat viewport berubah. |
 | Buka kembali | Klik atau ketuk bubble untuk memunculkan window di posisi sebelumnya. |
 | Pindah | Seret bubble untuk memindahkannya; bubble tetap berada di dalam layar. |

@@ -3595,10 +3595,10 @@ return function(Config)
 		end
 	end, Window.Root)
 
-	-- Floating round "D" bubble shown while the window is minimized: docked at the left edge,
+	-- Floating round "D" bubble shown while the window is minimized: docked near the left edge,
 	-- at 25% of the screen height, and clickable to restore the window.
 	local BUBBLE_SIZE = 56
-	local BUBBLE_MARGIN = 0 -- leftmost edge of the screen
+	local BUBBLE_MARGIN = 8 -- gap between the screen's left edge and the bubble
 	local BUBBLE_DOCK_Y = 0.25 -- docked vertical centre, as a fraction of the screen height (from the top)
 
 	local function ResolveIcon(Icon)
@@ -3924,7 +3924,7 @@ return function(Config)
 		return view.X, math.max(BUBBLE_SIZE, view.Y - inset), inset
 	end
 
-	-- Docked: leftmost edge, vertical centre at BUBBLE_DOCK_Y of the full screen height (the GUI area is
+	-- Docked: left edge (BUBBLE_MARGIN gap), vertical centre at BUBBLE_DOCK_Y of the full screen height (the GUI area is
 	-- the screen minus the top inset, so the inset is folded in). Dragged: keep the chosen spot, on screen.
 	local function ResolveBubbleCoords()
 		local width, height, inset = GetGuiArea()

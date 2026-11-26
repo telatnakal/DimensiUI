@@ -49,7 +49,7 @@ English · [Bahasa Indonesia](README.id.md)
 - **Notifications and dialogs**, including action buttons on notifications.
 - **Midnight visual system:** navy surfaces with a selective violet accent, plus runtime accent customization.
 - **Responsive layout:** viewport-aware window sizing, a collapsible sidebar and adaptive control alignment.
-- **Minimize bubble:** the window collapses into a round DimensiUI logo docked at the far left edge, 25% down from the top of the screen, that restores the window when clicked.
+- **Minimize bubble:** the window collapses into a round DimensiUI logo docked near the left edge, 25% down from the top of the screen, that restores the window when clicked.
 - **Clean lifecycle:** independent library instances (`NewInstance()`), instance-owned cleanup callbacks (`AddCleanup()`) and an internal motion package (`DimensiMotion`).
 - **Addons:** `SaveManager` and `InterfaceManager`, both with per-instance factories.
 - **Two ways to ship:** a modular source tree (`src/`) and a generated standalone bundle (`dist/main.lua`).
@@ -133,7 +133,7 @@ The title-bar minimize button collapses the window into a small round DimensiUI 
 
 | Behavior | Details |
 |---|---|
-| Position | Docked at the **leftmost edge**, with its center at **25% of the screen height** (from the top). Every minimize re-docks it there, at any resolution. |
+| Position | Docked at the **left edge** (8 px gap), with its center at **25% of the screen height** (from the top). Every minimize re-docks it there, at any resolution. |
 | Visibility | Always drawn above the rest of the interface (`ZIndex = 100`) and kept on-screen when the viewport changes. |
 | Restore | Click or tap the bubble to bring the window back where it was. |
 | Move | Drag the bubble to reposition it; it stays within the screen. |

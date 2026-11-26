@@ -8,7 +8,7 @@ All notable changes to DimensiUI are documented here. The format follows
 Release-preparation pass focused on quality, consistency and stability. No features were removed.
 
 ### Changed
-- **Minimize bubble:** the DimensiUI logo is now docked at the leftmost screen edge, with its center at 25% of
+- **Minimize bubble:** the DimensiUI logo is now docked at the left screen edge (8 px gap), with its center at 25% of
   the screen height (from the top), every time the window is minimized (previously it appeared wherever the
   window was). The position is a fraction of the screen, so it is consistent across resolutions.
 - The bubble is drawn above all other interface elements (`ZIndex = 100`) and is re-clamped when the
