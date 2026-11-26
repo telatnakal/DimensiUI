@@ -1,10 +1,5 @@
-local Lighting = game:GetService("Lighting")
 local RunService = game:GetService("RunService")
 local LocalPlayer = game:GetService("Players").LocalPlayer
-local UserInputService = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
-local Camera = game:GetService("Workspace").CurrentCamera
-local Mouse = LocalPlayer:GetMouse()
 
 local Root = script
 local Creator = require(Root.Creator)
@@ -46,7 +41,7 @@ local Library = {
 	Name = "DimensiUI",
 	Author = "telatnakal",
 	Credit = "telatnakal",
-	Version = "1.1.2",
+	Version = "1.0.1",
 
 	OpenFrames = {},
 	Options = {},
@@ -264,6 +259,7 @@ function Library:ResetAccent()
 	if Library.Unloaded then return false end
 	Creator.AccentOverride = nil
 	Creator.UpdateTheme()
+	return true
 end
 
 function Library:Destroy()

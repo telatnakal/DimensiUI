@@ -2,7 +2,6 @@ local Root = script.Parent.Parent
 local Typography = require(Root.Typography)
 local Assets = require(script.Parent.Assets)
 local Creator = require(Root.Creator)
-local Motion = require(Root.Packages.DimensiMotion)
 
 local New = Creator.New
 local AddSignal = Creator.AddSignal

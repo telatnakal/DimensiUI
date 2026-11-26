@@ -23,14 +23,14 @@ local Options = DimensiUI.Options
 do
 	DimensiUI:Notify({
 		Title = "DimensiUI",
-		Content = "Interface siap digunakan dengan ikon aktif.",
+		Content = "Interface siap. Klik tombol minimize untuk melihat logo di sisi kiri layar.",
 		SubContent = "Icon: " .. tostring(DimensiUI:GetIcon("layers")),
 		Duration = 4,
 	})
 
 	Tabs.Main:AddParagraph({
-		Title = "DimensiUI Rebuild",
-		Content = "DimensiUI — clean dark-purple interface library. Author: telatnakal.",
+		Title = "About DimensiUI",
+		Content = "DimensiUI v" .. DimensiUI.Version .. " — a modular, midnight-themed interface library. Author: telatnakal.",
 	})
 
 	Tabs.Main:AddButton({

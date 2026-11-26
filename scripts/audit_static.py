@@ -4,6 +4,7 @@ from pathlib import Path
 import re
 import hashlib
 import subprocess
+import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "src"
@@ -234,7 +235,7 @@ assert 'Library:UnregisterOption(Idx, Input)' in (SRC / "Elements/Input.lua").re
 assert 'Library:UnregisterOption(Idx, Keybind)' in (SRC / "Elements/Keybind.lua").read_text(), "Keybind destroy must unregister only its own option instance"
 
 first = hashlib.sha256(bundle_file.read_bytes()).hexdigest()
-subprocess.run(["python", str(ROOT / "scripts/build_bundle.py")], check=True, cwd=ROOT, capture_output=True)
+subprocess.run([sys.executable, str(ROOT / "scripts/build_bundle.py")], check=True, cwd=ROOT, capture_output=True)
 second = hashlib.sha256(bundle_file.read_bytes()).hexdigest()
 assert first == second, "Bundle build is not deterministic"
 print(f"PASS: {len(modules)} source modules; {len(paths)} bundle modules; require paths resolved; source parity; no legacy refs; deterministic build")
@@ -274,3 +275,35 @@ assert 'config apply failed; previous option values were restored where possible
 assert 'local pending, seen, skipped = {}, {}, 0' in save_manager, "SaveManager config load staging is missing"
 assert 'pcall(entry.Parser.Load, entry.Index, entry.Previous, self)' in save_manager, "SaveManager must restore the currently failing option when possible"
 assert 'table.insert(applied, entry)\n\t\tend\n\t\treturn true' in save_manager, "SaveManager successful loads must return true"
+
+
+# Version consistency: every place that states a version must match src/init.lua.
+for readme_name in ("README.md", "README.id.md"):
+    readme_text = (ROOT / readme_name).read_text(encoding="utf-8")
+    assert f"**Version:** {version}" in readme_text, f"{readme_name} version metadata mismatch"
+    assert f"version-{version}-" in readme_text, f"{readme_name} version badge mismatch"
+changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
+first_release = re.search(r"(?m)^## \[([0-9]+\.[0-9]+\.[0-9]+)\]", changelog)
+assert first_release and first_release.group(1) == version, "CHANGELOG latest entry must match the library version"
+previous_label = "1.1.2"  # the pre-release label that 1.0.1 replaces; it must not survive outside the changelog
+stale = [name for name in ("README.md", "README.id.md", "Example.lua")
+         if previous_label in (ROOT / name).read_text(encoding="utf-8")]
+assert version == previous_label or not stale, f"Stale version references: {stale}"
+
+# The embedded bubble logo must match the PNG source asset.
+icon_check = subprocess.run([sys.executable, str(ROOT / "scripts/build_icon.py"), "--check"], cwd=ROOT, capture_output=True, text=True)
+assert icon_check.returncode == 0, icon_check.stdout + icon_check.stderr
+
+# Minimize bubble contract: docked at the left edge, vertically centered, animated, restores the window.
+window_source = (SRC / "Components/Window.lua").read_text()
+assert "AnchorPoint = Vector2.new(0.5, 0.5)" in window_source, "Bubble must be anchored on its own centre"
+assert "UDim2.new(0, BUBBLE_MARGIN + BUBBLE_SIZE / 2, 0.5, 0)" in window_source, "Bubble must dock at the left edge"
+assert "UDim2.new(0, X + BUBBLE_SIZE / 2, 0.5, Y)" in window_source, "Bubble placement must be centre-anchored with scale-based vertical centring"
+assert "BubbleDocked = true" in window_source and "-(height + inset) * BUBBLE_DOCK_Y - inset / 2" in window_source, "Every minimize must re-dock the bubble at the fixed screen fraction"
+assert "BUBBLE_MARGIN = 0" in window_source and "BUBBLE_DOCK_Y = 0.25" in window_source, "Bubble must dock at the leftmost edge, 25% from the top"
+assert 'New("UIScale"' in window_source and "SetBubbleShown" in window_source, "Bubble show/hide animation is missing"
+assert "BubbleToken" in window_source, "Bubble animation must guard against stale hide callbacks"
+assert "Window:SetCollapsed(false)" in window_source, "Clicking the bubble must restore the window"
+assert "BubbleViewportHook" in window_source, "Bubble must re-clamp when the viewport changes"
+assert "ZIndex = 100" in window_source, "Bubble must stay above other GUI elements"
+print(f"PASS: version {version} is consistent across source, bundle, READMEs and changelog; bubble contract verified")

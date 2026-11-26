@@ -1,9 +1,4 @@
 local UserInputService = game:GetService("UserInputService")
-local Players = game:GetService("Players")
-
-local LocalPlayer = Players.LocalPlayer
-local Mouse = LocalPlayer:GetMouse()
-
 local Root = script.Parent.Parent
 local Typography = require(Root.Typography)
 local Creator = require(Root.Creator)

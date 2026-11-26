@@ -1,7 +1,3 @@
-local UserInputService = game:GetService("UserInputService")
-local Mouse = game:GetService("Players").LocalPlayer:GetMouse()
-local Camera = game:GetService("Workspace").CurrentCamera
-
 local Root = script.Parent.Parent
 local Typography = require(Root.Typography)
 local Motion = require(Root.Packages.DimensiMotion)

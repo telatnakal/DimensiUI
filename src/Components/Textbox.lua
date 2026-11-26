@@ -1,7 +1,6 @@
 local TextService = game:GetService("TextService")
 local Root = script.Parent.Parent
 local Typography = require(Root.Typography)
-local Motion = require(Root.Packages.DimensiMotion)
 local Creator = require(Root.Creator)
 local New = Creator.New
 

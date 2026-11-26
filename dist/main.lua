@@ -1,5 +1,5 @@
 --[[
-    DimensiUI v1.1.2 (Bundled Single-File Build)
+    DimensiUI v1.0.1 (Bundled Single-File Build)
     Standalone DimensiUI | Theme: Dimensi | Author: telatnakal
 ]]
 
@@ -142,13 +142,8 @@ local function __DimensiRequire(target)
 end
 
 __DimensiModules[''] = function(script, require)
-local Lighting = game:GetService("Lighting")
 local RunService = game:GetService("RunService")
 local LocalPlayer = game:GetService("Players").LocalPlayer
-local UserInputService = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
-local Camera = game:GetService("Workspace").CurrentCamera
-local Mouse = LocalPlayer:GetMouse()
 
 local Root = script
 local Creator = require(Root.Creator)
@@ -190,7 +185,7 @@ local Library = {
 	Name = "DimensiUI",
 	Author = "telatnakal",
 	Credit = "telatnakal",
-	Version = "1.1.2",
+	Version = "1.0.1",
 
 	OpenFrames = {},
 	Options = {},
@@ -408,6 +403,7 @@ function Library:ResetAccent()
 	if Library.Unloaded then return false end
 	Creator.AccentOverride = nil
 	Creator.UpdateTheme()
+	return true
 end
 
 function Library:Destroy()
@@ -489,7 +485,8 @@ end
 
 __DimensiModules['BubbleIcon'] = function(script, require)
 -- Logo "D" untuk bubble minimize (PNG 112x112, 7736 bytes), tertanam supaya tidak butuh jaringan.
--- Dibuat dari Assets/d-icon.png; PNG ini ditulis ke workspace executor lalu dimuat lewat getcustomasset.
+-- Dibuat dari Assets/d-icon-bubble.png; PNG ini ditulis ke workspace executor lalu dimuat lewat getcustomasset.
+-- File ini dihasilkan oleh scripts/build_icon.py; jangan diedit manual.
 return table.concat({
 	"\137\080\078\071\013\010\026\010\000\000\000\013\073\072\068\082\000\000\000\112\000\000\000\112\008\003\000\000\000\241\062\004\121\000\000\001\128\080\076\084\069\253\238\254\247\219\253\241\204\253\230\196\249\228\187\251\227\176\252\214\179\242\209\169",
 	"\238\215\154\251\199\148\243\199\132\249\195\112\249\167\134\207\165\113\228\165\102\246\148\100\228\170\086\249\148\088\243\137\084\249\133\081\223\159\068\248\131\069\233\150\052\252\131\049\235\107\075\168\105\060\190\106\047\220\077\048\125\100\038\222",
@@ -1981,10 +1978,6 @@ return Card
 end
 
 __DimensiModules['Components/Dialog'] = function(script, require)
-local UserInputService = game:GetService("UserInputService")
-local Mouse = game:GetService("Players").LocalPlayer:GetMouse()
-local Camera = game:GetService("Workspace").CurrentCamera
-
 local Root = script.Parent.Parent
 local Typography = require(Root.Typography)
 local Motion = require(Root.Packages.DimensiMotion)
@@ -2917,7 +2910,6 @@ __DimensiModules['Components/Textbox'] = function(script, require)
 local TextService = game:GetService("TextService")
 local Root = script.Parent.Parent
 local Typography = require(Root.Typography)
-local Motion = require(Root.Packages.DimensiMotion)
 local Creator = require(Root.Creator)
 local New = Creator.New
 
@@ -3025,7 +3017,6 @@ local Root = script.Parent.Parent
 local Typography = require(Root.Typography)
 local Assets = require(script.Parent.Assets)
 local Creator = require(Root.Creator)
-local Motion = require(Root.Packages.DimensiMotion)
 
 local New = Creator.New
 local AddSignal = Creator.AddSignal
@@ -3201,12 +3192,12 @@ end
 end
 
 __DimensiModules['Components/Window'] = function(script, require)
--- i will rewrite this someday
+-- DimensiUI window: layout, drag/resize, sidebar, minimize bubble, dialogs and tab API.
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
-local Mouse = game:GetService("Players").LocalPlayer:GetMouse()
 local Workspace = game:GetService("Workspace")
 local ContentProvider = game:GetService("ContentProvider")
+local GuiService = game:GetService("GuiService")
 local Camera = Workspace.CurrentCamera
 
 local Root = script.Parent.Parent
@@ -3543,6 +3534,9 @@ return function(Config)
 		end
 	end, Window.Root)
 
+	-- Assigned once the minimize bubble exists, so it can re-clamp itself when the viewport changes.
+	local BubbleViewportHook
+
 	local function FitToViewport()
 		if not Window.Root or not Window.Root.Parent then return end
 		local view, minW, minH, maxW, maxH, isMobile = getBounds()
@@ -3565,6 +3559,7 @@ return function(Config)
 		Window.PageDescription.Size = UDim2.new(1, -(Window.TabWidth + 72), 0, 18)
 		Window.ContainerHolder.Size = UDim2.new(1, -(Window.TabWidth + 72), 1, -(Window.ContentTop + 20))
 		Window.ContainerHolder.Position = UDim2.fromOffset(Window.TabWidth + 48, Window.ContentTop)
+		if BubbleViewportHook then BubbleViewportHook() end
 	end
 
 	local ViewportConnection
@@ -3600,8 +3595,11 @@ return function(Config)
 		end
 	end, Window.Root)
 
-	-- Floating round "D" bubble shown while the window is collapsed.
+	-- Floating round "D" bubble shown while the window is minimized: docked at the left edge,
+	-- at 25% of the screen height, and clickable to restore the window.
 	local BUBBLE_SIZE = 56
+	local BUBBLE_MARGIN = 0 -- leftmost edge of the screen
+	local BUBBLE_DOCK_Y = 0.25 -- docked vertical centre, as a fraction of the screen height (from the top)
 
 	local function ResolveIcon(Icon)
 		-- Hanya sumber yang bisa dimuat langsung oleh ImageLabel. URL biasa ditangani FetchIcon.
@@ -3716,23 +3714,30 @@ return function(Config)
 		ThemeTag = { TextColor3 = "Accent" },
 	})
 
+	local BubbleStroke = New("UIStroke", {
+		Thickness = 2,
+		ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+		ThemeTag = { Color = "Accent" },
+	})
+
+	local BubbleScale = New("UIScale", { Scale = 1 })
+
 	Window.Bubble = New("TextButton", {
 		Name = "MinimizedBubble",
 		Size = UDim2.fromOffset(BUBBLE_SIZE, BUBBLE_SIZE),
-		Position = Window.Position,
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.new(0, BUBBLE_MARGIN + BUBBLE_SIZE / 2, 0.5, 0),
 		Visible = false,
 		Active = true,
+		ZIndex = 100,
 		Text = "",
 		AutoButtonColor = false,
 		Parent = Config.Parent,
 		ThemeTag = { BackgroundColor3 = "WindowBackground" },
 	}, {
 		New("UICorner", { CornerRadius = UDim.new(1, 0) }),
-		New("UIStroke", {
-			Thickness = 2,
-			ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-			ThemeTag = { Color = "Accent" },
-		}),
+		BubbleStroke,
+		BubbleScale,
 		BubbleIcon,
 		BubbleLetter,
 	})
@@ -3880,16 +3885,134 @@ return function(Config)
 
 	Window:SetIcon(Config.Icon)
 
-	local BubblePlaced = false
-	local function ClampBubble(X, Y)
-		local view = (Workspace.CurrentCamera and Workspace.CurrentCamera.ViewportSize) or Vector2.new(800, 600)
-		return math.clamp(X, 0, math.max(0, view.X - BUBBLE_SIZE)), math.clamp(Y, 0, math.max(0, view.Y - BUBBLE_SIZE))
+	-- Bubble placement. X is the pixel offset of the bubble's left edge; Y is a pixel offset from the
+	-- vertical centre of the GUI area. The bubble is anchored at its own centre, so Y = 0 is centred
+	-- and the pop / hover scale grows symmetrically around the logo.
+	local BubbleDocked = true
+	local BubbleX, BubbleY = BUBBLE_MARGIN, 0
+	local BubbleShown = false
+	local BubbleToken = 0
+	local BubbleHovering = false
+	local BubbleMoveTween
+	local BubbleDragging, BubbleMoved, BubbleStart = false, false, nil
+	local BubbleOriginX, BubbleOriginY = 0, 0
+
+	local BubbleShowInfo = TweenInfo.new(0.42, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+	local BubbleFadeInInfo = TweenInfo.new(0.28, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+	local BubbleHideInfo = TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.In)
+	local BubbleHoverInfo = TweenInfo.new(0.16, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+	local BubblePressInfo = TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+
+	local function BubblePosition(X, Y)
+		return UDim2.new(0, X + BUBBLE_SIZE / 2, 0.5, Y)
+	end
+
+	-- Width and height of the GUI area plus the top inset that the ScreenGui reserves (if any).
+	local function GetGuiArea()
+		Camera = Workspace.CurrentCamera or Camera
+		local view = Camera and Camera.ViewportSize or Vector2.new(800, 600)
+		local inset = 0
+		local Gui = Window.Bubble:FindFirstAncestorOfClass("ScreenGui")
+		if Gui and not Gui.IgnoreGuiInset then
+			local ok, value = pcall(function()
+				return GuiService:GetGuiInset()
+			end)
+			if ok and typeof(value) == "Vector2" then
+				inset = value.Y
+			end
+		end
+		return view.X, math.max(BUBBLE_SIZE, view.Y - inset), inset
+	end
+
+	-- Docked: leftmost edge, vertical centre at BUBBLE_DOCK_Y of the full screen height (the GUI area is
+	-- the screen minus the top inset, so the inset is folded in). Dragged: keep the chosen spot, on screen.
+	local function ResolveBubbleCoords()
+		local width, height, inset = GetGuiArea()
+		if BubbleDocked then
+			BubbleX, BubbleY = BUBBLE_MARGIN, -(height + inset) * BUBBLE_DOCK_Y - inset / 2
+		end
+		local limitY = math.max(0, (height - BUBBLE_SIZE) / 2)
+		BubbleX = math.clamp(BubbleX, 0, math.max(0, width - BUBBLE_SIZE))
+		BubbleY = math.clamp(BubbleY, -limitY, limitY)
+	end
+
+	local function PlayBubbleTween(Object, Info, Goal)
+		local Tween = TweenService:Create(Object, Info, Goal)
+		Tween:Play()
+		return Tween
+	end
+
+	local function SetBubbleFade(Alpha)
+		Window.Bubble.BackgroundTransparency = Alpha
+		BubbleStroke.Transparency = Alpha
+		BubbleIcon.ImageTransparency = Alpha
+		BubbleLetter.TextTransparency = Alpha
+	end
+
+	local function TweenBubbleFade(Info, Alpha)
+		PlayBubbleTween(Window.Bubble, Info, { BackgroundTransparency = Alpha })
+		PlayBubbleTween(BubbleStroke, Info, { Transparency = Alpha })
+		PlayBubbleTween(BubbleIcon, Info, { ImageTransparency = Alpha })
+		PlayBubbleTween(BubbleLetter, Info, { TextTransparency = Alpha })
+	end
+
+	-- Show or hide the bubble with a short slide / scale / fade. A token discards stale hide callbacks
+	-- so rapid minimize / restore / hide-key presses can never leave the bubble in the wrong state.
+	local function SetBubbleShown(Show)
+		local Bubble = Window.Bubble
+		if not Bubble or not Bubble.Parent then return end
+		if Show == BubbleShown then return end
+		BubbleShown = Show
+		BubbleToken += 1
+		local Token = BubbleToken
+		if BubbleMoveTween then
+			BubbleMoveTween:Cancel()
+			BubbleMoveTween = nil
+		end
+
+		if Show then
+			ResolveBubbleCoords()
+			Bubble.Visible = true
+			Bubble.Position = BubblePosition(BubbleDocked and -BUBBLE_SIZE or (BubbleX - 18), BubbleY)
+			BubbleScale.Scale = 0.5
+			BubbleStroke.Thickness = 2
+			SetBubbleFade(1)
+			BubbleMoveTween = PlayBubbleTween(Bubble, BubbleShowInfo, { Position = BubblePosition(BubbleX, BubbleY) })
+			PlayBubbleTween(BubbleScale, BubbleShowInfo, { Scale = 1 })
+			TweenBubbleFade(BubbleFadeInInfo, 0)
+		else
+			BubbleMoveTween = PlayBubbleTween(Bubble, BubbleHideInfo, { Position = BubblePosition(BubbleX - 14, BubbleY) })
+			PlayBubbleTween(BubbleScale, BubbleHideInfo, { Scale = 0.6 })
+			TweenBubbleFade(BubbleHideInfo, 1)
+			task.delay(BubbleHideInfo.Time + 0.03, function()
+				if Token == BubbleToken and Bubble.Parent then
+					Bubble.Visible = false
+				end
+			end)
+		end
+	end
+
+	local function SetBubbleHover(Hovering)
+		BubbleHovering = Hovering
+		if not BubbleShown or BubbleDragging then return end
+		PlayBubbleTween(BubbleScale, BubbleHoverInfo, { Scale = Hovering and 1.08 or 1 })
+		PlayBubbleTween(BubbleStroke, BubbleHoverInfo, { Thickness = Hovering and 3 or 2 })
+	end
+
+	BubbleViewportHook = function()
+		if not BubbleShown or not Window.Bubble.Parent then return end
+		if BubbleMoveTween then
+			BubbleMoveTween:Cancel()
+			BubbleMoveTween = nil
+		end
+		ResolveBubbleCoords()
+		Window.Bubble.Position = BubblePosition(BubbleX, BubbleY)
 	end
 
 	local function ApplyVisibility()
 		local ShowWindow = not Window.Hidden and not Window.Collapsed
 		Window.Root.Visible = ShowWindow
-		Window.Bubble.Visible = not Window.Hidden and Window.Collapsed
+		SetBubbleShown(not Window.Hidden and Window.Collapsed)
 		Window.Minimized = Window.Collapsed
 		if not ShowWindow then
 			for _, frame in ipairs(Library.OpenFrames) do
@@ -3903,9 +4026,9 @@ return function(Config)
 		Collapsed = not not Collapsed
 		if Window.Collapsed == Collapsed then return false end
 		Window.Collapsed = Collapsed
-		if Collapsed and not BubblePlaced then
-			local x, y = ClampBubble(Window.Position.X.Offset, Window.Position.Y.Offset)
-			Window.Bubble.Position = UDim2.fromOffset(x, y)
+		if Collapsed then
+			-- Every minimize docks the bubble back at the left edge, vertically centered.
+			BubbleDocked = true
 		end
 		ApplyVisibility()
 		return true
@@ -3930,15 +4053,26 @@ return function(Config)
 		end
 	end
 
-	-- Bubble: click restores, drag moves.
-	local BubbleDragging, BubbleMoved, BubbleStart, BubbleOrigin = false, false, nil, nil
+	-- Bubble input: hover and press feedback, click restores, drag moves.
+	Creator.AddSignal(Window.Bubble.MouseEnter, function()
+		SetBubbleHover(true)
+	end, Window.Bubble)
+
+	Creator.AddSignal(Window.Bubble.MouseLeave, function()
+		SetBubbleHover(false)
+	end, Window.Bubble)
 
 	Creator.AddSignal(Window.Bubble.InputBegan, function(Input)
 		if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
 			BubbleDragging = true
 			BubbleMoved = false
 			BubbleStart = Input.Position
-			BubbleOrigin = Window.Bubble.Position
+			BubbleOriginX, BubbleOriginY = BubbleX, BubbleY
+			if BubbleMoveTween then
+				BubbleMoveTween:Cancel()
+				BubbleMoveTween = nil
+			end
+			PlayBubbleTween(BubbleScale, BubblePressInfo, { Scale = 0.92 })
 		end
 	end, Window.Bubble)
 
@@ -3947,10 +4081,14 @@ return function(Config)
 		if Input.UserInputType ~= Enum.UserInputType.MouseMovement and Input.UserInputType ~= Enum.UserInputType.Touch then return end
 		local Delta = Input.Position - BubbleStart
 		if not BubbleMoved and Delta.Magnitude < 5 then return end
-		BubbleMoved = true
-		BubblePlaced = true
-		local x, y = ClampBubble(BubbleOrigin.X.Offset + Delta.X, BubbleOrigin.Y.Offset + Delta.Y)
-		Window.Bubble.Position = UDim2.fromOffset(x, y)
+		if not BubbleMoved then
+			BubbleMoved = true
+			BubbleDocked = false
+			PlayBubbleTween(BubbleScale, BubblePressInfo, { Scale = 1.06 })
+		end
+		BubbleX, BubbleY = BubbleOriginX + Delta.X, BubbleOriginY + Delta.Y
+		ResolveBubbleCoords()
+		Window.Bubble.Position = BubblePosition(BubbleX, BubbleY)
 	end, Window.Root)
 
 	Creator.AddSignal(UserInputService.InputEnded, function(Input)
@@ -3959,6 +4097,8 @@ return function(Config)
 			BubbleDragging = false
 			if not BubbleMoved and not Window.Hidden then
 				Window:SetCollapsed(false)
+			elseif BubbleShown then
+				PlayBubbleTween(BubbleScale, BubbleHoverInfo, { Scale = BubbleHovering and 1.08 or 1 })
 			end
 		end
 	end, Window.Root)
@@ -4091,11 +4231,6 @@ end
 
 __DimensiModules['Elements/Colorpicker'] = function(script, require)
 local UserInputService = game:GetService("UserInputService")
-local Players = game:GetService("Players")
-
-local LocalPlayer = Players.LocalPlayer
-local Mouse = LocalPlayer:GetMouse()
-
 local Root = script.Parent.Parent
 local Typography = require(Root.Typography)
 local Creator = require(Root.Creator)
@@ -5449,7 +5584,6 @@ end
 __DimensiModules['Elements/Paragraph'] = function(script, require)
 local Root = script.Parent.Parent
 local Components = Root.Components
-local Motion = require(Root.Packages.DimensiMotion)
 local Creator = require(Root.Creator)
 
 local Paragraph = {}

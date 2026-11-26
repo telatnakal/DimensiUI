@@ -1,5 +1,6 @@
 -- Logo "D" untuk bubble minimize (PNG 112x112, 7736 bytes), tertanam supaya tidak butuh jaringan.
--- Dibuat dari Assets/d-icon.png; PNG ini ditulis ke workspace executor lalu dimuat lewat getcustomasset.
+-- Dibuat dari Assets/d-icon-bubble.png; PNG ini ditulis ke workspace executor lalu dimuat lewat getcustomasset.
+-- File ini dihasilkan oleh scripts/build_icon.py; jangan diedit manual.
 return table.concat({
 	"\137\080\078\071\013\010\026\010\000\000\000\013\073\072\068\082\000\000\000\112\000\000\000\112\008\003\000\000\000\241\062\004\121\000\000\001\128\080\076\084\069\253\238\254\247\219\253\241\204\253\230\196\249\228\187\251\227\176\252\214\179\242\209\169",
 	"\238\215\154\251\199\148\243\199\132\249\195\112\249\167\134\207\165\113\228\165\102\246\148\100\228\170\086\249\148\088\243\137\084\249\133\081\223\159\068\248\131\069\233\150\052\252\131\049\235\107\075\168\105\060\190\106\047\220\077\048\125\100\038\222",
